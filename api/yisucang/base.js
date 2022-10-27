@@ -1,17 +1,18 @@
-module.exports = function(url, data, token) {
+var FormData = require('form-data');
+
+module.exports = function(url) {
   return new Promise((resolve, reject) => {
-    var md5 = require('md5');
-    var sign = md5(JSON.stringify(data) + '62daace5e4b073604b7e0b27')
-  
+    const baseUrl = 'http://yisucang.com'
+    const data = new FormData();
+    data.append('PartnerID', '96648968');
+    data.append('PartnerKey', '7fd301de-7d58-388f-044a-74ef521b18c5');
     const options = {
       method: 'POST',
       headers: { 
-        'content-type': 'application/json',
-        'accessToken': token.accessToken,
-        'sign': sign
+        'content-type': 'multipart/form-data'
       },
       data: data,
-      url, url
+      url: baseUrl + url
     };
   
     const axios = require('axios');
