@@ -1,0 +1,53 @@
+<div id='content'>
+  <div class='panel'>
+    <div class='header'>
+      <ul class='breadcrumb'>
+        <li><a href='/'>主页</a><span class='divider'>/</span></li>
+      </ul>
+    </div>
+    <div class='inner userinfo'>
+      <div class='user_big_avatar'>
+        <img src="<%= proxy(user.avatar_url) %>" class="user_avatar" title="<%= product.asin %>"/>
+      </div>
+      <a class='dark'><%= product.asin %></a>
+
+      <div class='user_profile'>
+        <ul class='unstyled'>
+          <span class='big'></span> 积分
+
+          <li>
+            
+              <span class='big collect-topic-count'><%= product.cycle %></span>
+
+          </li>
+         
+          <li>
+            <i class="fa fa-lg fa-fw fa-home"></i>
+            <span class='big collect-topic-count'><%= product.units_per_box %></span>
+          </li>
+          <li>
+            <i class="fa fa-lg fa-fw fa-home"></i>
+            <span class='big collect-topic-count'><%= product.box %></span>
+          </li>
+          <li>
+            <i class="fa fa-lg fa-fw fa-home"></i>
+            <span class='big collect-topic-count'><%= product.box %></span>
+          </li>
+          
+        </ul>
+      </div>
+  
+     
+    </div>
+  </div>
+
+  <div class='panel'>
+    <div class='header'>
+      <span class='col_fade'>最近创建的话题</span>
+    </div>
+    
+  </div>
+
+
+</div>
+

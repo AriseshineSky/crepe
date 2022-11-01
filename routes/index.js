@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var model = require('../model')
+var model = require('../models')
 var urgen = require('../lib/urgent')
 var checkProductsInventory = require('../lib/checkProductsInventory')
 
@@ -77,5 +77,9 @@ router.get('/plan', async function(req, res, next) {
   console.log(purchase);
   res.render('plan', {purchase: purchase, freight: FREIGHT});
 })
+var product = require('../controllers/product');
+router.get('/product/:asin', product.show);
+router.get('/products/new', product.new);
 
+router.post('/products/create', product.put);
 module.exports = router;
