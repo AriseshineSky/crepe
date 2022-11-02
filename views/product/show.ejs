@@ -1,13 +1,9 @@
+<%- contentFor('pageSection') %>
 <div id='content'>
   <div class='panel'>
     <div class='header'>
       <ol class='breadcrumb'>
         <li><a href='/'>主页</a><span class='divider'>/</span></li>
-        <% if(typeof(action) !== 'undefined' && action == 'edit'){ %>
-        <li class='active'>编辑话题</li>
-        <% }else{ %>
-        <li class='active'>发布话题</li>
-        <% } %>
       </ol>
     </div>
     <div class='inner post'>
@@ -22,52 +18,56 @@
           <strong><%= error %></strong>
         </div>
       <% }else{ %>
-        <fieldset>
-          <span class="tab-selector">ASIN：</span><%- product.asin %><br/>
-          <span class="tab-selector">生产周期(天):</span><%- product.cycle %><br/>
-          <span class="tab-selector">预估最大销量</span><%- product.max_avg_sales %><br/>
-          <span class="tab-selector">装箱尺寸：</span><br/>
-          <span class="tab-selector">长(cm)</span><%- product.box.length %><br/>
-          <span class="tab-selector">宽(cm)</span><%- product.box.width %><br/>
-          <span class="tab-selector">高(cm)</span><%- product.box.height %><br/>
-          <span class="tab-selector">重(cm)</span><%- product.box.weight %><br/>
-          <span class="tab-selector">每箱数量(kg):</span><%- product.units_per_box %><br/>
-        </fieldset>
+        <div class="card" style="width: 18rem;">
+          <div class="card-header">
+            Product
+          </div>
+          <div class="card-body">
+            <div class="input-group mb-3">
+              <span class="input-group-text">ASIN：</span>
+              <span class="form-control" ><%- product.asin %></span>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text">生产周期(天):</span>
+              <span class="form-control" ><%- product.cycle %></span>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text">预估最大销量:</span>
+              <span class="form-control" ><%- product.max_avg_sales %></span>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text">装箱尺寸：</span>
+              <div class="input-group mb-3">
+                <span class="input-group-text">长(cm)：</span>
+                <span class="form-control" ><%- product.box.length %></span>
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text">长(cm)：</span>
+                <span class="form-control" ><%- product.box.length %></span>
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text">宽(cm)：</span>
+                <span class="form-control" ><%- product.box.width %></span>
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text">高(cm)：</span>
+                <span class="form-control" ><%- product.box.height %></span>
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text">重(kg)：</span>
+                <span class="form-control" ><%- product.box.weight %></span>
+              </div>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text">每箱数量(个)：</span>
+              <span class="form-control" ><%- product.units_per_box %></span>
+            </div>
+          </div>
+          <div class="card-footer text-muted">
+            <a href="/product/<%- product.asin %>/edit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Edit</a>
+          </div>
+        </div>
     </div>
     <% } %>
   </div>
 </div>
-
-
-<script>
-  (function () {
-    var editor = new Editor();
-    editor.render($('.editor')[0]);
-
-    // 版块选择的检查，必须选择
-    $('#create_topic_form').on('submit', function (e) {
-      var tabValue = $('#tab-value').val();
-      if (!tabValue) {
-        alert('必须选择一个版块！');
-        $('.submit_btn').button('reset');
-        $('.tab-selector').css('color', 'red');
-        return false;
-      }
-    });
-    // END 版块选择的检查，必须选择
-
-    // 选择招聘版块时，给出提示
-    $('#tab-value').on('change', function () {
-      var $this = $(this);
-      var value = $this.val();
-      var warnMsg = '';
-      if (value === 'job') {
-        warnMsg = '<strong>为避免被管理员删帖，发帖时请好好阅读<a href="http://cnodejs.org/topic/541ed2d05e28155f24676a12" target="_blank">《招聘帖规范》</a></strong>';
-      } else if (value === 'ask') {
-        warnMsg = '<strong>提问时，请遵循 <a href="https://gist.github.com/alsotang/f654af8b1fff220e63fcb44846423e6d" target="_blank">《提问的智慧》</a>中提及的要点，以便您更接收到高质量回复。</strong>'
-      }
-      $('#topic_create_warn').html(warnMsg);
-    });
-    // END 选择招聘版块时，给出提示
-  })();
-</script>

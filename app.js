@@ -6,6 +6,7 @@ var logger = require('morgan');
 var errorPageMiddleware = require('./middlewares/error_page');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var expressLayouts = require('express-ejs-layouts');
 
 var app = express();
 
@@ -18,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(expressLayouts);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
@@ -37,6 +38,9 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
+app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
 ASIN_MAP = {
   'B0B69WKWFG': {
     plwhsId: 1374,

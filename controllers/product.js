@@ -14,16 +14,42 @@ exports.show = function (req, res, next) {
     }
 
     res.render('product/show', {
-      product: product
+      product: product,
+      title: ""
+    });
+  });
+};
+
+exports.edit = function (req, res, next) {
+  var asin = req.params.asin;
+  Product.getProductByAsin(asin, function (err, product) {
+    console.log(err);
+    console.log(product);
+    if (err) {
+      return next(err);
+    }
+    if (!product) {
+      res.render404('这个产品不存在。');
+      return;
+    }
+
+    res.render('product/edit', {
+      product: product,
+      title: ""
     });
   });
 };
 exports.new = function(req, res, next) {
-  res.render('product/edit');
+  console.log("new");
+  res.render('product/new', {
+    title: "New"
+  });
 };
 
 exports.create = function(req, res, next) {
-  res.render('product/edit');
+  res.render('product/edit', {
+    title: "New"
+  });
 };
 
 exports.put = function (req, res, next) {

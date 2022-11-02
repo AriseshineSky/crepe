@@ -7,22 +7,7 @@
       </ol>
     </div>
     <div class='inner post'>
-      <% if(typeof(edit_error) !== 'undefined' && edit_error){ %>
-        <div class="alert alert-error">
-          <a class="close" data-dismiss="alert" href="#">&times;</a>
-          <strong><%= edit_error %></strong>
-        </div>
-      <% } %>
-      <% if(typeof(error) !== 'undefined' && error){ %>
-        <div class="alert alert-error">
-          <strong><%= error %></strong>
-        </div>
-      <% }else{ %>
-        <% if (typeof(action) !== 'undefined' && action === 'edit') { %>
-          <form id='edit_product_form' action='/product/<%= product.asin %>/edit' method='post'>
-            <% } else { %>
-            <form id='create_product_form' action='/products/create' method='post'>
-              <% } %>
+      <form id='create_product_form' action='/products/create' method='post'>
         <div class="card" style="width: 18rem;">
           <div class="card-header">
             Product
@@ -30,49 +15,46 @@
           <div class="card-body">
             <div class="input-group mb-3">
               <span class="input-group-text">ASIN：</span>
-              <input class="form-control" ><%- product.asin %></input>
+              <input type="text" class="form-control" name="asin">
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text">生产周期(天):</span>
-              <span class="form-control" ><%- product.cycle %></span>
+              <input type="number" class="form-control" name="cycle">
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text">预估最大销量:</span>
-              <span class="form-control" ><%- product.max_avg_sales %></span>
+              <input type="number" class="form-control" name="max_avg_sales">
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text">装箱尺寸：</span>
+             
               <div class="input-group mb-3">
                 <span class="input-group-text">长(cm)：</span>
-                <span class="form-control" ><%- product.box.length %></span>
-              </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">长(cm)：</span>
-                <span class="form-control" ><%- product.box.length %></span>
+                <input type="number" class="form-control" name="box.length">
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">宽(cm)：</span>
-                <span class="form-control" ><%- product.box.width %></span>
+                <input type="number" class="form-control" name="box.width">
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">高(cm)：</span>
-                <span class="form-control" ><%- product.box.height %></span>
+                <input type="number" class="form-control" name="box.height">
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">重(kg)：</span>
-                <span class="form-control" ><%- product.box.weight %></span>
+                <input type="number" class="form-control" name="box.weight">
               </div>
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text">每箱数量(个)：</span>
-              <span class="form-control" ><%- product.units_per_box %></span>
+              <input type="number" class="form-control" name="units_per_box">
             </div>
           </div>
           <div class="card-footer text-muted">
-            <a href="/product/<%- product.asin %>" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</a>
+            <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
           </div>
         </div>
+      </form>
     </div>
-    <% } %>
   </div>
 </div>

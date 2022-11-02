@@ -79,6 +79,7 @@ router.get('/plan', async function(req, res, next) {
 })
 var product = require('../controllers/product');
 router.get('/product/:asin', product.show);
+router.get('/product/:asin/edit', product.show);
 router.get('/products/new', product.new);
 
 router.post('/products/create', product.put);
