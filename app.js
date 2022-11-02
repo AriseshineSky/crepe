@@ -53,6 +53,18 @@ ASIN_MAP = {
   'B09BNX7DB6': {
     plwhsId: 984,
     yisucangId: 3087
+  },
+  'B091FZHF29': {
+    plwhsId: 814,
+    yisucangId: 5159
+  },
+  'B0BDPLFT94': {
+    plwhsId: 1317,
+    yisucangId: 3143
+  },
+  'B0B5VW3MLD': {
+    plwhsId: 1172,
+    yisucangId: 3119
   }
 };
 FREIGHT = {
@@ -73,6 +85,24 @@ FREIGHT = {
     price: 55
   }
 };
+YISUCANG_ID_KEYS = [
+  {
+    PartnerID: '96648968',
+    PartnerKey: '7fd301de-7d58-388f-044a-74ef521b18c5'
+  },
+  {
+    PartnerID: '58176925',
+    PartnerKey: '4cd81d9e-5f2c-dcd9-ed5e-d70039cdafd7'
+  },
+  {
+    PartnerID: '18464347',
+    PartnerKey: '657d40e7-0776-9a35-c12d-b6768aa4f699'
+  },
+  {
+    PartnerID: '62593998',
+    PartnerKey: '4febe1b9-096a-3ce0-cf2c-897bbbf95ce3'
+  }
+]
 PRODUCTS = {
   'B0B69WKWFG': {
     cycle: 20,
@@ -116,20 +146,34 @@ PRODUCTS = {
     ]
   },
   'B091FZHF29': {
-    cycle: 20,
-    unitsPerBox: 30,
+    cycle: 5,
+    unitsPerBox: 143,
+    boxD: {
+      l: 50,
+      w: 30,
+      h: 30,
+      wt: 11.8
+    }
+  },
+  'B0BDPLFT94': {
+    cycle: 5,
+    unitsPerBox: 98,
+    boxD: {
+      l: 50,
+      w: 30,
+      h: 30,
+      wt: 5
+    }
+  },
+  'B0B5VW3MLD': {
+    cycle: 5,
+    unitsPerBox: 150,
     boxD: {
       l: 50,
       w: 40,
       h: 30,
-      wt: 13.8
+      wt: 5
     }
-  },
-  'B0BDPLFT94': {
-
-  },
-  'B0B5VW3MLD': {
-
   }
 }
 module.exports = app;
