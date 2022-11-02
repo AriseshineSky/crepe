@@ -62,7 +62,7 @@ router.get('/inventory', async function(req, res, next) {
 })
 
 router.get('/stock', async function(req, res, next) {
-  var stock = await getStockByASIN('B0B69WKWFG');
+  var stock = await getStockByASIN('B091FZHF29');
   res.render('stock', {stock: stock});
 })
 
@@ -73,7 +73,7 @@ router.get('/products', async function(req, res, next) {
 })
 
 router.get('/plan', async function(req, res, next) {
-  var purchase = await plan('B09BNX7DB6');
+  var purchase = await plan('B091FZHF29');
   console.log(purchase);
   res.render('plan', {purchase: purchase, freight: FREIGHT});
 })

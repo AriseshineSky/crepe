@@ -1,11 +1,8 @@
 var FormData = require('form-data');
 
-module.exports = function(url) {
+module.exports = function(url, data) {
   return new Promise((resolve, reject) => {
     const baseUrl = 'http://yisucang.com'
-    const data = new FormData();
-    data.append('PartnerID', '96648968');
-    data.append('PartnerKey', '7fd301de-7d58-388f-044a-74ef521b18c5');
     const options = {
       method: 'POST',
       headers: { 
