@@ -15,7 +15,7 @@ var getPlwhsProductByASIN = require('../lib/getPlwhsProductByASIN')
 var getInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByASIN = require('../lib/getStockByASIN')
 
-var plan = require('../lib/plan')
+
 
 plwhsApis = {
   product: 'https://plwhs.com/api/Products?filter=%7B%22where%22:%7B%22appUserId%22:1%7D%7D',
@@ -66,21 +66,6 @@ router.get('/stock', async function(req, res, next) {
   res.render('stock', {stock: stock});
 })
 
-router.get('/products', async function(req, res, next) {
-  var product = await getPlwhsProductByASIN('B0B69WKWFG');
-  console.log(product);
-  res.render('stock', {product: product});
-})
 
-router.get('/plan', async function(req, res, next) {
-  var purchase = await plan('B091FZHF29');
-  console.log(purchase);
-  res.render('plan', {purchase: purchase, freight: FREIGHT});
-})
-var product = require('../controllers/product');
-router.get('/product/:asin', product.show);
-router.get('/product/:asin/edit', product.show);
-router.get('/products/new', product.new);
 
-router.post('/products/create', product.put);
 module.exports = router;

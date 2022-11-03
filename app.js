@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var errorPageMiddleware = require('./middlewares/error_page');
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var productsRouter = require('./routes/products');
 var expressLayouts = require('express-ejs-layouts');
 
 var app = express();
@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(expressLayouts);
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/products', productsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -153,7 +153,14 @@ PRODUCTS = {
       w: 30,
       h: 30,
       wt: 11.8
-    }
+    },
+    maxAvgSales: 150,
+    inboundShippeds: [
+      {
+        quantity: 6000,
+        deliveryDue: '2022-11-11'
+      }
+    ]
   },
   'B0BDPLFT94': {
     cycle: 5,
@@ -163,7 +170,14 @@ PRODUCTS = {
       w: 30,
       h: 30,
       wt: 5
-    }
+    },
+    maxAvgSales: 100,
+    inboundShippeds: [
+      {
+        quantity: 4500,
+        deliveryDue: '2022-11-11'
+      }
+    ]
   },
   'B0B5VW3MLD': {
     cycle: 5,
@@ -173,7 +187,11 @@ PRODUCTS = {
       w: 40,
       h: 30,
       wt: 5
-    }
+    },
+    maxAvgSales: 100,
+    inboundShippeds: [
+      
+    ]
   }
 }
 module.exports = app;

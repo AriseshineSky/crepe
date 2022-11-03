@@ -1,0 +1,43 @@
+<%- contentFor('pageSection') %>
+<style>
+  .select,
+  #locale {
+    width: 100%;
+  }
+  .like {
+    margin-right: 10px;
+  }
+</style>
+<table
+  data-toggle="table"
+  data-pagination="true"
+  data-search="true">
+  <thead>
+    <tr>
+      <th>ASIN</th>
+      <th>Cycle</th>
+      <th>unitsPerBox</th>
+      <th>boxD</th>
+      <th>maxAvgSales</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% products.forEach(function(product) { %>
+      <tr>
+        <td><%= product.asin %></td>
+        <td><%= product.cycle %></td>
+        <td><%= product.unitsPerBox %></td>
+        <td><%= product.box %></td>
+        <td><%= product.maxAvgSales %></td>
+        <td>
+          <a href="/products/<%= product.asin %>/inbound" target="_blank" type="button" class="btn btn-link">Inbound</a>
+          <a href="/products/<%= product.asin %>/plan" target="_blank" type="button" class="btn btn-link">Plan</a>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<script>
+
+</script>

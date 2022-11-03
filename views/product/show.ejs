@@ -18,7 +18,7 @@
           <strong><%= error %></strong>
         </div>
       <% }else{ %>
-        <div class="card" style="width: 18rem;">
+        <div class="card" style="width: 30rem;">
           <div class="card-header">
             Product
           </div>
@@ -33,14 +33,10 @@
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text">预估最大销量:</span>
-              <span class="form-control" ><%- product.max_avg_sales %></span>
+              <span class="form-control" ><%- product.maxAvgSales %></span>
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text">装箱尺寸：</span>
-              <div class="input-group mb-3">
-                <span class="input-group-text">长(cm)：</span>
-                <span class="form-control" ><%- product.box.length %></span>
-              </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">长(cm)：</span>
                 <span class="form-control" ><%- product.box.length %></span>
@@ -60,12 +56,81 @@
             </div>
             <div class="input-group mb-3">
               <span class="input-group-text">每箱数量(个)：</span>
-              <span class="form-control" ><%- product.units_per_box %></span>
+              <span class="form-control" ><%- product.unitsPerBox %></span>
             </div>
           </div>
           <div class="card-footer text-muted">
             <a href="/product/<%- product.asin %>/edit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Edit</a>
           </div>
+        </div>
+
+
+        <div class="card" style="width: 30rem;">
+            <div class="card-header">
+              Inbound
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">First</th>
+                  <th scope="col">Last</th>
+                  <th scope="col">Handle</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+
+                  <td><%- inboundShipped.quantity %></td>
+                  <td>Otto</td>
+                  <td>@mdo</td>
+                </tr>
+                <tr>
+                  <th scope="row">2</th>
+                  <td>Jacob</td>
+                  <td>Thornton</td>
+                  <td>@fat</td>
+                </tr>
+                <tr>
+                  <th scope="row">3</th>
+                  <td colspan="2">Larry the Bird</td>
+                  <td>@twitter</td>
+                </tr>
+              </tbody>
+            </table>
+            <% product.inboundShippeds.forEach(function(inboundShipped){ %>
+              <div class="card-body">
+                <div class="input-group mb-3">
+                  <span class="input-group-text">数量:</span>
+                  <span class="form-control" ><%- inboundShipped.quantity %></span>
+                </div>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">预估收货日期:</span>
+                  <span class="form-control" ><%- inboundShipped.deliveryDue %></span>
+                </div>
+              </div>
+            <% }) %>
+        </div>
+
+        <div class="card" style="width: 30rem;">
+          <form id='create_product_form' action='/product/<%- product.asin %>/inbound' method='post'>
+            <div class="card-header">
+              Product
+            </div>
+            <div class="card-body">
+              <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
+              <div class="input-group mb-3">
+                <span class="input-group-text">数量:</span>
+                <input type="number" class="form-control" name="quantity">
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text">预估收货日期:</span>
+                <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker">
+              </div>
+            </div>
+            <div class="card-footer text-muted">
+              <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
+            </div>
+          </form>
         </div>
     </div>
     <% } %>
