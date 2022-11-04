@@ -66,20 +66,12 @@ router.get('/stock', async function(req, res, next) {
   res.render('stock', {stock: stock});
 })
 
-router.get('/products', async function(req, res, next) {
-  var product = await getPlwhsProductByASIN('B0B69WKWFG');
-  console.log(product);
-  res.render('stock', {product: product});
-})
+
 
 router.get('/plan', async function(req, res, next) {
   var purchase = await plan('B091FZHF29');
   console.log(purchase);
   res.render('plan', {purchase: purchase, freight: FREIGHT});
 })
-var product = require('../controllers/product');
-router.get('/product/:asin', product.show);
-router.get('/products/new', product.new);
 
-router.post('/products/create', product.put);
 module.exports = router;

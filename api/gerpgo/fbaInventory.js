@@ -3,7 +3,6 @@ const path = require('path');
 var baseApi = require('./base');
 var listings = {};
 
-
 function parseAccountCountry(warehouseName) {
   return new Promise((resolve, reject) => {
     var country = warehouseName.split(":").pop().split("_")[0];
