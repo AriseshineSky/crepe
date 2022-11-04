@@ -1,84 +1,74 @@
+<%- contentFor('pageSection') %>
 <div id='content'>
   <div class='panel'>
     <div class='header'>
       <ol class='breadcrumb'>
         <li><a href='/'>主页</a><span class='divider'>/</span></li>
-        <% if(typeof(action) !== 'undefined' && action == 'edit'){ %>
-        <li class='active'>编辑话题</li>
-        <% }else{ %>
-        <li class='active'>发布话题</li>
-        <% } %>
       </ol>
     </div>
     <div class='inner post'>
       <% if(typeof(edit_error) !== 'undefined' && edit_error){ %>
-      <div class="alert alert-error">
-        <a class="close" data-dismiss="alert" href="#">&times;</a>
-        <strong><%= edit_error %></strong>
-      </div>
+        <div class="alert alert-error">
+          <a class="close" data-dismiss="alert" href="#">&times;</a>
+          <strong><%= edit_error %></strong>
+        </div>
       <% } %>
       <% if(typeof(error) !== 'undefined' && error){ %>
-      <div class="alert alert-error">
-        <strong><%= error %></strong>
-      </div>
+        <div class="alert alert-error">
+          <strong><%= error %></strong>
+        </div>
       <% }else{ %>
-      <% if (typeof(action) !== 'undefined' && action === 'edit') { %>
-      <form id='create_topic_form' action='/topic/<%= topic_id %>/edit' method='post'>
-        <% } else { %>
-        <form id='create_topic_form' action='/products/create' method='post'>
-          <% } %>
-          <fieldset>
-            <span class="tab-selector">ASIN：</span><input name="asin"/><br/>
-            <span class="tab-selector">生产周期:</span><input name="cycle"/><br/>
-            <span class="tab-selector">预估最大销量</span><input name="max_avg_sales"/><br/>
-            <span class="tab-selector">装箱尺寸：</span><br/>
-            <span class="tab-selector">长</span><input name="box.length"/><br/>
-            <span class="tab-selector">宽</span><input name="box.width"/><br/>
-            <span class="tab-selector">高</span><input name="box.height"/><br/>
-            <span class="tab-selector">重</span><input name="box.weight"/><br/>
-            <span class="tab-selector">每箱数量:</span><input name="units_per_box"/><br/>
-            <div class='editor_buttons'>
-              <input type="submit" class='span-primary submit_btn' data-loading-text="提交中"
-                      value="提交">
+        <% if (typeof(action) !== 'undefined' && action === 'edit') { %>
+          <form id='edit_product_form' action='/product/<%= product.asin %>/edit' method='post'>
+            <% } else { %>
+            <form id='create_product_form' action='/product/<%= product.asin %>/save' method='post'>
+              <% } %>
+            <div class="card" style="width: 18rem;">
+              <div class="card-header">
+                Product
+              </div>
+              <div class="card-body">
+                <div class="input-group mb-3">
+                  <span class="input-group-text">ASIN：</span>
+                  <input class="form-control" name="asin" value="<%= product.asin %>"/>
+                </div>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">生产周期(天):</span>
+                  <input class="form-control" name="cycle" value="<%= product.cycle %>">
+                </div>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">预估最大销量:</span>
+                  <input class="form-control" name="maxAvgSales" value="<%= product.maxAvgSales %>">
+                </div>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">装箱尺寸：</span>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">长(cm)：</span>
+                    <input class="form-control" name="box.length" value="<%= product.box.length %>">
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">宽(cm)：</span>
+                    <input class="form-control" name="box.width" value="<%= product.box.width %>">
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">高(cm)：</span>
+                    <input class="form-control" name="box.height" value="<%= product.box.height %>">
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">重(kg)：</span>
+                    <input class="form-control" name="box.weight" value="<%= product.box.weight %>">
+                  </div>
+                </div>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">每箱数量(个)：</span>
+                  <input class="form-control" name="unitsPerBox" value="<%= product.unitsPerBox %>">
+                </div>
+              </div>
+              <div class="card-footer text-muted">
+                <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
+              </div>
             </div>
-
-          </fieldset>
-        </form>
-    </div>
+        </div>
     <% } %>
   </div>
 </div>
-
-
-<script>
-  (function () {
-    var editor = new Editor();
-    editor.render($('.editor')[0]);
-
-    // 版块选择的检查，必须选择
-    $('#create_topic_form').on('submit', function (e) {
-      var tabValue = $('#tab-value').val();
-      if (!tabValue) {
-        alert('必须选择一个版块！');
-        $('.submit_btn').button('reset');
-        $('.tab-selector').css('color', 'red');
-        return false;
-      }
-    });
-    // END 版块选择的检查，必须选择
-
-    // 选择招聘版块时，给出提示
-    $('#tab-value').on('change', function () {
-      var $this = $(this);
-      var value = $this.val();
-      var warnMsg = '';
-      if (value === 'job') {
-        warnMsg = '<strong>为避免被管理员删帖，发帖时请好好阅读<a href="http://cnodejs.org/topic/541ed2d05e28155f24676a12" target="_blank">《招聘帖规范》</a></strong>';
-      } else if (value === 'ask') {
-        warnMsg = '<strong>提问时，请遵循 <a href="https://gist.github.com/alsotang/f654af8b1fff220e63fcb44846423e6d" target="_blank">《提问的智慧》</a>中提及的要点，以便您更接收到高质量回复。</strong>'
-      }
-      $('#topic_create_warn').html(warnMsg);
-    });
-    // END 选择招聘版块时，给出提示
-  })();
-</script>

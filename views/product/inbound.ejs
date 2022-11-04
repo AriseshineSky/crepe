@@ -1,0 +1,88 @@
+<%- contentFor('pageSection') %>
+<table
+  data-toggle="table"
+  data-pagination="true"
+  data-search="true"
+  data-editable-emptytext="Default empty text."
+  data-editable-url="/my/editable/update/path"
+>
+  <thead>
+    <tr>
+      <th data-editable="true" data-sortable="true">数量:</th>
+      <th data-editable="true" data-sortable="true">预估收货日期:</th>
+      <th class="">Edit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% inbounds.forEach(function(inbound){ %>
+      <tr>
+        <td><%= inbound.quantity %></td>
+        <td><%= inbound.deliveryDue %></td>
+        <td style="text-align:center;">
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#myModal" data-inbound-id="<%=inbound._id%>" >Edit</button>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content"></div>
+  </div>
+  <div class="modal-dialog">
+      <div class="modal-content"></div>
+  </div>
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"> <span aria-hidden="true" class="">×   </span><span class="sr-only">Close</span>
+
+              </button>
+               <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+      </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function() {
+    $(".btn[data-bs-target='#myModal']").click(function() {
+      console.log('test');
+      var columnHeadings = $("thead th").map(function() {
+        return $(this).text();
+      }).get();
+      columnHeadings.pop();
+      var columnValues = $(this).parent().siblings().map(function() {
+        return $(this).text();
+      }).get();     
+      var modalBody = $('<div id="modalContent"></div>');
+
+      var modalForm = $(`<form role="form" name="modalForm" id="create_product_form" action="/products/<%- product.asin %>/inbound" method="post"> \
+                          <div class="card-body"> \
+                            <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
+                            <div class="form-group"> \
+                              <label class="input-group-text">数量:</label> \
+                              <input type="number" class="form-control" name="quantity" value="${columnValues[0]}"> \
+                            </div> \
+                            <div class="form-group"> \
+                              <label class="input-group-text">预估收货日期:</label> \
+                              <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[1]}"> \
+                            </div> \
+                          </div> \
+                        </form>`);
+                        console.log(modalBody);
+      modalBody.append(modalForm);
+      console.log(modalForm);
+      $('.modal-body').html(modalBody);
+    });
+    $('.modal-footer .btn-primary').click(function() {
+      $('form[name="modalForm"]').submit();
+    });
+  }
+  )
+</script>

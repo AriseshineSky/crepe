@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%=  %></title>
+    <% include header.ejs %>
+</head>
+<body>
+    <div id="wrapper">
+        <% include menu.ejs %>
+        <div id="page-wrapper">
+            <div class="container">
+                <%- defineContent('pageSection') %>
+            </div>
+        </div>
+    </div>
+<% include footer.ejs %>
+</body>
+</html>

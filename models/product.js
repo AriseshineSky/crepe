@@ -4,23 +4,29 @@ var Schema    = mongoose.Schema;
 var ProductSchema = new Schema({
   asin: { type: String},
   cycle: { type: Number, default: 0 },
-  units_per_box: { type: Number, default: 0 },
-  max_avg_sales: { type: Number, default: 0 },
+  unitsPerBox: { type: Number, default: 0 },
+  maxAvgSales: { type: Number, default: 0 },
   box: { 
     length: {type: Number, default: 0 },
     width: {type: Number, default: 0 },
     height: {type: Number, default: 0 },
     weight: {type: Number, default: 0 }
   },
-  create_at: { type: Date, default: Date.now },
-  update_at: { type: Date, default: Date.now },
+  inboundShippeds: [
+    {
+      quantity: {type: Number, default: 0 },
+      deliveryDue: { type: Date, default: Date.now }
+    }
+  ],
+  createAt: { type: Date, default: Date.now },
+  updateAt: { type: Date, default: Date.now },
 });
 
 ProductSchema.plugin(BaseModel);
 
 ProductSchema.pre('save', function(next){
   var now = new Date();
-  this.update_at = now;
+  this.updateAt = now;
   next();
 });
 

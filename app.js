@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(expressLayouts);
 app.use('/', indexRouter);
 app.use('/products', productsRouter);
 
@@ -37,6 +37,9 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
+app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
 ASIN_MAP = {
   'B0B69WKWFG': {
     plwhsId: 1374,
@@ -150,7 +153,14 @@ PRODUCTS = {
       w: 30,
       h: 30,
       wt: 11.8
-    }
+    },
+    maxAvgSales: 150,
+    inboundShippeds: [
+      {
+        quantity: 6000,
+        deliveryDue: '2022-11-11'
+      }
+    ]
   },
   'B0BDPLFT94': {
     cycle: 5,
@@ -160,7 +170,14 @@ PRODUCTS = {
       w: 30,
       h: 30,
       wt: 5
-    }
+    },
+    maxAvgSales: 100,
+    inboundShippeds: [
+      {
+        quantity: 4500,
+        deliveryDue: '2022-11-11'
+      }
+    ]
   },
   'B0B5VW3MLD': {
     cycle: 5,
@@ -170,7 +187,11 @@ PRODUCTS = {
       w: 40,
       h: 30,
       wt: 5
-    }
+    },
+    maxAvgSales: 100,
+    inboundShippeds: [
+      
+    ]
   }
 }
 module.exports = app;
