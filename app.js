@@ -64,6 +64,42 @@ ASIN_MAP = {
   'B0B5VW3MLD': {
     plwhsId: 1172,
     yisucangId: 3119
+  },
+  'B0BH67C4MB': {
+    plwhsId: 1390,
+    yisucangId: null
+  },
+  'B09RG7HPRZ': {
+    plwhsId: 1011,
+    yisucangId: null
+  },
+  'B09BXWFYWC': {
+    plwhsId: 1010,
+    yisucangId: null
+  },
+  'B0B69VTXWX': {
+    plwhsId: 1373,
+    yisucangId: 3089
+  },
+  'B0B69WKWFG': {
+    plwhsId: 1374,
+    yisucangId: 3090
+  },
+  'B09C41RBVG': {
+    plwhsId: 1173,
+    yisucangId: null
+  },
+  'B09BNX7DB6': {
+    plwhsId: 984,
+    yisucangId: 3087
+  },
+  'B0B98XCZFX': {
+    plwhsId: 1491,
+    yisucangId: null
+  },
+  'B0B4PW6ZKY': {
+    plwhsId: 1372,
+    yisucangId: null
   }
 };
 FREIGHT = {
