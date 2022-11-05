@@ -1,9 +1,11 @@
 var models  = require('../models');
 var Product    = models.Product;
+var mongoose = require('mongoose');
 var moment = require('moment');
 const GAP = 4;
 var getFbaInventoryByASIN = require('../lib/getFbaInventoryByASIN')
-var getStockByASIN = require('../lib/getStockByASIN')
+var getStockByASIN = require('../lib/getStockByASIN');
+const { ObjectId } = require('mongodb');
 
 async function prepareStock(asin) {
   var stock = await getStockByASIN(asin);
@@ -311,3 +313,9 @@ exports.newAndSave = function (asin, cycle, unitsPerBox, box, maxAvgSales, callb
   product.save(callback);
 };
 exports.findAll = findAll;
+
+var deleteInbound = async function(inboundId) {
+  var objId = mongoose.Types.ObjectId(inboundId);
+  await Product.update({"inboundShippeds._id": objId}, { $pull:{'inboundShippeds': {"_id": objId}}})
+}
+exports.deleteInbound = deleteInbound;

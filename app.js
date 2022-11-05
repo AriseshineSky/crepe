@@ -6,7 +6,7 @@ var logger = require('morgan');
 var errorPageMiddleware = require('./middlewares/error_page');
 var indexRouter = require('./routes/index');
 var productsRouter = require('./routes/products');
-
+var expressLayouts = require('express-ejs-layouts');
 var app = express();
 
 // view engine setup

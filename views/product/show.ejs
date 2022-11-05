@@ -111,27 +111,7 @@
             <% }) %>
         </div>
 
-        <div class="card" style="width: 30rem;">
-          <form id='create_product_form' action='/product/<%- product.asin %>/inbound' method='post'>
-            <div class="card-header">
-              Product
-            </div>
-            <div class="card-body">
-              <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
-              <div class="input-group mb-3">
-                <span class="input-group-text">数量:</span>
-                <input type="number" class="form-control" name="quantity">
-              </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">预估收货日期:</span>
-                <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker">
-              </div>
-            </div>
-            <div class="card-footer text-muted">
-              <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
-            </div>
-          </form>
-        </div>
+       
     </div>
     <% } %>
   </div>
