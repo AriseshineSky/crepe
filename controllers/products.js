@@ -1,5 +1,7 @@
 var Product         = require('../proxy').Product;
+var Csv         = require('../proxy').Csv;
 var plan = require('../lib/plan')
+var mongoose = require('mongoose');
 exports.show = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);
@@ -123,9 +125,10 @@ exports.put = async function (req, res, next) {
 };
 
 exports.addInbound = async function (req, res, next) {
-  var asin = req.body.asin;
+  var asin = req.params.asin;
   var quantity = req.body.quantity;
   var deliveryDue = req.body.deliveryDue;
+  console.log(quantity);
   var product = await Product.getProductByAsin(asin);
   if (!product) {
     return;
@@ -138,17 +141,26 @@ exports.addInbound = async function (req, res, next) {
       if (err) {
         return next(err);
       }
-      res.redirect('/products/' + product.asin);
+      res.redirect('/products/' + product.asin + '/inbounds');
     });
   }
 };
+exports.deleteInbound = async function(req, res, next) {
+  var asin = req.body.asin;
+  var quantity = req.body.quantity;
+  var deliveryDue = req.body.deliveryDue;
+  var inboundId = req.body.inboundId;
+  console.log(inboundId)
 
+  await Product.deleteInbound(inboundId);
+  var product = await Product.getProductByAsin(asin);
+  res.redirect('/products/' + product.asin + '/inbounds');
+  
+
+}
 exports.showInbounds = async function (req, res, next) {
   var asin = req.params.asin;
-  console.log(asin);
   var product = await Product.getProductByAsin(asin);
-  console.log(product);
-  console.log(product.inboundShippeds);
   if (!product) {
     return;
   } else {
@@ -188,6 +200,13 @@ exports.update = function (req, res, next) {
       }
       res.redirect('/products/' + product.asin);
     });
+  });
+};
+
+exports.csv = async function (req, res, next) {
+  var products = await Csv.parseCsv('ProductDailyProfit-10212022-11042022.csv');
+  res.render('/product/csv', {
+    products: products
   });
 };
 
