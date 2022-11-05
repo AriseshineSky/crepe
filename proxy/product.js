@@ -32,6 +32,7 @@ async function prepareFbaInventoryAndSales(asin) {
       }
     }
   }
+  console.log(listings);
   return {
     inventory: inventory,
     sales: sales
@@ -296,7 +297,7 @@ async function bestPlan(quantity, product, freight, totalInventory, sales, inbou
       }
     }
   }
- 
+  return await formatPlan(plan, product.unitsPerBox, inventoryCheck);
 }
 var getProductByAsin = async function (asin) {
   return Product.findOne({'asin': asin}).clone().catch(function(err){ console.log(err)});

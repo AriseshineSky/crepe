@@ -77,21 +77,9 @@ ASIN_MAP = {
     plwhsId: 1010,
     yisucangId: null
   },
-  'B0B69VTXWX': {
-    plwhsId: 1373,
-    yisucangId: 3089
-  },
-  'B0B69WKWFG': {
-    plwhsId: 1374,
-    yisucangId: 3090
-  },
   'B09C41RBVG': {
     plwhsId: 1173,
     yisucangId: null
-  },
-  'B09BNX7DB6': {
-    plwhsId: 984,
-    yisucangId: 3087
   },
   'B0B98XCZFX': {
     plwhsId: 1491,
@@ -148,7 +136,10 @@ PRODUCTS = {
       w: 40,
       h: 30,
       wt: 13.8
-    }
+    },
+    maxAvgSales: 45,
+    inboundShippeds: [
+    ]
   },
   'B0B69VTXWX': {
     cycle: 20,
@@ -158,7 +149,10 @@ PRODUCTS = {
       w: 40,
       h: 30,
       wt: 13.8
-    }
+    },
+    maxAvgSales: 20,
+    inboundShippeds: [
+    ]
   },
   'B09BNX7DB6': {
     cycle: 20,
@@ -225,6 +219,139 @@ PRODUCTS = {
       wt: 5
     },
     maxAvgSales: 100,
+    inboundShippeds: [
+      
+    ]
+  },
+  'B0B5VW3MLD': {
+    cycle: 5,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 5
+    },
+    maxAvgSales: 100,
+    inboundShippeds: [
+      
+    ]
+  },
+  'B0B5VW3MLD': {
+    cycle: 5,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 5
+    },
+    maxAvgSales: 100,
+    inboundShippeds: [
+      
+    ]
+  },
+  'B0B5VW3MLD': {
+    cycle: 5,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 5
+    },
+    maxAvgSales: 100,
+    inboundShippeds: [
+      
+    ]
+  },
+  'B0BH67C4MB': {
+    cycle: 12,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 5
+    },
+    maxAvgSales: 40,
+    inboundShippeds: [
+      
+    ]
+  },
+  'B09RG7HPRZ': {
+    cycle: 30,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 5
+    },
+    maxAvgSales: 40,
+    inboundShippeds: [
+      
+    ]
+  },
+  'B09BXWFYWC': {
+    cycle: 30,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 5
+    },
+    maxAvgSales: 40,
+    inboundShippeds: [
+      
+    ]
+  },
+  'B09C41RBVG': {
+    cycle: 15,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 15
+    },
+    maxAvgSales: 90,
+    inboundShippeds: [
+      
+    ]
+  },
+  'B0B98XCZFX': {
+    cycle: 20,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 12.8
+    },
+    maxAvgSales: 150,
+    inboundShippeds: [
+      {
+        quantity: 2000,
+        deliveryDue: '2022-10-20'
+      },
+      {
+        quantity: 3000,
+        deliveryDue: '2022-12-20'
+      }
+    ]
+  },
+  'B0B4PW6ZKY': {
+    cycle: 35,
+    unitsPerBox: 150,
+    boxD: {
+      l: 50,
+      w: 40,
+      h: 30,
+      wt: 12.8
+    },
+    maxAvgSales: 250,
     inboundShippeds: [
       
     ]
