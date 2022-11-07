@@ -31,8 +31,8 @@ exports.new = function(req, res, next) {
 exports.create = function (req, res, next) {
   var asin = req.body.asin;
   var cycle = req.body.cycle;
-  var max_avg_sales = req.body.max_avg_sales;
-  var units_per_box = req.body.units_per_box;
+  var maxAvgSales = req.body.maxAvgSales;
+  var unitsPerBox = req.body.unitsPerBox;
   var box = {
     length: req.body["box.length"],
     width: req.body["box.width"],
@@ -42,7 +42,14 @@ exports.create = function (req, res, next) {
   Product.getProductByAsin(asin, function (err, product) {
 
     if (!product) {
-      Product.newAndSave(asin, cycle, units_per_box, box, max_avg_sales, function (err, product) {
+      var newProduct = {
+        asin: asin,
+        cycle: cycle, 
+        unitsPerBox: unitsPerBox, 
+        box: box,
+        maxAvgSales: maxAvgSales
+      }
+      Product.newAndSave(newProduct, function (err, product) {
         if (err) {
           return next(err);
         }
@@ -50,8 +57,8 @@ exports.create = function (req, res, next) {
       });
     } else {
       product.cycle = cycle;
-      product.max_avg_sales = max_avg_sales;
-      product.units_per_box = units_per_box;
+      product.maxAvgSales = maxAvgSales;
+      product.unitsPerBox = unitsPerBox;
       product.box = box;
   
       product.save(function (err) {
@@ -67,8 +74,8 @@ exports.create = function (req, res, next) {
 exports.put = function (req, res, next) {
   var asin = req.body.asin;
   var cycle = req.body.cycle;
-  var max_avg_sales = req.body.max_avg_sales;
-  var units_per_box = req.body.units_per_box;
+  var maxAvgSales = req.body.maxAvgSales;
+  var unitsPerBox = req.body.unitsPerBox;
   var box = {
     length: req.body["box.length"],
     width: req.body["box.width"],
@@ -78,16 +85,23 @@ exports.put = function (req, res, next) {
   Product.getProductByAsin(asin, function (err, product) {
 
     if (!product) {
-      Product.newAndSave(asin, cycle, units_per_box, box, max_avg_sales, function (err, product) {
+      var newProduct = {
+        asin: asin,
+        cycle: cycle, 
+        unitsPerBox: unitsPerBox, 
+        box: box,
+        maxAvgSales: maxAvgSales
+      }
+      Product.newAndSave(newProduct, function (err, product) {
         if (err) {
           return next(err);
         }
-        res.redirect('/product/' + product.asin);
+        res.redirect('/products');
       });
     } else {
       product.cycle = cycle;
-      product.max_avg_sales = max_avg_sales;
-      product.units_per_box = units_per_box;
+      product.maxAvgSales = maxAvgSales;
+      product.unitsPerBox = unitsPerBox;
       product.box = box;
   
       product.save(function (err) {
@@ -103,8 +117,8 @@ exports.put = function (req, res, next) {
 exports.update = function (req, res, next) {
   var asin = req.body.asin;
   var cycle = req.body.cycle;
-  var max_avg_sales = req.body.max_avg_sales;
-  var units_per_box = req.body.units_per_box;
+  var maxAvgSales = req.body.maxAvgSales;
+  var unitsPerBox = req.body.unitsPerBox;
   var box = {
     length: req.body["box.length"],
     width: req.body["box.width"],
@@ -119,8 +133,8 @@ exports.update = function (req, res, next) {
       return;
     }
     product.cycle = cycle;
-    product.max_avg_sales = max_avg_sales;
-    product.units_per_box = units_per_box;
+    product.maxAvgSales = maxAvgSales;
+    product.unitsPerBox = unitsPerBox;
     product.box = box;
 
     product.save(function (err) {

@@ -42,7 +42,7 @@ open_apis = {
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.redirect('/products');
 });
 
 router.get('/regist', function(req, res, next) {

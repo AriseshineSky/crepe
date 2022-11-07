@@ -6,6 +6,7 @@ var ProductSchema = new Schema({
   cycle: { type: Number, default: 0 },
   unitsPerBox: { type: Number, default: 0 },
   maxAvgSales: { type: Number, default: 0 },
+  minInventory: { type: Number, default: 0 },
   box: { 
     length: {type: Number, default: 0 },
     width: {type: Number, default: 0 },
@@ -18,6 +19,8 @@ var ProductSchema = new Schema({
       deliveryDue: { type: Date, default: Date.now }
     }
   ],
+  plwhsId: {type: Number, default: 0 },
+  yisucangId: {type: Number, default: 0 },
   createAt: { type: Date, default: Date.now },
   updateAt: { type: Date, default: Date.now },
 });

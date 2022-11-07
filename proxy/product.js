@@ -32,6 +32,7 @@ async function prepareFbaInventoryAndSales(asin) {
       }
     }
   }
+  console.log(JSON.stringify(listings));
   return {
     inventory: inventory,
     sales: sales
@@ -43,13 +44,14 @@ exports.getPlan = async function(asin) {
   console.log(fbaInventorySales);
   var stock = await prepareStock(asin);
   console.log(stock);
-  // var product = await getProductByAsin(asin);
-  var product = PRODUCTS[asin];
+  var product = await getProductByAsin(asin);
+  // var product = PRODUCTS[asin];
   var sales = {
     minAvgSales: Math.ceil(fbaInventorySales.sales),
     maxAvgSales: product.maxAvgSales
   };
-  var inboundShippeds = PRODUCTS[asin].inboundShippeds;
+  // var inboundShippeds = PRODUCTS[asin].inboundShippeds;
+  var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
   var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
@@ -57,12 +59,16 @@ exports.getPlan = async function(asin) {
   console.log(seaFreightDue);
   var seaExpressDue = await getOrderDue(product, 'seaExpress', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
   console.log(seaExpressDue);
-  var allAirDeliveryDue = await getOrderDue(product, 'airDelivery', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
-  console.log(allAirDeliveryDue);
+  // var allAirDeliveryDue = await getOrderDue(product, 'airDelivery', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
+  // console.log(allAirDeliveryDue);
   var airExpressDue = await getOrderDue(product, 'airExpress', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
   console.log(airExpressDue);
   var quantity = await getQuantity(sales, totalInventory, product, inboundShippeds);
   console.log(quantity);
+  if (quantity.boxes < 0) {
+    console.log("Inventory is enough, do not need to purchase any more");
+    return quantity;
+  }
   var deliveryDue = await getDeliveryDue(totalInventory, inboundShippeds, sales, inboundShippeds);
   console.log(deliveryDue);
   var plan = await bestPlan(quantity, product, FREIGHT, totalInventory, sales, inboundShippeds);
@@ -70,7 +76,7 @@ exports.getPlan = async function(asin) {
   var volumeWeightCheck = true;
   for (var type in plan) {
     if (plan[type].units > 0) {
-      if (!checkVolumeWeight(product.boxD, type)) {
+      if (!checkVolumeWeight(product.box, type)) {
         volumeWeightCheck = false;
       }
     }
@@ -88,7 +94,7 @@ exports.getPlan = async function(asin) {
     volumeWeightCheck: volumeWeightCheck,
     seaFreightDue: seaFreightDue,
     seaExpressDue: seaExpressDue,
-    allAirDeliveryDue: allAirDeliveryDue,
+    // allAirDeliveryDue: allAirDeliveryDue,
     airExpressDue: airExpressDue,
     quantity: quantity,
     deliveryDue: deliveryDue,
@@ -133,12 +139,21 @@ async function getQuantity(sales, totalInventory, product, inboundShippeds) {
   console.log(product);
   console.log(sales);
   var boxes = Math.ceil((sales.maxAvgSales * 90 - total) / product.unitsPerBox);
-  var quantity = boxes * product.unitsPerBox;
-  return {boxes: boxes, quantity: quantity};
+  if (boxes > 0) {
+    var quantity = boxes * product.unitsPerBox;
+    return {boxes: boxes, quantity: quantity};
+  } else {
+    var days = total / sales.maxAvgSales;
+    return {boxes: boxes, days: days};
+  }
+  
 }
-
 async function getDeliveryDue(totalInventory, inboundShippeds, sales) {
   var due = totalInventory / sales.maxAvgSales;
+
+  inboundShippeds = inboundShippeds.sort(function(m, n){ 
+    return moment(m.deliveryDue).isBefore(n.deliveryDue)
+  })
 
   for (var inbound of inboundShippeds) {
     var total = totalInventory;
@@ -153,6 +168,8 @@ async function getDeliveryDue(totalInventory, inboundShippeds, sales) {
     }
     if (total / sales.maxAvgSales > due) {
       due = total / sales.maxAvgSales;
+    } else {
+      break;
     }
   }
   return moment(moment().add(due - GAP, 'days')).format('YYYY-MM-DD');
@@ -164,7 +181,7 @@ async function totalUnits(boxCount, unitsPerBox) {
 async function calculatePlanAmounts(freightPlan, freight, product) {
   var amount = 0;
   for (var type in freightPlan) {
-    freightPlan[type].amount = freightPlan[type].boxes * freight[type].price * product.boxD.wt;
+    freightPlan[type].amount = freightPlan[type].boxes * freight[type].price * product.box.weight;
     amount += freightPlan[type].amount;
   }
   if (freightPlan['sea']['boxes'] == 51) {
@@ -177,7 +194,6 @@ async function calculatePlanAmounts(freightPlan, freight, product) {
 async function checkInventory(freightPlan, freight, product, totalInventory, sales, inboundShippeds) {
   var data = [];
   for (var inbound of inboundShippeds) {
-    // var delivery = moment('2022-11-11', "YYYY-MM-DD");
     var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
     var period = delivery.diff(moment(), "days") + 1;
     var units = 0;
@@ -190,7 +206,6 @@ async function checkInventory(freightPlan, freight, product, totalInventory, sal
       }
     }
     for (var fasterType in freightPlan) {
-
       if (freightPlan[fasterType].boxes && (freight[fasterType].period + product.cycle) < period) {
         units += await totalUnits(freightPlan[fasterType].boxes, product.unitsPerBox);
       }
@@ -217,7 +232,7 @@ async function checkInventory(freightPlan, freight, product, totalInventory, sal
         quantity += Number(inbound.quantity);
       } 
     }
-    if (quantity + totalInventory - (freight[type].period + product.cycle) * sales.minAvgSales < 0) {
+    if (quantity + totalInventory - (freight[type].period + product.cycle) * sales.minAvgSales < sales.minAvgSales * 10) {
       return false;
     }  
     data[freight[type].period + product.cycle] = {
@@ -233,9 +248,9 @@ async function checkFreightPlan(freightPlan, freight, product, totalInventory, s
 
 async function checkVolumeWeight(box, freightType) {
   if (freightType.indexOf('sea') > 0) {
-    var volumeWeight = (box.l + box.w + box.h) / 5000;
+    var volumeWeight = (box.length + box.width + box.height)  / 5000;
   } else {
-    var volumeWeight = (box.l + box.w + box.h) / 6000;
+    var volumeWeight = (box.length + box.width + box.height)  / 6000;
   }
   return (volumeWeight < 1.2 * box.wt);
 }
@@ -259,13 +274,13 @@ async function bestPlan(quantity, product, freight, totalInventory, sales, inbou
     seaExpress: {
       boxes: 0
     },
-    airDelivery: {
-      boxes: 0
-    },
+    // airDelivery: {
+    //   boxes: 0
+    // },
     airExpress: {
       boxes: quantity.boxes
     },
-    totalAmount: quantity.boxes * freight.airExpress.price * product.boxD.wt
+    totalAmount: quantity.boxes * freight.airExpress.price * product.box.weight
   };
   for (var i = quantity.boxes; i >= 0; i--) {
     for (var j = quantity.boxes - i; j >= 0; j--) {
@@ -277,9 +292,9 @@ async function bestPlan(quantity, product, freight, totalInventory, sales, inbou
           seaExpress: {
             boxes: j
           },
-          airDelivery: {
-            boxes: k
-          },
+          // airDelivery: {
+          //   boxes: k
+          // },
           airExpress: {
             boxes: (quantity.boxes - i - j - k)
           }
@@ -296,20 +311,24 @@ async function bestPlan(quantity, product, freight, totalInventory, sales, inbou
       }
     }
   }
- 
+  return await formatPlan(plan, product.unitsPerBox, inventoryCheck);
 }
 var getProductByAsin = async function (asin) {
   return Product.findOne({'asin': asin}).clone().catch(function(err){ console.log(err)});
 };
 exports.getProductByAsin = getProductByAsin;
 
-exports.newAndSave = function (asin, cycle, unitsPerBox, box, maxAvgSales, callback) {
+exports.newAndSave = function (data, callback) {
   var product = new Product();
-  product.asin = asin;
-  product.cycle = cycle;
-  product.unitsPerBox = unitsPerBox;
-  product.box = box;
-  product.maxAvgSales = maxAvgSales;
+  product.asin = data.asin;
+  product.cycle = data.cycle;
+  product.unitsPerBox = data.unitsPerBox;
+  product.box = data.box;
+  product.maxAvgSales = data.maxAvgSales;
+  product.plwhsId = data.plwhsId;
+  product.yisucangId = data.yisucangId;
+  product.minInventory = data.minInventory;
+  console.log(product);
   product.save(callback);
 };
 exports.findAll = findAll;
@@ -318,4 +337,8 @@ var deleteInbound = async function(inboundId) {
   var objId = mongoose.Types.ObjectId(inboundId);
   await Product.update({"inboundShippeds._id": objId}, { $pull:{'inboundShippeds': {"_id": objId}}})
 }
+var remove = async function(asin) {
+  await Product.deleteOne({"asin": asin})
+}
 exports.deleteInbound = deleteInbound;
+exports.remove = remove;
