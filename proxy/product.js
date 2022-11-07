@@ -337,8 +337,12 @@ var deleteInbound = async function(inboundId) {
   var objId = mongoose.Types.ObjectId(inboundId);
   await Product.update({"inboundShippeds._id": objId}, { $pull:{'inboundShippeds': {"_id": objId}}})
 }
-var remove = async function(asin) {
-  await Product.deleteOne({"asin": asin})
+var remove = async function(asin, productId) {
+  if (asin) {
+    await Product.deleteOne({"asin": asin})
+  } else if (productId) {
+    await Product.deleteOne({"_id": mongoose.Types.ObjectId(productId)})
+  }
 }
 exports.deleteInbound = deleteInbound;
 exports.remove = remove;

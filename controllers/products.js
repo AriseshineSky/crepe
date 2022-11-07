@@ -19,7 +19,8 @@ exports.show = async function (req, res, next) {
 
 exports.delete = async function (req, res, next) {
   var asin = req.body.asin;
-  await Product.remove(asin);
+  var productId = req.body.productId;
+  await Product.remove(asin, productId);
   res.redirect('/products');
 };
 

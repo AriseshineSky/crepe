@@ -173,10 +173,10 @@
                             <div class="modal-body">\
                               <p>Do you really want to delete these records? This process cannot be undone.</p>\
                             </div>\
-                            <form role="form" name="modalForm" id="update_inbound_form" action="/products/<%= product.asin %>/inbound" method="post"> \
+                            <form role="form" name="modalForm" id="delete_product" action="/products/delete" method="post"> \
                               <div class="modal-footer justify-content-center"> \
-                                <input class="form-control" name="asin" value="" type="hidden" > \
-                                <input class="form-control" name="productId" value="" type="hidden" > \
+                                <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
+                                <input class="form-control" name="productId" value="<%= product._id %>" type="hidden" > \
                               </div> \
                             </form>\
                             
