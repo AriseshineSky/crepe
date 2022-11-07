@@ -67,27 +67,27 @@ ASIN_MAP = {
   },
   'B0BH67C4MB': {
     plwhsId: 1390,
-    yisucangId: null
+    yisucangId: 3091
   },
   'B09RG7HPRZ': {
     plwhsId: 1011,
-    yisucangId: null
+    yisucangId: 6178
   },
   'B09BXWFYWC': {
     plwhsId: 1010,
-    yisucangId: null
+    yisucangId: 3118
   },
   'B09C41RBVG': {
     plwhsId: 1173,
-    yisucangId: null
+    yisucangId: 3116
   },
   'B0B98XCZFX': {
     plwhsId: 1491,
-    yisucangId: null
+    yisucangId: 6162
   },
   'B0B4PW6ZKY': {
     plwhsId: 1372,
-    yisucangId: null
+    yisucangId: 6095
   }
 };
 FREIGHT = {
@@ -99,10 +99,10 @@ FREIGHT = {
     period: 35,
     price: 15
   },
-  airDelivery: {
-    period: 15,
-    price: 32
-  },
+  // airDelivery: {
+  //   period: 15,
+  //   price: 32
+  // },
   airExpress: {
     period: 8,
     price: 55
@@ -148,7 +148,7 @@ PRODUCTS = {
       l: 50,
       w: 40,
       h: 30,
-      wt: 13.8
+      wt: 12.8
     },
     maxAvgSales: 20,
     inboundShippeds: [
@@ -167,7 +167,7 @@ PRODUCTS = {
     inboundShippeds: [
       {
         quantity: 2800,
-        deliveryDue: '2022-11-11'
+        deliveryDue: '2022-11-7'
       },
       {
         quantity: 2800,
@@ -267,40 +267,50 @@ PRODUCTS = {
   },
   'B0BH67C4MB': {
     cycle: 12,
-    unitsPerBox: 150,
+    unitsPerBox: 250,
     boxD: {
       l: 50,
       w: 40,
-      h: 30,
-      wt: 5
+      h: 50,
+      wt: 11.38
     },
     maxAvgSales: 40,
     inboundShippeds: [
-      
+      {
+        quantity: 750,
+        deliveryDue: '2022-11-11'
+      },
+      {
+        quantity: 750,
+        deliveryDue: '2022-11-30'
+      }
     ]
   },
   'B09RG7HPRZ': {
     cycle: 30,
-    unitsPerBox: 150,
+    unitsPerBox: 100,
     boxD: {
-      l: 50,
-      w: 40,
-      h: 30,
-      wt: 5
+      l: 44.5,
+      w: 23.5,
+      h: 27.5,
+      wt: 14.4
     },
     maxAvgSales: 40,
     inboundShippeds: [
-      
+      {
+        quantity: 1500,
+        deliveryDue: '2022-11-24'
+      }
     ]
   },
   'B09BXWFYWC': {
     cycle: 30,
-    unitsPerBox: 150,
+    unitsPerBox: 450,
     boxD: {
-      l: 50,
-      w: 40,
-      h: 30,
-      wt: 5
+      l: 48,
+      w: 31,
+      h: 46,
+      wt: 12.37
     },
     maxAvgSales: 40,
     inboundShippeds: [
@@ -311,10 +321,10 @@ PRODUCTS = {
     cycle: 15,
     unitsPerBox: 150,
     boxD: {
-      l: 50,
-      w: 40,
-      h: 30,
-      wt: 15
+      l: 48,
+      w: 29.7,
+      h: 33.5,
+      wt: 13.26
     },
     maxAvgSales: 90,
     inboundShippeds: [
@@ -322,38 +332,37 @@ PRODUCTS = {
     ]
   },
   'B0B98XCZFX': {
-    cycle: 20,
-    unitsPerBox: 150,
+    cycle: 5,
+    unitsPerBox: 120,
     boxD: {
-      l: 50,
-      w: 40,
-      h: 30,
+      l: 36.4,
+      w: 23,
+      h: 30.8,
       wt: 12.8
     },
     maxAvgSales: 150,
     inboundShippeds: [
       {
-        quantity: 2000,
-        deliveryDue: '2022-10-20'
-      },
-      {
-        quantity: 3000,
-        deliveryDue: '2022-12-20'
+        quantity: 1350,
+        deliveryDue: '2022-11-13'
       }
     ]
   },
   'B0B4PW6ZKY': {
     cycle: 35,
-    unitsPerBox: 150,
+    unitsPerBox: 600,
     boxD: {
-      l: 50,
-      w: 40,
-      h: 30,
-      wt: 12.8
+      l: 50.5,
+      w: 46,
+      h: 26.25,
+      wt: 13.4
     },
     maxAvgSales: 250,
     inboundShippeds: [
-      
+      {
+        quantity: 10000,
+        deliveryDue: '2022-11-30'
+      }
     ]
   }
 }

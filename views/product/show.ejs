@@ -36,6 +36,14 @@
               <span class="form-control" ><%- product.maxAvgSales %></span>
             </div>
             <div class="input-group mb-3">
+              <span class="input-group-text">plwhs产品id:</span>
+              <span class="form-control" ><%- product.plwhsId %></span>
+            </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text">yisucang产品id:</span>
+              <span class="form-control" ><%- product.yisucangId %></span>
+            </div>
+            <div class="input-group mb-3">
               <span class="input-group-text">装箱尺寸：</span>
               <div class="input-group mb-3">
                 <span class="input-group-text">长(cm)：</span>
@@ -60,7 +68,7 @@
             </div>
           </div>
           <div class="card-footer text-muted">
-            <a href="/product/<%- product.asin %>/edit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Edit</a>
+            <a href="/products/<%- product.asin %>/edit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Edit</a>
           </div>
         </div>
 
@@ -69,34 +77,7 @@
             <div class="card-header">
               Inbound
             </div>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">First</th>
-                  <th scope="col">Last</th>
-                  <th scope="col">Handle</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
 
-                  <td><%- inboundShipped.quantity %></td>
-                  <td>Otto</td>
-                  <td>@mdo</td>
-                </tr>
-                <tr>
-                  <th scope="row">2</th>
-                  <td>Jacob</td>
-                  <td>Thornton</td>
-                  <td>@fat</td>
-                </tr>
-                <tr>
-                  <th scope="row">3</th>
-                  <td colspan="2">Larry the Bird</td>
-                  <td>@twitter</td>
-                </tr>
-              </tbody>
-            </table>
             <% product.inboundShippeds.forEach(function(inboundShipped){ %>
               <div class="card-body">
                 <div class="input-group mb-3">

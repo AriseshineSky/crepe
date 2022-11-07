@@ -6,6 +6,7 @@
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
     "axios": "^1.1.3",
     "body-parser": "^1.20.1",
     "bootstrap": "^5.2.2",
@@ -18,6 +19,7 @@
     "express": "~4.16.1",
     "express-ejs-layouts": "^2.5.1",
     "express-element-ui": "^0.1.21",
+    "googleapis": "^105.0.0",
     "http-errors": "~1.6.3",
     "log4js": "^6.7.0",
     "md5": "^2.3.0",

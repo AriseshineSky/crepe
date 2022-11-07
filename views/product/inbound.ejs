@@ -73,7 +73,7 @@
       }).get();     
       var modalBody = $('<div id="modalContent"></div>');
       var inboundId = $(this).data('inbound-id')
-      var modalForm = $(`<form role="form" name="modalForm" id="update_inbound_form" action="/products/<%- product.asin %>/inbound" method="post"> \
+      var modalForm = $(`<form role="form" name="modalForm" id="update_inbound_form" action="/products/<%= product.asin %>/inbound" method="post"> \
                           <div class="card-body"> \
                             <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
                             <input class="form-control" name="inboundId" value="${inboundId}" type="hidden" > \

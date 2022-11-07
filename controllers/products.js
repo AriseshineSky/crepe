@@ -2,6 +2,7 @@ var Product         = require('../proxy').Product;
 var Csv         = require('../proxy').Csv;
 var plan = require('../lib/plan')
 var mongoose = require('mongoose');
+var syncProducts = require('../lib/getInfoFromGoogleSheet')
 exports.show = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);
@@ -16,6 +17,12 @@ exports.show = async function (req, res, next) {
   }
 };
 
+exports.delete = async function (req, res, next) {
+  var asin = req.body.asin;
+  await Product.remove(asin);
+  res.redirect('/products');
+};
+
 exports.index = async function (req, res, next) {
   var products = await Product.findAll();
   res.render('product/index', {
@@ -23,6 +30,10 @@ exports.index = async function (req, res, next) {
   });
 };
 
+exports.sync = async function(req, res, next) {
+  syncProducts.syncProducts();
+  res.render('index');
+}
 exports.plan = async function (req, res, next) {
   var asin = req.params.asin;
   var purchase = await Product.getPlan(asin);
@@ -50,11 +61,55 @@ exports.new = function(req, res, next) {
   });
 };
 
-exports.create = function(req, res, next) {
-  res.render('product/edit', {
-    title: "New"
-  });
+exports.create = async function (req, res, next) {
+  var asin = req.body.asin;
+  var cycle = req.body.cycle;
+  var maxAvgSales = req.body.maxAvgSales;
+  var unitsPerBox = req.body.unitsPerBox;
+  var box = {
+    length: req.body["box.length"],
+    width: req.body["box.width"],
+    height: req.body["box.height"],
+    weight: req.body["box.weight"]
+  }
+  var plwhsId = req.body.plwhsId;
+  var yisucangId = req.body.yisucangId;
+
+  var product = await Product.getProductByAsin(asin);
+  console.log(product);
+  if (!product) {
+    var newProduct = {
+      asin: asin,
+      cycle: cycle, 
+      unitsPerBox: unitsPerBox, 
+      box: box,
+      maxAvgSales: maxAvgSales,
+      plwhsId: plwhsId,
+      yisucangId: yisucangId
+    }
+    Product.newAndSave(newProduct, function (err, product) {
+      console.log(product);
+      if (err) {
+        return next(err);
+      }
+      res.redirect('/products');
+    });
+  } else {
+    product.cycle = cycle;
+    product.maxAvgSales = maxAvgSales;
+    product.unitsPerBox = unitsPerBox;
+    product.box = box;
+    product.plwhsId = plwhsId;
+    product.yisucangId = yisucangId;
+    product.save(function (err) {
+      if (err) {
+        return next(err);
+      }
+      res.redirect('/products/');
+    });
+  }
 };
+
 
 exports.save = async function (req, res, next) {
   var asin = req.body.asin;
@@ -67,20 +122,33 @@ exports.save = async function (req, res, next) {
     height: req.body["box.height"],
     weight: req.body["box.weight"]
   }
+  var plwhsId = req.body.plwhsId;
+  var yisucangId = req.body.yisucangId;
   var product = await Product.getProductByAsin(asin);
   if (!product) {
-    Product.newAndSave(asin, cycle, unitsPerBox, box, maxAvgSales, function (err, product) {
+    var newProduct = {
+      asin: asin,
+      cycle: cycle, 
+      unitsPerBox: unitsPerBox, 
+      box: box,
+      maxAvgSales: maxAvgSales,
+      plwhsId: plwhsId,
+      yisucangId: yisucangId
+    }
+    Product.newAndSave(newProduct, function (err, product) {
+      console.log(product);
       if (err) {
         return next(err);
       }
-      res.redirect('/products/' + product.asin);
+      res.redirect('/products' + product.asin);
     });
   } else {
     product.cycle = cycle;
     product.maxAvgSales = maxAvgSales;
     product.unitsPerBox = unitsPerBox;
     product.box = box;
-
+    product.plwhsId = plwhsId;
+    product.yisucangId = yisucangId;
     product.save(function (err) {
       if (err) {
         return next(err);
@@ -174,8 +242,8 @@ exports.showInbounds = async function (req, res, next) {
 exports.update = function (req, res, next) {
   var asin = req.body.asin;
   var cycle = req.body.cycle;
-  var max_avg_sales = req.body.max_avg_sales;
-  var units_per_box = req.body.units_per_box;
+  var maxAvgSales = req.body.maxAvgSales;
+  var unitsPerBox = req.body.unitsPerBox;
   var box = {
     length: req.body["box.length"],
     width: req.body["box.width"],
@@ -183,23 +251,21 @@ exports.update = function (req, res, next) {
     weight: req.body["box.weight"]
   }
 
-  Product.getProductByAsin(asin, function (err, product) {
+  var product = Product.getProductByAsin(asin);
+  if (!product) {
+    res.render404('此产品不存在或已被删除。');
+    return;
+  }
+  product.cycle = cycle;
+  product.maxAvgSales = maxAvgSales;
+  product.unitsPerBox = unitsPerBox;
+  product.box = box;
 
-    if (!product) {
-      res.render404('此产品不存在或已被删除。');
-      return;
+  product.save(function (err) {
+    if (err) {
+      return next(err);
     }
-    product.cycle = cycle;
-    product.max_avg_sales = max_avg_sales;
-    product.units_per_box = units_per_box;
-    product.box = box;
-
-    product.save(function (err) {
-      if (err) {
-        return next(err);
-      }
-      res.redirect('/products/' + product.asin);
-    });
+    res.redirect('/products/' + product.asin);
   });
 };
 

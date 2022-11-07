@@ -19,9 +19,9 @@
         </div>
       <% }else{ %>
         <% if (typeof(action) !== 'undefined' && action === 'edit') { %>
-          <form id='edit_product_form' action='/product/<%= product.asin %>/edit' method='post'>
+          <form id='edit_product_form' action='/products/<%= product.asin %>/edit' method='post'>
             <% } else { %>
-            <form id='create_product_form' action='/product/<%= product.asin %>/save' method='post'>
+            <form id='create_product_form' action='/products/<%= product.asin %>/save' method='post'>
               <% } %>
             <div class="card" style="width: 18rem;">
               <div class="card-header">
@@ -39,6 +39,14 @@
                 <div class="input-group mb-3">
                   <span class="input-group-text">预估最大销量:</span>
                   <input class="form-control" name="maxAvgSales" value="<%= product.maxAvgSales %>">
+                </div>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">plwhs产品id:</span>
+                  <input type="number" class="form-control" name="plwhsId" value="<%= product.plwhsId %>">
+                </div>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">yisucang产品id:</span>
+                  <input type="number" class="form-control" name="yisucangId" value="<%= product.yisucangId %>">
                 </div>
                 <div class="input-group mb-3">
                   <span class="input-group-text">装箱尺寸：</span>
