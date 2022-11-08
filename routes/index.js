@@ -13,9 +13,7 @@ var getYisucangProducts = require('../api/yisucang/products')
 var getYisucangInventories = require('../api/yisucang/inventories')
 var getPlwhsProductByASIN = require('../lib/getPlwhsProductByASIN')
 var getInventoryByASIN = require('../lib/getFbaInventoryByASIN')
-var getStockByASIN = require('../lib/getStockByASIN')
-
-
+var getStockByProduct = require('../lib/getStockByProduct')
 
 plwhsApis = {
   product: 'https://plwhs.com/api/Products?filter=%7B%22where%22:%7B%22appUserId%22:1%7D%7D',
@@ -62,7 +60,7 @@ router.get('/inventory', async function(req, res, next) {
 })
 
 router.get('/stock', async function(req, res, next) {
-  var stock = await getStockByASIN('B091FZHF29');
+  var stock = await getStockByProduct('B091FZHF29');
   res.render('stock', {stock: stock});
 })
 

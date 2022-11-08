@@ -119,11 +119,23 @@ YISUCANG_ID_KEYS = [
   },
   {
     PartnerID: '18464347',
-    PartnerKey: '657d40e7-0776-9a35-c12d-b6768aa4f699'
+    PartnerKey: '9f57b273-e3f0-4802-79c3-19f062640086'
   },
   {
     PartnerID: '62593998',
     PartnerKey: '4febe1b9-096a-3ce0-cf2c-897bbbf95ce3'
+  },
+  {
+    PartnerID: '21169534',
+    PartnerKey: '6d368a38-6fff-63c2-4ed7-5ed10206791a'
+  },
+  {
+    PartnerID: '84163649',
+    PartnerKey: 'b2426b75-282c-d77d-1992-14c52ddf4f6d'
+  },
+  {
+    PartnerID: '94734457',
+    PartnerKey: 'a8d83a18-1dad-21ee-dfbb-2f20475c8c6c'
   }
 ]
 PRODUCTS = {

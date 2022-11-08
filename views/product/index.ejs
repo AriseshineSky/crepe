@@ -164,7 +164,9 @@
 <script>
   $(document).ready(function() {
     $(".btn[data-bs-target='#myModal']").click(function() {
+      console.log(12);
       var modalBody = $('<div id="myModal"></div>');
+      var productId = $(this).data('product-id');
       var modalForm = $(`<div class="modal-dialog modal-confirm"> \
                           <div class="modal-content">\
                             <div class="modal-header flex-column">\
@@ -175,17 +177,14 @@
                             </div>\
                             <form role="form" name="modalForm" id="delete_product" action="/products/delete" method="post"> \
                               <div class="modal-footer justify-content-center"> \
-                                <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
-                                <input class="form-control" name="productId" value="<%= product._id %>" type="hidden" > \
+                                <input class="form-control" name="productId" value="${productId}" type="hidden" > \
                               </div> \
                             </form>\
-                            
 	                        </div>\
                         </div>`);
-       
       modalBody.append(modalForm);
       console.log(modalForm);
-      
+      $('.modal-body').html(modalBody);
     });
     $('.modal-footer .btn-danger').click(function() {
       $('form[name="modalForm"]').submit();
