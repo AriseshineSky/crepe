@@ -420,7 +420,6 @@ async function bestPlanV2(quantity, product, freight, totalInventory, sales, inb
             boxes: (quantity.boxes - i - j)
           }
         }
-        console.log(i, j);
         if (quantity.boxes - i - j > 0) {
           checked = await checkInventoryAfterAir(freightPlan, freight, product, totalInventory, sales, inboundShippeds)
           if (checked) {
