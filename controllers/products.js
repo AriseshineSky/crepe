@@ -131,6 +131,7 @@ exports.save = async function (req, res, next) {
   var cycle = req.body.cycle;
   var maxAvgSales = req.body.maxAvgSales;
   var unitsPerBox = req.body.unitsPerBox;
+  var minInventory = req.body.minInventory;
   var box = {
     length: req.body["box.length"],
     width: req.body["box.width"],
@@ -150,7 +151,8 @@ exports.save = async function (req, res, next) {
       maxAvgSales: maxAvgSales,
       plwhsId: plwhsId,
       yisucangId: yisucangId,
-      airDelivery: airDelivery
+      airDelivery: airDelivery,
+      minInventory: minInventory
     }
     Product.newAndSave(newProduct, function (err, product) {
       console.log(product);
@@ -167,6 +169,7 @@ exports.save = async function (req, res, next) {
     product.plwhsId = plwhsId;
     product.yisucangId = yisucangId;
     product.airDelivery = airDelivery;
+    product.minInventory = minInventory;
     product.save(function (err) {
       if (err) {
         return next(err);

@@ -31,6 +31,10 @@
               <span class="input-group-text">生产周期(天):</span>
               <span class="form-control" ><%- product.cycle %></span>
             </div>
+            <div class="input-group mb-3">
+              <span class="input-group-text">最小库存保有量(天):</span>
+              <span class="form-control" ><%- product.minInventory %></span>
+            </div>
             <div class="form-check">
               <% if (product.airDelivery) { %>
                 <input class="form-check-input" type="checkbox" name="airDelivery" value="true" checked id="defaultCheck1">

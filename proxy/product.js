@@ -54,10 +54,29 @@ async function calculateOutOfStockPeriod(status) {
 
   for (var i = 0; i < status.length; i++) {
     if (status[i].before === 0 && status[i].after === 0) {
-      period += (status[i+1].period - status[i].period + 1)
+      period += (status[i+1].period - status[i].period + 1);
     }
   }
   return period;
+}
+
+
+async function calculateMinInventory(freightPlan, freight, freightType, status, sales, product) {
+  var period = 0;
+  var minInventory = 100000;
+  for (var i = 0; i < status.length; i++) {
+    for (var type of freightType) {
+      console.log(type);
+      console.log(status);
+      if (status[i].period === freight[type].period + product.cycle) {
+        period = Math.floor(status[i].before / sales.minAvgSales);
+        if (period < minInventory) {
+          minInventory = period;
+        }
+      }
+    }
+  }
+  return minInventory;
 }
 
 async function recalculateInboundQueue(inboundQueue, sales) {
@@ -808,7 +827,7 @@ async function bestPlan(quantity, product, freight, totalInventory, sales, inbou
   return await formatPlan(plan, product.unitsPerBox, inventoryCheck);
 }
 
-async function bestPlanWithAirDelivery(quantity, product, freight, sales, inbounds) {
+async function bestPlanWithAirDelivery(quantity, product, freight, sales, inbounds, freightType) {
   var plan = {
     sea: {
       boxes: 0
@@ -855,17 +874,18 @@ async function bestPlanWithAirDelivery(quantity, product, freight, sales, inboun
   return await formatPlan(plan, product.unitsPerBox);
 }
 
-async function getNewFreightPlan(freightPlan, freight, inbounds, product, sales) {
+async function getNewFreightPlan(freightPlan, freight, freightType, inbounds, product, sales) {
   var newInbounds = await addFreightPlanToInbounds(freightPlan, freight, inbounds, product);
   newInbounds = await convertInboundsToSortedQueue(newInbounds);
   var inboundQueue = await calculateInboundQueue(newInbounds, sales);
   var status = await recalculateInboundQueue(inboundQueue, sales);
   var newPlan = await calculatePlanAmounts(freightPlan, freight, product);
   newPlan.gap = await calculateOutOfStockPeriod(status);
+  newPlan.minInventory = await calculateMinInventory(freightPlan, freight, freightType, status, sales, product);
   newPlan.inventoryStatus = status;
   return newPlan;
 }
-async function bestPlanWithoutAirDelivery(quantity, product, freight, sales, inbounds) {
+async function bestPlanWithoutAirDelivery(quantity, product, freight, sales, inbounds, freightType) {
   var plan = {
     sea: {
       boxes: 0
@@ -877,7 +897,8 @@ async function bestPlanWithoutAirDelivery(quantity, product, freight, sales, inb
       boxes: quantity.boxes
     },
     totalAmount: quantity.boxes * freight.airExpress.price * product.box.weight,
-    gap: 100000
+    gap: 100000,
+    minInventory: 0
   };
   for (var i = quantity.boxes; i >= 0; i--) {
     for (var j = quantity.boxes - i; j >= 0; j--) {
@@ -892,23 +913,30 @@ async function bestPlanWithoutAirDelivery(quantity, product, freight, sales, inb
           boxes: (quantity.boxes - i - j)
         }
       }
-     
-      var newPlan = await getNewFreightPlan(freightPlan, freight, inbounds, product, sales);
-      if (newPlan.gap == 0) {
-        plan = JSON.parse(JSON.stringify(newPlan));
-        return await formatPlan(plan, product.unitsPerBox);
-      } else if (newPlan.gap <= plan.gap && Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
-        plan = JSON.parse(JSON.stringify(newPlan));
+      var newPlan = await getNewFreightPlan(freightPlan, freight, freightType, inbounds, product, sales);
+      if (newPlan.minInventory >= product.minInventory) {
+        if (newPlan.gap == 0) {
+          plan = JSON.parse(JSON.stringify(newPlan));
+          return await formatPlan(plan, product.unitsPerBox);
+        } else if (newPlan.gap === plan.gap && Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
+          plan = JSON.parse(JSON.stringify(newPlan));
+        } else if (newPlan.gap < plan.gap) {
+          plan = JSON.parse(JSON.stringify(newPlan));
+        }
+      } else if (newPlan.minInventory >= plan.minInventory) {
+        plan = JSON.parse(JSON.stringify(newPlan));  
       }
     }
   }
   return await formatPlan(plan, product.unitsPerBox);
 }
 async function bestPlanV4(quantity, product, freight, sales, inbounds) {
+  var freightType = ['sea', 'seaExpress', 'airExpress']
   if (product.airDelivery) {
-    return await bestPlanWithAirDelivery(quantity, product, freight, sales, inbounds);
+    freightType.push('airDelivery');
+    return await bestPlanWithAirDelivery(quantity, product, freight, sales, inbounds, freightType);
   } else {
-    return await bestPlanWithoutAirDelivery(quantity, product, freight, sales, inbounds);
+    return await bestPlanWithoutAirDelivery(quantity, product, freight, sales, inbounds, freightType);
   }
 }
 
