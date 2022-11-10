@@ -19,6 +19,7 @@ var ProductSchema = new Schema({
       deliveryDue: { type: Date, default: Date.now }
     }
   ],
+  airDelivery: {type: Boolean, default: false},
   plwhsId: {type: Number, default: 0 },
   yisucangId: {type: Number, default: 0 },
   createAt: { type: Date, default: Date.now },

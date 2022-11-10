@@ -35,10 +35,22 @@ exports.sync = async function(req, res, next) {
   syncProducts.syncProducts();
   res.render('index');
 }
+// exports.plan = async function (req, res, next) {
+//   var asin = req.params.asin;
+//   var purchase = await Product.getPlan(asin);
+//   if (purchase.plan) {
+//     console.log(`${purchase.seaFreightDue}\t${purchase.quantity.quantity}\t${purchase.plan.airExpress.units}\t \t${purchase.plan.seaExpress.units}\t${purchase.plan.sea.units}\t`)
+//   }
+//   res.render('product/plan', {purchase: purchase, freight: FREIGHT});
+// };
+
 exports.plan = async function (req, res, next) {
   var asin = req.params.asin;
-  var purchase = await Product.getPlan(asin);
-  res.render('product/plan', {purchase: purchase, freight: FREIGHT});
+  var purchase = await Product.getPlanV2(asin);
+  // if (purchase.plan) {
+  //   console.log(`${purchase.seaFreightDue}\t${purchase.quantity.quantity}\t${purchase.plan.airExpress.units}\t \t${purchase.plan.seaExpress.units}\t${purchase.plan.sea.units}\t`)
+  // }
+  // res.render('product/plan', {purchase: purchase, freight: FREIGHT});
 };
 
 exports.edit = async function (req, res, next) {
@@ -75,7 +87,7 @@ exports.create = async function (req, res, next) {
   }
   var plwhsId = req.body.plwhsId;
   var yisucangId = req.body.yisucangId;
-
+  var airDelivery = req.body.airDelivery;
   var product = await Product.getProductByAsin(asin);
   console.log(product);
   if (!product) {
@@ -86,7 +98,8 @@ exports.create = async function (req, res, next) {
       box: box,
       maxAvgSales: maxAvgSales,
       plwhsId: plwhsId,
-      yisucangId: yisucangId
+      yisucangId: yisucangId,
+      airDelivery: airDelivery
     }
     Product.newAndSave(newProduct, function (err, product) {
       console.log(product);
@@ -102,6 +115,7 @@ exports.create = async function (req, res, next) {
     product.box = box;
     product.plwhsId = plwhsId;
     product.yisucangId = yisucangId;
+    product.airDelivery = airDelivery;
     product.save(function (err) {
       if (err) {
         return next(err);
@@ -125,6 +139,7 @@ exports.save = async function (req, res, next) {
   }
   var plwhsId = req.body.plwhsId;
   var yisucangId = req.body.yisucangId;
+  var airDelivery = req.body.airDelivery;
   var product = await Product.getProductByAsin(asin);
   if (!product) {
     var newProduct = {
@@ -134,7 +149,8 @@ exports.save = async function (req, res, next) {
       box: box,
       maxAvgSales: maxAvgSales,
       plwhsId: plwhsId,
-      yisucangId: yisucangId
+      yisucangId: yisucangId,
+      airDelivery: airDelivery
     }
     Product.newAndSave(newProduct, function (err, product) {
       console.log(product);
@@ -150,6 +166,7 @@ exports.save = async function (req, res, next) {
     product.box = box;
     product.plwhsId = plwhsId;
     product.yisucangId = yisucangId;
+    product.airDelivery = airDelivery;
     product.save(function (err) {
       if (err) {
         return next(err);
@@ -276,5 +293,3 @@ exports.csv = async function (req, res, next) {
     products: products
   });
 };
-
-

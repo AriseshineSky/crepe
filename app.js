@@ -148,6 +148,10 @@ YISUCANG_ID_KEYS = [
   {
     PartnerID: '36295842',
     PartnerKey: '69768d50-57d0-4653-861e-936251d62489'
+  },
+  {
+    PartnerID: '91497841',
+    PartnerKey: '049244d5-3bb7-48c8-0b53-fc1c2724c8f9'
   }
 ]
 PRODUCTS = {

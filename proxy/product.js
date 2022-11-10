@@ -7,6 +7,94 @@ var getFbaInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByProduct = require('../lib/getStockByProduct');
 const { ObjectId } = require('mongodb');
 
+var inboundQueue = [];
+
+async function checkStatus(inbound, units, sales) {
+  return(units - inbound.period * sales.minAvgSales);
+}
+
+async function sortQueue(inboundQueue) {
+  return inboundQueue.sort(function(m, n){ 
+    return m.period < n.period;
+  })
+}
+
+async function calculateInboundQueue(inboundQueue, sales) {
+  inboundQueue[0].inventory = {
+    before: inboundQueue[0].quantity,
+    after: inboundQueue[0].quantity
+  }
+  for(var i = 1; i < inboundQueue.length; i++) {
+    var units = 0;
+    for (var j = 0; j < i; j++) {
+      units += inboundQueue[j].quantity;
+    }
+    var items = await checkStatus(inboundQueue[i], units, sales);
+    inboundQueue[i].inventory = {
+      before: items,
+      after: items + inboundQueue[i].quantity
+    }
+  }
+}
+
+async function checkInboundQueue(inboundQueue, sales) {
+  var states = [];
+  for(var i = 0; i < inboundQueue.length; i++) {
+    if (inboundQueue[i].inventory.before > 0) {
+      states.push(
+        {
+          period: inboundQueue[i].period,
+          before: inboundQueue[i].inventory.before,
+          after: inboundQueue[i].inventory.after
+        }
+      )
+    } else {
+      var period = Math.ceil(-inboundQueue[i].inventory.before / sales.minAvgSales)
+      states.push(
+        {
+          period: inboundQueue[i].inventory.period - period,
+          before: 0,
+          after: 0
+        }
+      )
+      for (var j = i; j < inboundQueue.length; j++) {
+        inboundQueue[j].inventory.before -= inboundQueue[i].inventory.before
+        inboundQueue[j].inventory.after -= inboundQueue[i].inventory.before
+      }
+    }
+  }
+  return states;
+}
+
+async function convertDeliveryDueToPeroid(inbound) {
+  var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
+  return(delivery.diff(moment(), "days") + 1);
+}
+
+async function convertInboundShippedsDeliveryDueToPeroid(inboundShippeds) {
+  var inbounds = [];
+  inboundShippeds.forEach(async function(inbound) {
+    inbound.period = await convertDeliveryDueToPeroid(inbound);
+    inbounds.push({
+      period: inbound.period,
+      quantity: inbound.quantity
+    });
+  })
+  return inbounds;
+}
+
+async function convertInboundsToSortedQueue(inboundShippeds) {
+  var sortedInboundShippeds = await sortQueue(inboundShippeds);
+  return sortedInboundShippeds;
+}
+
+async function addCurrentInventoryToInbounds(totalInventory, inboundShippeds) {
+  inboundShippeds.push({
+    quantity: totalInventory,
+    period: 0
+  })
+}
+
 async function prepareStock(product) {
   var stock = await getStockByProduct(product);
   console.log('stock', stock);
@@ -40,19 +128,210 @@ async function prepareFbaInventoryAndSales(asin) {
   }
 }
 
-exports.getPlan = async function(asin) {
+async function checkInventoryWithInbounds(product, freight, totalInventory, sales, inboundShippeds) {
+  var airDeliveryDue = product.cycle + freight.airExpress.period + GAP;
+  var units = 0;
+  var inventoryCheck = true;
+  for (var inbound of inboundShippeds) {
+    units += Number(inbound.quantity);
+  }
+  if (airDeliveryDue * sales.minAvgSales > units + totalInventory) {
+    inventoryCheck = false;
+  }
+  return {
+    period: Math.floor((units + totalInventory) / sales.minAvgSales),
+    inventoryCheck: inventoryCheck
+  }
+}
+
+async function checkInbounds(totalInventory, sales, inboundShippeds) {
+  var data = [];
+  var checked = true;
+  inboundShippeds = inboundShippeds.sort(function(m, n){ 
+    return moment(m.deliveryDue).isBefore(n.deliveryDue)
+  })
+
+  var gapItems = 0;
+  for (var inbound of inboundShippeds) {
+    var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
+    var period = delivery.diff(moment(), "days") + 1;
+    var units = 0;
+
+    for (var fasterInbound of inboundShippeds) {
+      var fasterDelivery = moment(fasterInbound.deliveryDue, "YYYY-MM-DD");
+      var lessPeriod = fasterDelivery.diff(moment(), "days") + 1;
+      if (lessPeriod < period) {
+        units += Number(fasterInbound.quantity);
+      }
+    }
+
+    var leftItems = units + totalInventory + gapItems - period * sales.minAvgSales;
+    if (leftItems < 0) {
+      checked = false;
+      console.log("gapItems");
+      console.log(gapItems);
+      console.log(Math.floor((units + totalInventory + gapItems) / sales.minAvgSales));
+      data[Math.floor((units + totalInventory + gapItems) / sales.minAvgSales)] = {
+        before: 0,
+        after: 0
+      }
+      data[period] = {
+        before: 0,
+        after: Number(inbound.quantity)
+      } 
+      gapItems -= leftItems;
+    } else {
+      data[period] = {
+        before: gapItems + units + totalInventory - period * sales.minAvgSales,
+        after: (gapItems + units + Number(inbound.quantity) + totalInventory - period * sales.minAvgSales)
+      }
+    }
+  }
+  return {
+    checked: checked,
+    data: data
+  }
+}
+
+async function prepareCurrentInventory() {
+
+}
+
+exports.getPlanV2 = async function(asin) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
+  // var product = PRODUCTS[asin];
   var stock = await prepareStock(product);
   console.log(stock);
-  
-  // var product = PRODUCTS[asin];
   var sales = {
     minAvgSales: Math.ceil(fbaInventorySales.sales),
     maxAvgSales: product.maxAvgSales
   };
-  // var inboundShippeds = PRODUCTS[asin].inboundShippeds;
+  console.log(product.inboundShippeds);
+  var inboundShippeds = [];
+
+  var totalInventory = fbaInventorySales.inventory + stock;
+
+  inboundShippeds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
+  await addCurrentInventoryToInbounds(totalInventory, inboundShippeds);
+  
+  inboundShippeds = await convertInboundsToSortedQueue(inboundShippeds);
+  console.log(inboundShippeds);
+  await calculateInboundQueue(inboundShippeds, sales);
+
+  var status = await checkInboundQueue(inboundShippeds, sales);
+  console.log(status);
+  var plan = await bestPlanV4(quantity, product, FREIGHT, sales);
+  // var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
+  // var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
+  // var seaFreightDue = await getOrderDue(product, 'sea', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
+  // console.log(seaFreightDue);
+  // var seaExpressDue = await getOrderDue(product, 'seaExpress', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
+  // console.log(seaExpressDue);
+  // if (product.airDelivery) {
+  //   var allAirDeliveryDue = await getOrderDue(product, 'airDelivery', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
+  //   console.log(allAirDeliveryDue);
+  // }
+  // var airExpressDue = await getOrderDue(product, 'airExpress', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
+  // console.log(airExpressDue);
+  // var quantity = await getQuantity(sales, totalInventory, product, inboundShippeds);
+  // console.log(quantity);
+  // if (quantity.boxes < 0) {
+  //   console.log("Inventory is enough, do not need to purchase any more");
+  //   return quantity;
+  // }
+  // var deliveryDue = await getDeliveryDue(totalInventory, inboundShippeds, sales, inboundShippeds);
+  // console.log(deliveryDue);
+
+  // await addInboundsToQueue(totalInventory, sales, inboundShippeds);
+
+  // var inventoryInfo = await checkInventoryWithInbounds(product, FREIGHT, totalInventory, sales, inboundShippeds)
+  // var inboundsInfo = await checkInbounds(totalInventory, sales, inboundShippeds);
+  
+  // if (!inventoryInfo.inventoryCheck) {
+  //   console.log("inventory is not enough");
+  //   var plan = await bestPlanV3(quantity, product, FREIGHT, sales);
+  //   if (inventoryInfo.period < product.cycle + FREIGHT["airExpress"].period) {
+  //     plan.inventoryCheck[inventoryInfo.period] = {
+  //       before: 0,
+  //       after: 0
+  //     }
+  //   }
+  // } else if (inboundsInfo.checked) {
+  //   console.log("inbound is good");
+  //   var plan = await bestPlan(quantity, product, FREIGHT, totalInventory, sales, inboundShippeds);
+  // } else {
+  //   console.log("inbound is not good");
+  // }
+
+  // var volumeWeightCheck = true;
+  // for (var type in plan) {
+  //   if (plan[type].units > 0) {
+  //     if (!checkVolumeWeight(product.box, type)) {
+  //       volumeWeightCheck = false;
+  //     }
+  //   }
+  // }
+
+  // if (product.airDelivery) {
+  //   var purchase = {
+  //     asin: asin,
+  //     plan: plan,
+  //     sales: sales,
+  //     minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
+  //     maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
+  //     totalInventory: totalInventory,
+  //     fbaInventory: fbaInventorySales.inventory,
+  //     stock: stock,
+  //     inboundShippeds: inboundShippeds,
+  //     inboundsCheck: inboundsInfo.data,
+  //     volumeWeightCheck: volumeWeightCheck,
+  //     seaFreightDue: seaFreightDue,
+  //     seaExpressDue: seaExpressDue,
+  //     allAirDeliveryDue: allAirDeliveryDue,
+  //     airExpressDue: airExpressDue,
+  //     quantity: quantity,
+  //     deliveryDue: deliveryDue,
+  //     product: product
+  //   }
+  // } else {
+  //   var purchase = {
+  //     asin: asin,
+  //     plan: plan,
+  //     sales: sales,
+  //     minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
+  //     maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
+  //     totalInventory: totalInventory,
+  //     fbaInventory: fbaInventorySales.inventory,
+  //     stock: stock,
+  //     inboundShippeds: inboundShippeds,
+  //     inboundsCheck: inboundsInfo.data,
+  //     volumeWeightCheck: volumeWeightCheck,
+  //     seaFreightDue: seaFreightDue,
+  //     seaExpressDue: seaExpressDue,
+  //     // allAirDeliveryDue: allAirDeliveryDue,
+  //     airExpressDue: airExpressDue,
+  //     quantity: quantity,
+  //     deliveryDue: deliveryDue,
+  //     product: product
+  //   }
+  // }
+  
+  // console.log(purchase);
+  // return(purchase);
+}
+exports.getPlan = async function(asin) {
+  var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+  console.log(fbaInventorySales);
+  var product = await getProductByAsin(asin);
+  // var product = PRODUCTS[asin];
+  var stock = await prepareStock(product);
+  console.log(stock);
+  var sales = {
+    minAvgSales: Math.ceil(fbaInventorySales.sales),
+    maxAvgSales: product.maxAvgSales
+  };
   var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
@@ -61,8 +340,10 @@ exports.getPlan = async function(asin) {
   console.log(seaFreightDue);
   var seaExpressDue = await getOrderDue(product, 'seaExpress', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
   console.log(seaExpressDue);
-  // var allAirDeliveryDue = await getOrderDue(product, 'airDelivery', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
-  // console.log(allAirDeliveryDue);
+  if (product.airDelivery) {
+    var allAirDeliveryDue = await getOrderDue(product, 'airDelivery', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
+    console.log(allAirDeliveryDue);
+  }
   var airExpressDue = await getOrderDue(product, 'airExpress', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
   console.log(airExpressDue);
   var quantity = await getQuantity(sales, totalInventory, product, inboundShippeds);
@@ -74,11 +355,25 @@ exports.getPlan = async function(asin) {
   var deliveryDue = await getDeliveryDue(totalInventory, inboundShippeds, sales, inboundShippeds);
   console.log(deliveryDue);
 
-  if (moment(deliveryDue, "YYYY-MM-DD").diff(moment(), "days") < product.cycle + 8) {
+  await addInboundsToQueue(totalInventory, sales, inboundShippeds);
+
+  var inventoryInfo = await checkInventoryWithInbounds(product, FREIGHT, totalInventory, sales, inboundShippeds)
+  var inboundsInfo = await checkInbounds(totalInventory, sales, inboundShippeds);
+  
+  if (!inventoryInfo.inventoryCheck) {
     console.log("inventory is not enough");
-    var plan = await bestPlanV2(quantity, product, FREIGHT, totalInventory, sales, inboundShippeds);
-  } else {
+    var plan = await bestPlanV3(quantity, product, FREIGHT, sales);
+    if (inventoryInfo.period < product.cycle + FREIGHT["airExpress"].period) {
+      plan.inventoryCheck[inventoryInfo.period] = {
+        before: 0,
+        after: 0
+      }
+    }
+  } else if (inboundsInfo.checked) {
+    console.log("inbound is good");
     var plan = await bestPlan(quantity, product, FREIGHT, totalInventory, sales, inboundShippeds);
+  } else {
+    console.log("inbound is not good");
   }
 
   var volumeWeightCheck = true;
@@ -89,25 +384,51 @@ exports.getPlan = async function(asin) {
       }
     }
   }
-  var purchase = {
-    asin: asin,
-    plan: plan,
-    sales: sales,
-    minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
-    maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
-    totalInventory: totalInventory,
-    fbaInventory: fbaInventorySales.inventory,
-    stock: stock,
-    inboundShippeds: inboundShippeds,
-    volumeWeightCheck: volumeWeightCheck,
-    seaFreightDue: seaFreightDue,
-    seaExpressDue: seaExpressDue,
-    // allAirDeliveryDue: allAirDeliveryDue,
-    airExpressDue: airExpressDue,
-    quantity: quantity,
-    deliveryDue: deliveryDue,
-    product: product
+
+  if (product.airDelivery) {
+    var purchase = {
+      asin: asin,
+      plan: plan,
+      sales: sales,
+      minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
+      maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
+      totalInventory: totalInventory,
+      fbaInventory: fbaInventorySales.inventory,
+      stock: stock,
+      inboundShippeds: inboundShippeds,
+      inboundsCheck: inboundsInfo.data,
+      volumeWeightCheck: volumeWeightCheck,
+      seaFreightDue: seaFreightDue,
+      seaExpressDue: seaExpressDue,
+      allAirDeliveryDue: allAirDeliveryDue,
+      airExpressDue: airExpressDue,
+      quantity: quantity,
+      deliveryDue: deliveryDue,
+      product: product
+    }
+  } else {
+    var purchase = {
+      asin: asin,
+      plan: plan,
+      sales: sales,
+      minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
+      maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
+      totalInventory: totalInventory,
+      fbaInventory: fbaInventorySales.inventory,
+      stock: stock,
+      inboundShippeds: inboundShippeds,
+      inboundsCheck: inboundsInfo.data,
+      volumeWeightCheck: volumeWeightCheck,
+      seaFreightDue: seaFreightDue,
+      seaExpressDue: seaExpressDue,
+      // allAirDeliveryDue: allAirDeliveryDue,
+      airExpressDue: airExpressDue,
+      quantity: quantity,
+      deliveryDue: deliveryDue,
+      product: product
+    }
   }
+  
   console.log(purchase);
   return(purchase);
 }
@@ -193,11 +514,56 @@ async function calculatePlanAmounts(freightPlan, freight, product) {
     amount += freightPlan[type].amount;
   }
   if (freightPlan['sea']['boxes'] == 51) {
-    console.log('amount')
     console.log(amount)
   }
   freightPlan.totalAmount = amount;
   return freightPlan;
+}
+async function getInventoryByDate(freightPlan, freight, product, totalInventory, sales, inboundShippeds) {
+  var data = [];
+  for (var inbound of inboundShippeds) {
+    var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
+    var period = delivery.diff(moment(), "days") + 1;
+    var units = 0;
+
+    for (var fasterInbound of inboundShippeds) {
+      var fasterDelivery = moment(fasterInbound.deliveryDue, "YYYY-MM-DD");
+      var lessPeriod = fasterDelivery.diff(moment(), "days") + 1;
+      if (lessPeriod < period) {
+        units += Number(fasterInbound.quantity);
+      }
+    }
+    for (var fasterType in freightPlan) {
+      if (freightPlan[fasterType].boxes && (freight[fasterType].period + product.cycle) < period) {
+        units += await totalUnits(freightPlan[fasterType].boxes, product.unitsPerBox);
+      }
+    }
+ 
+    data[period] = {
+      before: units + totalInventory - period * sales.minAvgSales,
+      after: (units + Number(inbound.quantity) + totalInventory - period * sales.minAvgSales)
+    }   
+  }
+  for (var type in freightPlan) {
+    var quantity = 0;
+    for (var fasterType in freightPlan) {
+      if (freightPlan[fasterType].boxes && freight[fasterType].period < freight[type].period) {
+        quantity += await totalUnits(freightPlan[fasterType].boxes, product.unitsPerBox);
+      }
+    }
+
+    for (var inbound of inboundShippeds) {
+      var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
+      if (delivery.diff(moment(), "days") + 1 < freight[type].period + product.cycle) {
+        quantity += Number(inbound.quantity);
+      } 
+    }
+    data[freight[type].period + product.cycle] = {
+      before: quantity + totalInventory - (freight[type].period + product.cycle) * sales.minAvgSales,
+      after: (quantity + await totalUnits(freightPlan[type].boxes, product.unitsPerBox) + totalInventory - (freight[type].period + product.cycle) * sales.minAvgSales)
+    }
+  }
+  return data;
 }
 async function checkInventory(freightPlan, freight, product, totalInventory, sales, inboundShippeds) {
   var data = [];
@@ -313,6 +679,33 @@ async function checkInventoryAfterAir(freightPlan, freight, product, totalInvent
   }
   return data;
 }
+async function checkInventoryAfterAirV3(freightPlan, freight, product, sales) {
+  var data = [];
+  for (var type in freightPlan) {
+    if (type === 'airExpress') {
+      data[freight[type].period + product.cycle] = {
+        before: 0,
+        after: (await totalUnits(freightPlan[type].boxes, product.unitsPerBox))
+      }
+      continue;
+    }
+    var quantity = 0;
+    for (var fasterType in freightPlan) {
+      if (freightPlan[fasterType].boxes && freight[fasterType].period < freight[type].period) {
+        quantity += await totalUnits(freightPlan[fasterType].boxes, product.unitsPerBox);
+      }
+    }
+
+    if (quantity - (freight[type].period - freight['airExpress'].period) * sales.minAvgSales < sales.minAvgSales * 10) {
+      return false;
+    }  
+    data[freight[type].period + product.cycle] = {
+      before: quantity - (freight[type].period - freight['airExpress'].period) * sales.minAvgSales,
+      after: (quantity + await totalUnits(freightPlan[type].boxes, product.unitsPerBox) - (freight[type].period - freight['airExpress'].period) * sales.minAvgSales)
+    }
+  }
+  return data;
+}
 async function checkFreightPlan(freightPlan, freight, product, totalInventory, sales, inboundShippeds) {
   return await checkInventory(freightPlan, freight, product, totalInventory, sales, inboundShippeds)
 }
@@ -370,6 +763,7 @@ async function bestPlan(quantity, product, freight, totalInventory, sales, inbou
             boxes: (quantity.boxes - i - j)
           }
         }
+        inventoryCheck = await getInventoryByDate(freightPlan, freight, product, totalInventory, sales, inboundShippeds)
         checked = await checkFreightPlan(freightPlan, freight, product, totalInventory, sales, inboundShippeds)
         if (checked) {
           var newPlan = await calculatePlanAmounts(freightPlan, freight, product);
@@ -377,6 +771,114 @@ async function bestPlan(quantity, product, freight, totalInventory, sales, inbou
             plan = newPlan;
             inventoryCheck = checked;
             return await formatPlan(plan, product.unitsPerBox, inventoryCheck);
+          }
+        }
+      // }
+    }
+  }
+  return await formatPlan(plan, product.unitsPerBox, inventoryCheck);
+}
+async function bestPlanV4(quantity, product, freight, sales) {
+  if (product.airDelivery) {
+    const TYPES = ['sea', 'seaExpress', 'airDelivery', 'airExpress']
+  } else {
+    const TYPES = ['sea', 'seaExpress', 'airExpress']
+  }
+  var inventoryCheck = [];
+  var checked = null;
+  var plan = {
+    sea: {
+      boxes: 0
+    },
+    seaExpress: {
+      boxes: 0
+    },
+    // airDelivery: {
+    //   boxes: 0
+    // },
+    airExpress: {
+      boxes: quantity.boxes
+    },
+    totalAmount: quantity.boxes * freight.airExpress.price * product.box.weight
+  };
+  for (var i = quantity.boxes; i >= 0; i--) {
+    for (var j = quantity.boxes - i; j >= 0; j--) {
+      // for (var k = quantity.boxes - i - j; k >= 0; k--) {
+        freightPlan = {
+          sea: {
+            boxes: i
+          },
+          seaExpress: {
+            boxes: j
+          },
+          // airDelivery: {
+          //   boxes: k
+          // },
+          airExpress: {
+            boxes: (quantity.boxes - i - j)
+          }
+        }
+        if (quantity.boxes - i - j > 0) {
+          checked = await checkInventoryAfterAirV3(freightPlan, freight, product, sales)
+          if (checked) {
+            var newPlan = await calculatePlanAmounts(freightPlan, freight, product);
+            if (Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
+              plan = newPlan;
+              inventoryCheck = checked;
+              return await formatPlan(plan, product.unitsPerBox, inventoryCheck);
+            }
+          }
+        }
+      // }
+    }
+  }
+  return await formatPlan(plan, product.unitsPerBox, inventoryCheck);
+}
+
+async function bestPlanV3(quantity, product, freight, sales) {
+  var inventoryCheck = [];
+  var checked = null;
+  var plan = {
+    sea: {
+      boxes: 0
+    },
+    seaExpress: {
+      boxes: 0
+    },
+    // airDelivery: {
+    //   boxes: 0
+    // },
+    airExpress: {
+      boxes: quantity.boxes
+    },
+    totalAmount: quantity.boxes * freight.airExpress.price * product.box.weight
+  };
+  for (var i = quantity.boxes; i >= 0; i--) {
+    for (var j = quantity.boxes - i; j >= 0; j--) {
+      // for (var k = quantity.boxes - i - j; k >= 0; k--) {
+        freightPlan = {
+          sea: {
+            boxes: i
+          },
+          seaExpress: {
+            boxes: j
+          },
+          // airDelivery: {
+          //   boxes: k
+          // },
+          airExpress: {
+            boxes: (quantity.boxes - i - j)
+          }
+        }
+        if (quantity.boxes - i - j > 0) {
+          checked = await checkInventoryAfterAirV3(freightPlan, freight, product, sales)
+          if (checked) {
+            var newPlan = await calculatePlanAmounts(freightPlan, freight, product);
+            if (Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
+              plan = newPlan;
+              inventoryCheck = checked;
+              return await formatPlan(plan, product.unitsPerBox, inventoryCheck);
+            }
           }
         }
       // }

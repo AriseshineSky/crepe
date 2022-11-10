@@ -19,6 +19,7 @@
     "express": "~4.16.1",
     "express-ejs-layouts": "^2.5.1",
     "express-element-ui": "^0.1.21",
+    "google-spreadsheet": "^3.3.0",
     "googleapis": "^105.0.0",
     "http-errors": "~1.6.3",
     "log4js": "^6.7.0",

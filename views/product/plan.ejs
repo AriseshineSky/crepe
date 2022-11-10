@@ -9,67 +9,114 @@
     <div class='inner post'>
       <div id="purchase" data-purchase="<%= JSON.stringify(purchase) %>"></div>
       <div id="freight" data-freight="<%= JSON.stringify(freight) %>"></div>
+      <div id="inbounds" data-inbounds="<%= JSON.stringify(purchase.inboundsCheck) %>"></div>
       <div id="chart"></div>
     </div>
   </div>
 </div>
 <script type="text/javascript">
-  const FREIGHT_TYPES = ['sea', 'seaExpress', 'airDelivery', 'airExpress'];
-  var purchase =$('#purchase').data('purchase');
-  var freight =$('#freight').data('freight');
-  var data = { 0: {
-                    before: purchase.totalInventory,
-                    after: purchase.totalInventory
-                  }
-              }
- 
-  var x = [moment().format('YYYY-MM-DD')];
-  var y = [purchase.totalInventory];
-  var data = purchase.plan.inventoryCheck;
-  for (var date in data) {
-    if (data[date]) {
-      if (data[date].before === data[date].after) {
-        x.push(date);
-        y.push(data[date].before);
-      } else {
-        x.push(date);
-        y.push(data[date].before);
-        x.push(Number(date)+1);
-        y.push(data[date].after);
+  $(document).ready(function() {
+    const FREIGHT_TYPES = ['sea', 'seaExpress', 'airDelivery', 'airExpress'];
+    var purchase =$('#purchase').data('purchase');
+    var freight =$('#freight').data('freight');
+    var data = { 0: {
+                      before: purchase.totalInventory,
+                      after: purchase.totalInventory
+                    }
+                }
+  
+    var inboundsX = [0];
+    var inboundsY = [purchase.totalInventory];
+    var x = [0];
+    var y = [purchase.totalInventory];
+    var inboundsData =$('#inbounds').data('inbounds');
+      
+    for (var date in inboundsData) {
+      if (inboundsData[date]) {
+        if (inboundsData[date].before === inboundsData[date].after) {
+          inboundsX.push(date);
+          inboundsY.push(inboundsData[date].before);
+        } else {
+          inboundsX.push(date);
+          inboundsY.push(inboundsData[date].before);
+          inboundsX.push(Number(date)+1);
+          inboundsY.push(inboundsData[date].after);
+        }
       }
     }
-  }
 
-  async function changeNumberToDate(x) {
-    return new Promise((resolve, reject) => {
-      var days = [];
-      var day = new Date();
-      days = x.map(function(n) {
-        return moment().add(Number(n), 'days').format('YYYY-MM-DD');
-      });
-      resolve(days);
-    })
-  }
-
-  changeNumberToDate(x).then((days) => {
-    console.log(days);
-    var chart = c3.generate({
-      data: {
-        x: 'x',
-        columns: [
-          ['x'].concat(days),
-          ['inventory'].concat(y)
-        ]
-      },
-      axis: {
-        x: {
-          type: 'timeseries',
-          tick: {
-            count: days.length,
-            format: '%Y-%m-%d'
+    console.log(inboundsX);
+    console.log(inboundsY);
+   
+    async function changeNumberToDate(x) {
+      return new Promise((resolve, reject) => {
+        var days = [];
+        var day = new Date();
+        days = x.map(function(n) {
+          return moment().add(Number(n), 'days').format('YYYY-MM-DD');
+        });
+        resolve(days);
+      })
+    }
+    if (purchase.plan) {
+      console.log(purchase.plan);
+      var data = purchase.plan.inventoryCheck;
+      for (var date in data) {
+        if (data[date]) {
+          if (data[date].before === data[date].after) {
+            x.push(date);
+            y.push(data[date].before);
+          } else {
+            x.push(date);
+            y.push(data[date].before);
+            x.push(Number(date)+1);
+            y.push(data[date].after);
           }
         }
-      },
-    });
+      }
+      changeNumberToDate(x).then((days) => {
+        console.log(days);
+        var chart = c3.generate({
+          data: {
+            x: 'x',
+            columns: [
+              ['x'].concat(days),
+              ['inventory'].concat(y)
+            ]
+          },
+          axis: {
+            x: {
+              type: 'timeseries',
+              tick: {
+                count: days.length,
+                format: '%Y-%m-%d'
+              }
+            }
+          },
+        });
+      })
+    } else {
+      changeNumberToDate(inboundsX).then((days) => {
+        console.log(days);
+        var chart = c3.generate({
+          data: {
+            x: 'x',
+            columns: [
+              ['x'].concat(days),
+              ['inbound'].concat(inboundsY),
+            ]
+          },
+          axis: {
+            x: {
+              type: 'timeseries',
+              tick: {
+                count: days.length,
+                format: '%Y-%m-%d'
+              }
+            }
+          },
+        });
+      })
+    }
   })
 </script>
