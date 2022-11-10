@@ -60,19 +60,18 @@
     }
     if (purchase.plan) {
       console.log(purchase.plan);
-      var data = purchase.plan.inventoryCheck;
-      for (var date in data) {
-        if (data[date]) {
-          if (data[date].before === data[date].after) {
-            x.push(date);
-            y.push(data[date].before);
-          } else {
-            x.push(date);
-            y.push(data[date].before);
-            x.push(Number(date)+1);
-            y.push(data[date].after);
-          }
+      var status = purchase.plan.inventoryStatus;
+      for (var data of purchase.plan.inventoryStatus) {
+        if (data.before === data.after) {
+          x.push(data.period);
+          y.push(data.before);
+        } else {
+          x.push(data.period);
+          y.push(data.before);
+          x.push(Number(data.period)+1);
+          y.push(data.after);
         }
+        
       }
       changeNumberToDate(x).then((days) => {
         console.log(days);

@@ -50,7 +50,7 @@ exports.plan = async function (req, res, next) {
   // if (purchase.plan) {
   //   console.log(`${purchase.seaFreightDue}\t${purchase.quantity.quantity}\t${purchase.plan.airExpress.units}\t \t${purchase.plan.seaExpress.units}\t${purchase.plan.sea.units}\t`)
   // }
-  // res.render('product/plan', {purchase: purchase, freight: FREIGHT});
+  res.render('product/plan', {purchase: purchase, freight: FREIGHT});
 };
 
 exports.edit = async function (req, res, next) {
