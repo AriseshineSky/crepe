@@ -15,10 +15,7 @@ var getPlwhsProductByASIN = require('../lib/getPlwhsProductByASIN')
 var getInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByProduct = require('../lib/getStockByProduct')
 
-plwhsApis = {
-  product: 'https://plwhs.com/api/Products?filter=%7B%22where%22:%7B%22appUserId%22:1%7D%7D',
-  purchase: 'https://plwhs.com/api/StockOutRequests?filter=%7B%22where%22:%7B%22status%22:%22stocking_out%22%7D%7D'
-}
+
 yisucangApis = {
   inventory: '/OrderAPI/GetInventory',
   product: '/OrderAPI/GetProductList'

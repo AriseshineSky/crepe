@@ -1,12 +1,13 @@
 var base = require('./base')
 
-function purchases() {
+
+function purchases(productId) {
+  plwhsPurchaseApis = `https://plwhs.com/api/Purchases?filter={"where":{"productId":"${productId}"},"order":["id DESC"],"limit":50,"skip":0}`;
   return new Promise((resolve, reject)=>{
-    base(plwhsApis.purchase).then((data)=>{
-      var purchases = data.Data;
-      resolve(purchases);
+    base(plwhsPurchaseApis).then((data)=>{
+      resolve(data);
     })
   })
 }
 
-exports.plwhsPurchases = purchases;
+exports.purchases = purchases;

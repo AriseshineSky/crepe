@@ -7,8 +7,29 @@ var getFbaInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByProduct = require('../lib/getStockByProduct');
 const { ObjectId } = require('mongodb');
 
-var inboundQueue = [];
+var Freight = require('./freight');
 
+var Purchase = require('./purchases');
+
+async function getFreight(product) {
+  Freight.getFreightsByProduct(product);
+}
+
+async function syncFreight(product) {
+  var freights = await Freight.getFreightsByProduct(product);
+  for (var freight of freights) {
+    product.inboundShippeds.push({
+      quantity: freight.qty,
+      deliveryDue: freight.delivery
+    });
+  }
+  product.save(function (err) {
+    console.log(err);
+  });
+}
+
+exports.syncFreight = syncFreight;
+exports.getFreight = getFreight;
 async function checkStatus(inbound, units, sales) {
   return(units - inbound.period * sales.minAvgSales);
 }
@@ -151,7 +172,12 @@ async function addCurrentInventoryToInbounds(totalInventory, inboundShippeds) {
 }
 
 async function addShipmentToInbounds(shipment, inbounds) {
-  var newInbounds = JSON.parse(JSON.stringify(inbounds));
+  if (inbounds) {
+    var newInbounds = JSON.parse(JSON.stringify(inbounds));
+  } else {
+    var newInbounds = [];
+  }
+  console.log(newInbounds);
   newInbounds.push({
     quantity: shipment.quantity,
     period: shipment.period
@@ -287,8 +313,12 @@ exports.getPlanV2 = async function(asin) {
   // var product = PRODUCTS[asin];
   var stock = await prepareStock(product);
   console.log(stock);
+  // var sales = {
+  //   minAvgSales: Math.ceil(fbaInventorySales.sales),
+  //   maxAvgSales: product.maxAvgSales
+  // };
   var sales = {
-    minAvgSales: Math.ceil(fbaInventorySales.sales),
+    minAvgSales: product.maxAvgSales,
     maxAvgSales: product.maxAvgSales
   };
   console.log(product.inboundShippeds);
@@ -303,7 +333,10 @@ exports.getPlanV2 = async function(asin) {
   }
 
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
+  console.log("inbound")
+  console.log(inbounds)
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
+  console.log(inbounds)
   var plan = await bestPlanV4(quantity, product, FREIGHT, sales, inbounds);
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
   var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
@@ -861,12 +894,25 @@ async function bestPlanWithAirDelivery(quantity, product, freight, sales, inboun
             boxes: (quantity.boxes - i - j -k)
           }
         }
-        var newPlan = await getNewFreightPlan(freightPlan, freight, inbounds, product, sales);
-        if (newPlan.gap == 0) {
-          plan = JSON.parse(JSON.stringify(newPlan));
-          return await formatPlan(plan, product.unitsPerBox);
-        } else if (newPlan.gap <= plan.gap && Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
-          plan = JSON.parse(JSON.stringify(newPlan));
+        // var newPlan = await getNewFreightPlan(freightPlan, freight, inbounds, product, sales);
+        // if (newPlan.gap == 0) {
+        //   plan = JSON.parse(JSON.stringify(newPlan));
+        //   return await formatPlan(plan, product.unitsPerBox);
+        // } else if (newPlan.gap <= plan.gap && Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
+        //   plan = JSON.parse(JSON.stringify(newPlan));
+        // }
+        var newPlan = await getNewFreightPlan(freightPlan, freight, freightType, inbounds, product, sales);
+        if (newPlan.minInventory >= product.minInventory) {
+          if (newPlan.gap == 0) {
+            plan = JSON.parse(JSON.stringify(newPlan));
+            return await formatPlan(plan, product.unitsPerBox);
+          } else if (newPlan.gap === plan.gap && Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
+            plan = JSON.parse(JSON.stringify(newPlan));
+          } else if (newPlan.gap < plan.gap) {
+            plan = JSON.parse(JSON.stringify(newPlan));
+          }
+        } else if (newPlan.minInventory >= plan.minInventory) {
+          plan = JSON.parse(JSON.stringify(newPlan));  
         }
       }
     }

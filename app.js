@@ -6,6 +6,7 @@ var logger = require('morgan');
 var errorPageMiddleware = require('./middlewares/error_page');
 var indexRouter = require('./routes/index');
 var productsRouter = require('./routes/products');
+var freightsRouter = require('./routes/freights');
 var expressLayouts = require('express-ejs-layouts');
 var app = express();
 
@@ -21,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(expressLayouts);
 app.use('/', indexRouter);
 app.use('/products', productsRouter);
+app.use('/freights', freightsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -99,10 +101,10 @@ FREIGHT = {
     period: 35,
     price: 15
   },
-  // airDelivery: {
-  //   period: 15,
-  //   price: 32
-  // },
+  airDelivery: {
+    period: 15,
+    price: 32
+  },
   airExpress: {
     period: 8,
     price: 55

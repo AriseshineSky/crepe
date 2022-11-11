@@ -1,5 +1,6 @@
-var Product         = require('../proxy').Product;
-var Csv         = require('../proxy').Csv;
+var Product = require('../proxy').Product;
+var Csv = require('../proxy').Csv;
+var Freight = require('../proxy').Freight;
 var plan = require('../lib/plan')
 var mongoose = require('mongoose');
 var syncProducts = require('../lib/getInfoFromGoogleSheet')
@@ -16,6 +17,32 @@ exports.show = async function (req, res, next) {
     });
   }
 };
+exports.freights = async function (req, res, next) {
+  var asin = req.params.asin;
+  var product = await Product.getProductByAsin(asin);
+  if (!product) {
+    res.render404('这个产品不存在。');
+    return;
+  } else {
+    Product.getFreight(product);
+    // res.render('product/show', {
+    //   product: product,
+    //   title: ""
+    // });
+  }
+};
+
+exports.syncFreight = async function (req, res, next) {
+  var asin = req.params.asin;
+  var product = await Product.getProductByAsin(asin);
+  if (!product) {
+    res.render404('这个产品不存在。');
+    return;
+  } else {
+    Product.syncFreight(product);
+  }
+};
+
 
 exports.delete = async function (req, res, next) {
   var asin = req.body.asin;
