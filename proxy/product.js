@@ -12,15 +12,27 @@ var Freight = require('./freight');
 var Purchase = require('./purchases');
 
 async function getFreight(product) {
-  Freight.getFreightsByProduct(product);
+  Freight.getFreightsAndProductingsByProduct(product);
 }
 
 async function syncFreight(product) {
-  var freights = await Freight.getFreightsByProduct(product);
-  for (var freight of freights) {
-    product.inboundShippeds.push({
-      quantity: freight.qty,
-      deliveryDue: freight.delivery
+  var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
+  product.inboundShippeds = [];
+  product.producings = [];
+  for (var freight of freightsAndProducings.freights) {
+    if (moment(freight.delivery).isAfter(moment.now())) {
+      product.inboundShippeds.push({
+        quantity: freight.qty,
+        deliveryDue: freight.delivery
+      });
+    }
+  }
+  console.log(freightsAndProducings.producings);
+  for (var producing of freightsAndProducings.producings) {
+    product.producings.push({
+      orderId: freight.orderId,
+      quantity: producing.qty,
+      deliveryDue: producing.delivery
     });
   }
   product.save(function (err) {

@@ -4,16 +4,12 @@ var Product = models.Product;
 var mongoose = require('mongoose');
 var moment = require('moment');
 const GAP = 4;
-var getFbaInventoryByASIN = require('../lib/getFbaInventoryByASIN')
-var getStockByProduct = require('../lib/getStockByProduct');
-const { ObjectId } = require('mongodb');
-
-var inboundQueue = [];
 
 async function formatPurchase(purchase) {
   return {
     orderId: `OR${purchase.id}`,
-    qty: purchase.qty
+    qty: purchase.qty,
+    delivery: purchase.us_arrival_date
   }
 }
 

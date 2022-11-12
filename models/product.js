@@ -19,6 +19,12 @@ var ProductSchema = new Schema({
       deliveryDue: { type: Date, default: Date.now }
     }
   ],
+  producings: [
+    {
+      quantity: {type: Number, default: 0 },
+      deliveryDue: { type: Date, default: Date.now }
+    }
+  ],
   airDelivery: {type: Boolean, default: false},
   plwhsId: {type: Number, default: 0 },
   yisucangId: {type: Number, default: 0 },

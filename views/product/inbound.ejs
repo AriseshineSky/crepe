@@ -12,6 +12,36 @@
     </tr>
   </thead>
   <tbody>
+    
+    <% product.producings.forEach(function(producing){ %>
+      <tr>
+        <td><%= producing.quantity %></td>
+        <td><%= producing.deliveryDue %></td>
+        <td style="text-align:center;">
+          <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-inbound-id="<%=producing._id%>" >Delete</button>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<br/>
+
+
+<table
+  data-toggle="table"
+  data-pagination="true"
+  data-editable-emptytext="Default empty text."
+>
+  <thead>
+    <tr>
+      <th data-editable="true" data-sortable="true">数量:</th>
+      <th data-editable="true" data-sortable="true">预估收货日期:</th>
+      <th class="">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    
     <% inbounds.forEach(function(inbound){ %>
       <tr>
         <td><%= inbound.quantity %></td>
