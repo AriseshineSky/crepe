@@ -5,36 +5,15 @@ var moment = require('moment');
 const GAP = 4;
 var getFbaInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByProduct = require('../lib/getStockByProduct');
-const { ObjectId } = require('mongodb');
-
 var Freight = require('./freight');
-
-var Purchase = require('./purchases');
-
 async function getFreight(product) {
   Freight.getFreightsAndProductingsByProduct(product);
 }
 
 async function syncFreight(product) {
   var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
-  product.inboundShippeds = [];
-  product.producings = [];
-  for (var freight of freightsAndProducings.freights) {
-    if (moment(freight.delivery).isAfter(moment.now())) {
-      product.inboundShippeds.push({
-        quantity: freight.qty,
-        deliveryDue: freight.delivery
-      });
-    }
-  }
-  console.log(freightsAndProducings.producings);
-  for (var producing of freightsAndProducings.producings) {
-    product.producings.push({
-      orderId: freight.orderId,
-      quantity: producing.qty,
-      deliveryDue: producing.delivery
-    });
-  }
+  product.inboundShippeds = freightsAndProducings.inboundShippeds;
+  product.producings = freightsAndProducings.producings;
   product.save(function (err) {
     console.log(err);
   });
@@ -93,14 +72,12 @@ async function calculateOutOfStockPeriod(status) {
   return period;
 }
 
-
-async function calculateMinInventory(freightPlan, freight, freightType, status, sales, product) {
+async function calculateMinInventory(freight, freightType, status, sales, product) {
   var period = 0;
   var minInventory = 100000;
-  for (var i = 0; i < status.length; i++) {
-    for (var type of freightType) {
-      console.log(type);
-      console.log(status);
+  for (var j = 1; j < freightType.length; j++) {
+    for (var i = 0; i < status.length; i++) {
+      var type = freightType[j];
       if (status[i].period === freight[type].period + product.cycle) {
         period = Math.floor(status[i].before / sales.minAvgSales);
         if (period < minInventory) {
@@ -318,6 +295,55 @@ async function removeDeliveredInbounds(product) {
   });
 }
 
+async function getFbaSalesPeriod(fbaInventorySales) {
+  return Math.floor(fbaInventorySales.fbaInventory / fbaInventorySales.sales)
+}
+
+async function getStockSalesPeriod(fbaInventorySales, stock) {
+  return Math.floor(stock / fbaInventorySales.sales)
+}
+
+var generateReport = async function(asin) {
+  var message;
+  var report = await getInventoryReport(asin);
+  if (report.fbaSalesPeriod < 10) {
+    message.fba =  `${asin} 亚马逊库存不足10天`;
+  }
+  console.log(report);
+}
+
+async function checkInboundShippeds(product) {
+  var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
+  product.inboundShippeds = freightsAndProducings.inboundShippeds;
+  product.producings = freightsAndProducings.producings;
+  product.save(function (err) {
+    console.log(err);
+  });
+}
+
+var getInventoryReport = async function(asin) {
+  var report = {};
+  var product = await getProductByAsin(asin);
+  var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+  var fbaSalesPeriod = await getFbaSalesPeriod(fbaInventorySales);
+  var stock = await prepareStock(product);
+  var stockSalesPeriod = await getStockSalesPeriod(fbaInventorySales, stock);
+  await syncFreight(product);
+
+  var inbounds = await convertInboundShippedsDeliveryDueToPeroid(product.inboundShippeds);
+  await addCurrentInventoryToInbounds(totalInventory, inbounds);
+  var newInbounds = await convertInboundsToSortedQueue(inbounds);
+  var inboundQueue = await calculateInboundQueue(newInbounds, sales);
+  var status = await recalculateInboundQueue(inboundQueue, sales);
+  var gap = await calculateOutOfStockPeriod(status);
+  report.fbaSalesPeriod = fbaSalesPeriod;
+  report.inventory = fbaInventorySales.inventory;
+  report.stockSalesPeriod = stockSalesPeriod;
+  report.status = status;
+  report.gap = gap;
+  return report;
+}
+
 exports.getPlanV2 = async function(asin) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
   console.log(fbaInventorySales);
@@ -325,14 +351,14 @@ exports.getPlanV2 = async function(asin) {
   // var product = PRODUCTS[asin];
   var stock = await prepareStock(product);
   console.log(stock);
-  // var sales = {
-  //   minAvgSales: Math.ceil(fbaInventorySales.sales),
-  //   maxAvgSales: product.maxAvgSales
-  // };
   var sales = {
-    minAvgSales: product.maxAvgSales,
+    minAvgSales: Math.ceil(fbaInventorySales.sales),
     maxAvgSales: product.maxAvgSales
   };
+  // var sales = {
+  //   minAvgSales: product.maxAvgSales,
+  //   maxAvgSales: product.maxAvgSales
+  // };
   console.log(product.inboundShippeds);
   await removeDeliveredInbounds(product);
   var inboundShippeds = product.inboundShippeds;
@@ -350,6 +376,8 @@ exports.getPlanV2 = async function(asin) {
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
   console.log(inbounds)
   var plan = await bestPlanV4(quantity, product, FREIGHT, sales, inbounds);
+  
+  
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
   var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
   var seaFreightDue = await getOrderDue(product, 'sea', maxTotalSalesPeriod, totalInventory, sales, FREIGHT, inboundShippeds);
@@ -887,6 +915,7 @@ async function bestPlanWithAirDelivery(quantity, product, freight, sales, inboun
       boxes: quantity.boxes
     },
     gap: 100000,
+    minInventory: 0,
     totalAmount: quantity.boxes * freight.airExpress.price * product.box.weight
   };
   for (var i = quantity.boxes; i >= 0; i--) {
@@ -906,13 +935,6 @@ async function bestPlanWithAirDelivery(quantity, product, freight, sales, inboun
             boxes: (quantity.boxes - i - j -k)
           }
         }
-        // var newPlan = await getNewFreightPlan(freightPlan, freight, inbounds, product, sales);
-        // if (newPlan.gap == 0) {
-        //   plan = JSON.parse(JSON.stringify(newPlan));
-        //   return await formatPlan(plan, product.unitsPerBox);
-        // } else if (newPlan.gap <= plan.gap && Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
-        //   plan = JSON.parse(JSON.stringify(newPlan));
-        // }
         var newPlan = await getNewFreightPlan(freightPlan, freight, freightType, inbounds, product, sales);
         if (newPlan.minInventory >= product.minInventory) {
           if (newPlan.gap == 0) {
@@ -939,7 +961,7 @@ async function getNewFreightPlan(freightPlan, freight, freightType, inbounds, pr
   var status = await recalculateInboundQueue(inboundQueue, sales);
   var newPlan = await calculatePlanAmounts(freightPlan, freight, product);
   newPlan.gap = await calculateOutOfStockPeriod(status);
-  newPlan.minInventory = await calculateMinInventory(freightPlan, freight, freightType, status, sales, product);
+  newPlan.minInventory = await calculateMinInventory(freight, freightType, status, sales, product);
   newPlan.inventoryStatus = status;
   return newPlan;
 }
@@ -976,7 +998,7 @@ async function bestPlanWithoutAirDelivery(quantity, product, freight, sales, inb
         if (newPlan.gap == 0) {
           plan = JSON.parse(JSON.stringify(newPlan));
           return await formatPlan(plan, product.unitsPerBox);
-        } else if (newPlan.gap === plan.gap && Number(plan.totalAmount) >= Number(newPlan.totalAmount)) {
+        } else if (newPlan.gap === plan.gap && Number(plan.totalAmount) > Number(newPlan.totalAmount)) {
           plan = JSON.parse(JSON.stringify(newPlan));
         } else if (newPlan.gap < plan.gap) {
           plan = JSON.parse(JSON.stringify(newPlan));

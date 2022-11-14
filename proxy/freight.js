@@ -31,27 +31,61 @@ var syncFreights = async function() {
   return freights;
 }
 
+async function formatFreightsAndProductings(freightsAndProducings) {
+  var inboundShippeds = [];
+  var producings = [];
+  for (var freight of freightsAndProducings.freights) {
+    inboundShippeds.push({
+      quantity: freight.qty,
+      deliveryDue: freight.delivery
+    });
+  }
+  for (var producing of freightsAndProducings.producings) {
+    producings.push({
+      orderId: freight.orderId,
+      quantity: producing.qty,
+      deliveryDue: producing.delivery
+    });
+  }
+  return {
+    inboundShippeds: inboundShippeds,
+    producings: producings
+  }
+}
+
 var getFreightsAndProductingsByProduct = async function(product) {
   var freights = [];
   var producings = [];
   var allFreights = await syncFreights();
   var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
+
+  var lastestFreight = moment().subtract(1, 'year').format('YYYY-MM-DD');
+  var lastestFreightOrderId = moment().subtract(1, 'year').format('YYYY-MM-DD');
+  for (var i = 0; i < allFreights.length; i++) {
+    if (moment(allFreights[i].delivery).isAfter(moment(lastestFreight))) {
+      lastestFreight = allFreights[i].delivery;
+      lastestFreightOrderId = allFreights[i].orderId;
+    }
+  }
   for (var j = 0; j < purchases.length; j++) {
     var shipped = false;
     for (var i = 0; i < allFreights.length; i++) {
       if (allFreights[i].orderId === purchases[j].orderId) {
-        freights.push(allFreights[i]);
         shipped = true;
+        if (moment(allFreights[i].delivery).isAfter(moment.now())) {
+          freights.push(allFreights[i]);
+        }
       }
     }
-    if (!shipped) {
+    if (!shipped && purchases[j].orderId > lastestFreightOrderId) {
       producings.push(purchases[j]);
     }
   }
-  return {
+
+  return await formatFreightsAndProductings({
     freights: freights,
     producings: producings
-  }
+  })
 }
 
 var parseDate = async function(date) {

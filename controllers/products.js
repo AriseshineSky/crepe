@@ -80,6 +80,22 @@ exports.plan = async function (req, res, next) {
   res.render('product/plan', {purchase: purchase, freight: FREIGHT});
 };
 
+exports.report = async function(req, res, next) {
+  var asin = req.params.asin;
+  var product = await Product.getProductByAsin(asin);
+  await generateReport(asin);
+  if (!product) {
+    res.render404('这个产品不存在。');
+    return;
+  } else {
+    res.render('product/edit', {
+      product: product,
+      title: ""
+    });
+  }
+}
+
+
 exports.edit = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);

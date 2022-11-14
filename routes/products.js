@@ -13,6 +13,7 @@ router.get('/:asin/edit', products.edit);
 router.get('/:asin/plan', products.plan);
 router.get('/:asin/freights', products.freights);
 router.get('/:asin/syncFreight', products.syncFreight);
+router.get('/:asin/report', products.syncFreight);
 router.post('/create', products.create);
 router.get('/sync', products.sync);
 router.post('/delete', products.delete);
