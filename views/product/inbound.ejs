@@ -8,6 +8,7 @@
     <tr>
       <th data-editable="true" data-sortable="true">数量:</th>
       <th data-editable="true" data-sortable="true">预估收货日期:</th>
+      
       <th class="">Action</th>
     </tr>
   </thead>
@@ -37,6 +38,7 @@
     <tr>
       <th data-editable="true" data-sortable="true">数量:</th>
       <th data-editable="true" data-sortable="true">预估收货日期:</th>
+      <th data-editable="true" data-sortable="true">装箱信息:</th>
       <th class="">Action</th>
     </tr>
   </thead>
@@ -46,6 +48,7 @@
       <tr>
         <td><%= inbound.quantity %></td>
         <td><%= inbound.deliveryDue %></td>
+        <td><%= inbound.box %></td>
         <td style="text-align:center;">
           <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-inbound-id="<%=inbound._id%>" >Delete</button>
         </td>

@@ -21,7 +21,8 @@ var ProductSchema = new Schema({
         length: {type: Number, default: 0 },
         width: {type: Number, default: 0 },
         height: {type: Number, default: 0 },
-        weight: {type: Number, default: 0 }
+        weight: {type: Number, default: 0 },
+        units: { type: Number, default: 0 }
       },
     }
   ],

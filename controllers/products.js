@@ -17,6 +17,22 @@ exports.show = async function (req, res, next) {
     });
   }
 };
+
+exports.generateReport = async function (req, res, next) {
+  var asin = req.params.asin;
+  var product = await Product.getProductByAsin(asin);
+  if (!product) {
+    res.render404('这个产品不存在。');
+    return;
+  } else {
+    await Product.generateReport(asin);
+    res.render('product/report', {
+      product: product,
+      title: ""
+    });
+  }
+};
+
 exports.freights = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);

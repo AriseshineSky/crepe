@@ -296,7 +296,7 @@ async function removeDeliveredInbounds(product) {
 }
 
 async function getFbaSalesPeriod(fbaInventorySales) {
-  return Math.floor(fbaInventorySales.fbaInventory / fbaInventorySales.sales)
+  return Math.floor(fbaInventorySales.inventory / fbaInventorySales.sales)
 }
 
 async function getStockSalesPeriod(fbaInventorySales, stock) {
@@ -304,13 +304,21 @@ async function getStockSalesPeriod(fbaInventorySales, stock) {
 }
 
 var generateReport = async function(asin) {
-  var message;
+  var messages = [];
   var report = await getInventoryReport(asin);
   if (report.fbaSalesPeriod < 10) {
-    message.fba =  `${asin} 亚马逊库存不足10天`;
+    messages.push(`${asin} 亚马逊库存不足10天`);
+    if (report.stock > 0) {
+      messages.push(`请把仓库中${report.stock}发往亚马逊`);
+    }
+  }
+  if (report.gap > 0) {
+    messages.push(`当前的发货计划可能会造成断货`);
   }
   console.log(report);
 }
+
+exports.generateReport = generateReport;
 
 async function checkInboundShippeds(product) {
   var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
@@ -325,19 +333,26 @@ var getInventoryReport = async function(asin) {
   var report = {};
   var product = await getProductByAsin(asin);
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+  console.log(fbaInventorySales);
   var fbaSalesPeriod = await getFbaSalesPeriod(fbaInventorySales);
   var stock = await prepareStock(product);
   var stockSalesPeriod = await getStockSalesPeriod(fbaInventorySales, stock);
   await syncFreight(product);
 
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(product.inboundShippeds);
-  await addCurrentInventoryToInbounds(totalInventory, inbounds);
+
+  await addCurrentInventoryToInbounds(fbaInventorySales.inventory + stock, inbounds);
   var newInbounds = await convertInboundsToSortedQueue(inbounds);
+  var sales = {
+    minAvgSales: Math.ceil(fbaInventorySales.sales),
+    maxAvgSales: product.maxAvgSales
+  };
   var inboundQueue = await calculateInboundQueue(newInbounds, sales);
   var status = await recalculateInboundQueue(inboundQueue, sales);
   var gap = await calculateOutOfStockPeriod(status);
   report.fbaSalesPeriod = fbaSalesPeriod;
   report.inventory = fbaInventorySales.inventory;
+  report.stock = fbaInventorySales.stock;
   report.stockSalesPeriod = stockSalesPeriod;
   report.status = status;
   report.gap = gap;
