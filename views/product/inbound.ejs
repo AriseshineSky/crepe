@@ -6,6 +6,7 @@
 >
   <thead>
     <tr>
+      <th data-editable="true" data-sortable="true">orderId:</th>
       <th data-editable="true" data-sortable="true">数量:</th>
       <th data-editable="true" data-sortable="true">预估收货日期:</th>
       
@@ -16,6 +17,7 @@
     
     <% product.producings.forEach(function(producing){ %>
       <tr>
+        <td><%= producing.orderId %></td>
         <td><%= producing.quantity %></td>
         <td><%= producing.deliveryDue %></td>
         <td style="text-align:center;">
@@ -36,6 +38,7 @@
 >
   <thead>
     <tr>
+      <th data-editable="true" data-sortable="true">orderId:</th>
       <th data-editable="true" data-sortable="true">数量:</th>
       <th data-editable="true" data-sortable="true">预估收货日期:</th>
       <th data-editable="true" data-sortable="true">装箱信息:</th>
@@ -46,6 +49,7 @@
     
     <% inbounds.forEach(function(inbound){ %>
       <tr>
+        <td><%= inbound.orderId %></td>
         <td><%= inbound.quantity %></td>
         <td><%= inbound.deliveryDue %></td>
         <td><%= inbound.box %></td>

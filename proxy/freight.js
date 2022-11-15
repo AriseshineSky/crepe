@@ -37,6 +37,7 @@ async function formatFreightsAndProductings(freightsAndProducings) {
   for (var freight of freightsAndProducings.freights) {
     inboundShippeds.push({
       quantity: freight.qty,
+      orderId: freight.orderId,
       deliveryDue: freight.delivery,
       box: freight.box
     });
@@ -59,6 +60,7 @@ var getFreightsAndProductingsByProduct = async function(product) {
   var producings = [];
   var allFreights = await syncFreights();
   var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
+  console.log(purchases)
   var lastestFreight = moment().subtract(1, 'year').format('YYYY-MM-DD');
   var lastestFreightOrderId = moment().subtract(1, 'year').format('YYYY-MM-DD');
   for (var i = 0; i < allFreights.length; i++) {
@@ -68,24 +70,26 @@ var getFreightsAndProductingsByProduct = async function(product) {
     }
   }
   for (var j = 0; j < purchases.length; j++) {
-    var shipped = false;
+    var unShippedAmount = purchases[j].qty;
     for (var i = 0; i < allFreights.length; i++) {
-      if (allFreights[i].orderId === 'OR4314') {
-        console.log('OR4314');
-        console.log(allFreights[i].orderId);
-      }
       if (allFreights[i].orderId === purchases[j].orderId) {
-        shipped = true;
+        unShippedAmount -= allFreights[i].qty;
         if (moment(allFreights[i].delivery).isAfter(moment.now())) {
           freights.push(allFreights[i]);
         }
       }
     }
-    if (!shipped && purchases[j].orderId > lastestFreightOrderId && moment(purchases[j].delivery).isAfter(moment.now())) {
-      producings.push(purchases[j]);
+    if ((unShippedAmount / purchases[j].qty) > 0.15 && moment(new Date()).diff(moment(purchases[j].created), 'days') < 60) {
+    // if (!shipped && purchases[j].orderId > lastestFreightOrderId) {
+    // if (!shipped && purchases[j].orderId > lastestFreightOrderId && moment(purchases[j].delivery).isAfter(moment.now())) {
+      producings.push({
+        orderId: purchases[j].orderId,
+        qty: unShippedAmount,
+        delivery: purchases[j].us_arrival_date
+      });
     }
   }
-
+  console.log()
   return await formatFreightsAndProductings({
     freights: freights,
     producings: producings

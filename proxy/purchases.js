@@ -9,7 +9,8 @@ async function formatPurchase(purchase) {
   return {
     orderId: `OR${purchase.id}`,
     qty: purchase.qty,
-    delivery: purchase.us_arrival_date
+    delivery: purchase.us_arrival_date,
+    created: purchase.created
   }
 }
 

@@ -12,6 +12,7 @@ async function getFreight(product) {
 
 async function syncFreight(product) {
   var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
+  console.log(freightsAndProducings)
   product.inboundShippeds = freightsAndProducings.inboundShippeds;
   product.producings = freightsAndProducings.producings;
   product.save(function (err) {
@@ -194,15 +195,17 @@ async function prepareStock(product) {
     return 0;
   }
 }
-
+exports.prepareStock = prepareStock;
 var findAll = async function() {
   return Product.find({});
 }
 
-async function prepareFbaInventoryAndSales(asin) {
+async function prepareFbaInventoryAndSales(asin, listings) {
   var inventory = 0;
   var sales = 0;
-  var listings = await getFbaInventoryByASIN(asin);
+  if (!listings) {
+    listings = await getFbaInventoryByASIN(asin);
+  }
   for(var country in listings[asin]) {
     for(var account in listings[asin][country]) {
       for(var listing of listings[asin][country][account]) {
@@ -211,7 +214,6 @@ async function prepareFbaInventoryAndSales(asin) {
       }
     }
   }
-  console.log(JSON.stringify(listings));
   return {
     inventory: inventory,
     sales: sales
@@ -1102,3 +1104,4 @@ var remove = async function(asin, productId) {
 }
 exports.deleteInbound = deleteInbound;
 exports.remove = remove;
+exports.prepareFbaInventoryAndSales = prepareFbaInventoryAndSales;
