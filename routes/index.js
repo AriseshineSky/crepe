@@ -45,8 +45,8 @@ router.get('/regist', function(req, res, next) {
   res.render('index', {title: "regist"});
 })
 
-router.get('/check', function(req, res, next) {
-  checkProductsInventory();
+router.get('/check', async function(req, res, next) {
+  await checkProductsInventory();
   res.render('index', {title: "regist"});
 })
 

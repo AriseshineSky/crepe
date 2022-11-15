@@ -12,7 +12,6 @@ async function getFreight(product) {
 
 async function syncFreight(product) {
   var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
-  console.log(freightsAndProducings)
   product.inboundShippeds = freightsAndProducings.inboundShippeds;
   product.producings = freightsAndProducings.producings;
   product.save(function (err) {
@@ -200,6 +199,10 @@ var findAll = async function() {
   return Product.find({});
 }
 
+var findAllAsins = async function() {
+  return Product.find().select('asin');
+}
+exports.findAllAsins = findAllAsins;
 async function prepareFbaInventoryAndSales(asin, listings) {
   var inventory = 0;
   var sales = 0;

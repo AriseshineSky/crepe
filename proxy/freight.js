@@ -3,6 +3,7 @@ var Csv = require('../proxy').Csv;
 var sheetApi = require('./sheetApi');
 var Purchase = require('./purchases');
 var moment = require('moment');
+var getStockByProduct = require('../lib/getStockByProduct');
 const HEADER = ['pm', 'asin', 'plwhsId', 
 'yisucangId', 'cycle', 
 'maxAvgSales', 
@@ -11,6 +12,19 @@ const PRODUCT_ATTR = ['asin', 'plwhsId',
 'yisucangId', 'cycle', 
 'maxAvgSales', 'unitsPerBox']
 const INBOUND_ATTR = ['deliveryDue', 'quantity']
+class Freight {
+  constructor() {
+    this.freights = null;
+  }
+  static async getInstance() {
+    if(!this.instance) {
+      this.instance = new Freight();
+      this.instance.freights = await syncFreights();
+    }
+    return this.instance;
+  }
+}
+
 var syncFreights = async function() {
   var freights = [];
   var rows = await sheetApi.listFreights();
@@ -55,12 +69,37 @@ async function formatFreightsAndProductings(freightsAndProducings) {
   }
 }
 
+function compare(type) {
+  return function(m, n) {
+    return m[type] - n[type];
+  }
+}
+
+async function sortFreightsByDelivery(freights) {
+  return freights.sort(compare('delivery'))
+}
+var sumFreights = async function(freights) {
+  var sum = 0;
+  for (var freight of freights) {
+    sum += freight.qty;
+  }
+  return sum;
+}
+
+var checkFreights = async function(freights, pendingStorageNumber) {
+  freights = await sortFreightsByDelivery(freights);
+  while ((await sumFreights(freights)) > pendingStorageNumber) {
+    freights.shift;
+  }
+}
+
 var getFreightsAndProductingsByProduct = async function(product) {
   var freights = [];
   var producings = [];
-  var allFreights = await syncFreights();
+  // var allFreights = await syncFreights();
+  const freightApi = await Freight.getInstance();
+  var allFreights = freightApi.freights;
   var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
-  console.log(purchases)
   var lastestFreight = moment().subtract(1, 'year').format('YYYY-MM-DD');
   var lastestFreightOrderId = moment().subtract(1, 'year').format('YYYY-MM-DD');
   for (var i = 0; i < allFreights.length; i++) {
@@ -74,7 +113,7 @@ var getFreightsAndProductingsByProduct = async function(product) {
     for (var i = 0; i < allFreights.length; i++) {
       if (allFreights[i].orderId === purchases[j].orderId) {
         unShippedAmount -= allFreights[i].qty;
-        if (moment(allFreights[i].delivery).isAfter(moment.now())) {
+        if (moment(allFreights[i].delivery).diff(moment(new Date()), 'days') > -10) {
           freights.push(allFreights[i]);
         }
       }
@@ -89,7 +128,13 @@ var getFreightsAndProductingsByProduct = async function(product) {
       });
     }
   }
-  console.log()
+  var stock = await getStockByProduct(product);
+  if (stock.inventory !== 0) {
+    await checkFreights(freights, stock.inventory.pendingStorageNumber);
+  } else {
+    await checkFreights(freights, 20000);
+  }
+  
   return await formatFreightsAndProductings({
     freights: freights,
     producings: producings
