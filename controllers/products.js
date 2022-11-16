@@ -96,6 +96,15 @@ exports.plan = async function (req, res, next) {
   res.render('product/plan', {purchase: purchase, freight: FREIGHT});
 };
 
+exports.producingPlan = async function (req, res, next) {
+  var asin = req.params.asin;
+  var purchase = await Product.getProducingPlan(asin);
+  // if (purchase.plan) {
+  //   console.log(`${purchase.seaFreightDue}\t${purchase.quantity.quantity}\t${purchase.plan.airExpress.units}\t \t${purchase.plan.seaExpress.units}\t${purchase.plan.sea.units}\t`)
+  // }
+  res.render('product/plan', {purchase: purchase, freight: FREIGHT});
+};
+
 exports.report = async function(req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);

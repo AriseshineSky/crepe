@@ -60,7 +60,8 @@ async function formatFreightsAndProductings(freightsAndProducings) {
     producings.push({
       orderId: producing.orderId,
       quantity: producing.qty,
-      deliveryDue: producing.delivery
+      deliveryDue: producing.delivery,
+      created: producing.created
     });
   }
   return {
@@ -93,6 +94,19 @@ var checkFreights = async function(freights, pendingStorageNumber) {
   }
 }
 
+async function syncBoxInfo(freight, product) {
+  if (product.unitsPerBox === 0) {
+    product.unitsPerBox = freight.box.units;
+    product.box.length = freight.box.length;
+    product.box.width = freight.box.width;
+    product.box.height  = freight.box.height;
+    product.box.weight  = freight.box.weight;
+    product.save(function (err) {
+      console.log(err);
+    });
+  }
+}
+
 var getFreightsAndProductingsByProduct = async function(product) {
   var freights = [];
   var producings = [];
@@ -114,6 +128,7 @@ var getFreightsAndProductingsByProduct = async function(product) {
     var unShippedAmount = purchases[j].qty;
     for (var i = 0; i < allFreights.length; i++) {
       if (allFreights[i].orderId === purchases[j].orderId) {
+        await syncBoxInfo(allFreights[i], product);
         unShippedAmount -= allFreights[i].qty;
         if (moment(allFreights[i].delivery).diff(moment(new Date()), 'days') > -10) {
           freights.push(allFreights[i]);
@@ -126,7 +141,8 @@ var getFreightsAndProductingsByProduct = async function(product) {
       producings.push({
         orderId: purchases[j].orderId,
         qty: unShippedAmount,
-        delivery: purchases[j].us_arrival_date
+        delivery: purchases[j].us_arrival_date,
+        created: purchases[j].created
       });
     }
   }

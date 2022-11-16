@@ -31,7 +31,8 @@ var ProductSchema = new Schema({
     {
       orderId: {type: String },
       quantity: {type: Number, default: 0 },
-      deliveryDue: { type: Date }
+      deliveryDue: { type: Date },
+      created: { type: Date }
     }
   ],
   airDelivery: {type: Boolean, default: false},
