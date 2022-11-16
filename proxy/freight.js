@@ -129,7 +129,7 @@ var getFreightsAndProductingsByProduct = async function(product) {
     }
   }
   var stock = await getStockByProduct(product);
-  if (stock.inventory !== 0) {
+  if (stock.inventory && stock.inventory !== 0) {
     await checkFreights(freights, stock.inventory.pendingStorageNumber);
   } else {
     await checkFreights(freights, 20000);
