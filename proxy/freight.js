@@ -88,7 +88,7 @@ var sumFreights = async function(freights) {
 
 var checkFreights = async function(freights, pendingStorageNumber) {
   freights = await sortFreightsByDelivery(freights);
-  while ((await sumFreights(freights)) > pendingStorageNumber) {
+  while ((pendingStorageNumber > 0) && (await sumFreights(freights)) > pendingStorageNumber) {
     freights.shift;
   }
 }
@@ -99,7 +99,9 @@ var getFreightsAndProductingsByProduct = async function(product) {
   // var allFreights = await syncFreights();
   const freightApi = await Freight.getInstance();
   var allFreights = freightApi.freights;
+  console.log(`allFreights: ${allFreights.length}`);
   var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
+  console.log(`purchases: ${purchases.length}`);
   var lastestFreight = moment().subtract(1, 'year').format('YYYY-MM-DD');
   var lastestFreightOrderId = moment().subtract(1, 'year').format('YYYY-MM-DD');
   for (var i = 0; i < allFreights.length; i++) {
@@ -129,6 +131,7 @@ var getFreightsAndProductingsByProduct = async function(product) {
     }
   }
   var stock = await getStockByProduct(product);
+  console.log('stock', stock);
   if (stock.inventory && stock.inventory !== 0) {
     await checkFreights(freights, stock.inventory.pendingStorageNumber);
   } else {
