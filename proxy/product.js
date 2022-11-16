@@ -10,6 +10,15 @@ async function getFreight(product) {
   Freight.getFreightsAndProductingsByProduct(product);
 }
 
+async function syncAllProductsFreights() {
+  var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
+  product.inboundShippeds = freightsAndProducings.inboundShippeds;
+  product.producings = freightsAndProducings.producings;
+  product.save(function (err) {
+    console.log(err);
+  });
+}
+
 async function syncFreight(product) {
   var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
   product.inboundShippeds = freightsAndProducings.inboundShippeds;
