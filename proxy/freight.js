@@ -81,14 +81,14 @@ async function sortFreightsByDelivery(freights) {
 var sumFreights = async function(freights) {
   var sum = 0;
   for (var freight of freights) {
-    sum += freight.qty;
+    sum += Number(freight.qty);
   }
   return sum;
 }
 
 var checkFreights = async function(freights, pendingStorageNumber) {
   freights = await sortFreightsByDelivery(freights);
-  while ((pendingStorageNumber > 0) && (await sumFreights(freights)) > pendingStorageNumber) {
+  while (Number(pendingStorageNumber > 0) && ((await sumFreights(freights)) > Number(pendingStorageNumber))) {
     freights.shift;
   }
 }
