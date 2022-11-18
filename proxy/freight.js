@@ -96,16 +96,14 @@ var checkFreights = async function(freights, pendingStorageNumber) {
 }
 
 async function syncBoxInfo(freight, product) {
-  if (product.unitsPerBox === 0) {
-    product.unitsPerBox = freight.box.units;
-    product.box.length = freight.box.length;
-    product.box.width = freight.box.width;
-    product.box.height  = freight.box.height;
-    product.box.weight  = freight.box.weight;
-    product.save(function (err) {
-      console.log(err);
-    });
-  }
+  product.unitsPerBox = freight.box.units || product.unitsPerBox || 10;
+  product.box.length = freight.box.length || product.box.length || 10;
+  product.box.width = freight.box.width || product.box.width || 10;
+  product.box.height = freight.box.height || product.box.height || 10;
+  product.box.weight = freight.box.weight || product.box.weight || 10;
+  product.save(function (err) {
+    console.log(err);
+  });
 }
 
 var getFreightsAndProductingsByProduct = async function(product) {
@@ -203,6 +201,7 @@ var parseQuantity = async function(quantity, boxInfo) {
 var parseBox = async function(boxInfo) {
   var box = {};
   if (boxInfo) {
+    
     var diRe = /[\d\.]+(\*|\×)[\d\.]+(\*|\×)[\d\.]+/;
     var diStr = boxInfo.match(diRe);
     if (diStr) {
@@ -213,27 +212,47 @@ var parseBox = async function(boxInfo) {
         height: Number(di[2])
       }
     } else {
-      logger.info(boxInfo)
-      console.log(boxInfo)
+      logger.info(diRe);
+      logger.info(boxInfo);
+      console.log(boxInfo);
     }
 
-    var weightRe = /[\d\s\.]*(kg|KG)/;
-    diStr = boxInfo.match(weightRe);
-    
+    var weightRe = /[\d\s\.]*(kg|KG|Kg)/;
     if (diStr) {
       box.weight = Number(diStr[0].match(/[\d\.]+/)[0]);
     } else {
-      logger.info(boxInfo)
-      console.log(boxInfo)
+      weightRe = /[\d\s\.]+\/箱/gi;
+      var diStrs = boxInfo.matchAll(weightRe);
+      for (var diStr of diStrs) {
+        if (Number(diStr[0].match(/[\d\.]+/)[0]) < 30) {
+          box.weight = Number(diStr[0].match(/[\d\.]+/)[0]);
+        }
+      }
+      console.log(boxInfo);
     }
 
-    var unitsRe = /\d+(盒|瓶)?\/箱/;
+    if (!box.weight) {
+      logger.error(weightRe);
+      logger.error(boxInfo);
+    }
+    
+    var unitsRe = /\d+(盒|瓶|套|付|PCS|个|件)?\/箱/;
     var unitsStr = boxInfo.match(unitsRe);
     if (unitsStr) {
       box.units = Number(unitsStr[0].match(/[\d]+/)[0]);
     } else {
-      logger.info(boxInfo)
-      console.log(boxInfo)
+      unitsRe = /[\d\s\.]+\/箱/gi;
+      var unitsStrs = boxInfo.matchAll(unitsRe);
+      for (var unitsStr of unitsStrs) {
+        if (Number(unitsStr[0].match(/[\d]+/)[0]) > 30) {
+          box.units = Number(unitsStr[0].match(/[\d]+/)[0]);
+        }
+      }
+      console.log(boxInfo);
+    }
+    if (!box.units) {
+      logger.error(unitsRe);
+      logger.error(boxInfo);
     }
     return box;
   }
@@ -255,7 +274,5 @@ var parseRow = async function(row, orderIndex, deliveryIndex, deliveryDueIndex, 
     box: box
   }
 }
-module.exports.listFreights = syncFreights;
+module.exports.syncFreights = syncFreights;
 module.exports.getFreightsAndProductingsByProduct = getFreightsAndProductingsByProduct;
-
-
