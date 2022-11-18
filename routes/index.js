@@ -1,20 +1,10 @@
 var express = require('express');
 var router = express.Router();
-var model = require('../models')
-var urgen = require('../lib/urgent')
-var checkProductsInventory = require('../lib/checkProductsInventory')
 
-var marketAnalyze = require('../lib/marketAnalyze')
+var checkProductsInventory = require('../lib/checkProductsInventory')
 var getToken = require('../api/token')
-var getAllListings = require('../api/getAllListings')
-var getSellerAccounts = require('../lib/getSellerAccounts')
-var fbaInventory = require('../api/fbaInventory')
-var getYisucangProducts = require('../api/yisucang/products')
-var getYisucangInventories = require('../api/yisucang/inventories')
-var getPlwhsProductByASIN = require('../lib/getPlwhsProductByASIN')
 var getInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByProduct = require('../lib/getStockByProduct')
-var logger = require('../common/logger');
 
 yisucangApis = {
   inventory: '/OrderAPI/GetInventory',

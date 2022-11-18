@@ -25,11 +25,15 @@ async function syncFreight(product) {
   product.inboundShippeds = freightsAndProducings.inboundShippeds;
   product.producings = freightsAndProducings.producings;
   product.save(function (err) {
-    console.log(err);
+    if (err) {
+      logger.error("saved err");
+      logger.error(product.inboundShippeds);
+      logger.error(product.producings);
+      logger.error(product);
+      logger.error(err);
+      console.log(err);
+    }
   });
-  if (product.asin === 'B0B8F27R5H') {
-    logger.info('syncFreight ing')
-  }
 }
 
 exports.syncFreight = syncFreight;

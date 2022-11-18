@@ -96,14 +96,23 @@ var checkFreights = async function(freights, pendingStorageNumber) {
 }
 
 async function syncBoxInfo(freight, product) {
-  product.unitsPerBox = freight.box.units || product.unitsPerBox || 10;
-  product.box.length = freight.box.length || product.box.length || 10;
-  product.box.width = freight.box.width || product.box.width || 10;
-  product.box.height = freight.box.height || product.box.height || 10;
-  product.box.weight = freight.box.weight || product.box.weight || 10;
-  product.save(function (err) {
-    console.log(err);
-  });
+  if (!product.unitsPerBox || product.unitsPerBox === 1) {
+    product.unitsPerBox = freight.box.units || product.unitsPerBox;
+    product.box.length = freight.box.length || product.box.length;
+    product.box.width = freight.box.width || product.box.width;
+    product.box.height = freight.box.height || product.box.height;
+    product.box.weight = freight.box.weight || product.box.weight;
+    product.save(function (err) {
+      if (err) {
+        logger.error("saved error");
+        logger.error(freight.box);
+        logger.error(product);
+        logger.error(product.box);
+        logger.error(err);
+        console.log(err);
+      }
+    });
+  }
 }
 
 var getFreightsAndProductingsByProduct = async function(product) {
@@ -188,7 +197,7 @@ var parseQuantity = async function(quantity, boxInfo) {
     var boxQtyRe = /\d+箱.*?\d+\/箱/;
     var diStr = boxInfo.match(boxQtyRe);
     if (diStr[0]) {
-      var di = diStr[0].split('*');
+      var di = diStr[0].split(/[\*\×x]/);
       box = {
         length: Number(di[0]),
         width: Number(di[1]),
@@ -199,13 +208,18 @@ var parseQuantity = async function(quantity, boxInfo) {
 }
 
 var parseBox = async function(boxInfo) {
-  var box = {};
+  var box = {
+    length: 1,
+    width: 1,
+    height: 1,
+    weight: 1
+  };
   if (boxInfo) {
     
-    var diRe = /[\d\.]+(\*|\×)[\d\.]+(\*|\×)[\d\.]+/;
+    var diRe = /[\d\.]+(\*|\×|x)[\d\.]+(\*|\×|x)[\d\.]+/;
     var diStr = boxInfo.match(diRe);
     if (diStr) {
-      var di = diStr[0].split('*');
+      var di = diStr[0].split(/[\*\×x]/);
       box = {
         length: Number(di[0]),
         width: Number(di[1]),
@@ -217,7 +231,8 @@ var parseBox = async function(boxInfo) {
       console.log(boxInfo);
     }
 
-    var weightRe = /[\d\s\.]*(kg|KG|Kg)/;
+    var weightRe = /[\d\s\.]*(kg)/i;
+    diStr = boxInfo.match(weightRe);
     if (diStr) {
       box.weight = Number(diStr[0].match(/[\d\.]+/)[0]);
     } else {
@@ -234,6 +249,7 @@ var parseBox = async function(boxInfo) {
     if (!box.weight) {
       logger.error(weightRe);
       logger.error(boxInfo);
+      
     }
     
     var unitsRe = /\d+(盒|瓶|套|付|PCS|个|件)?\/箱/;
@@ -253,6 +269,14 @@ var parseBox = async function(boxInfo) {
     if (!box.units) {
       logger.error(unitsRe);
       logger.error(boxInfo);
+    }
+
+    for (var type in box) {
+      if (isNaN(box[type])) {
+        logger.error("boxInfo");
+        logger.error(box);
+        logger.error(boxInfo);
+      }
     }
     return box;
   }
