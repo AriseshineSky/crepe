@@ -30,7 +30,8 @@
     "mongoose": "^6.7.0",
     "morgan": "~1.9.1",
     "node-csv": "^0.1.2",
-    "node-schedule": "^2.1.0"
+    "node-schedule": "^2.1.0",
+    "shimo-sdk-cabinet": "^4.5.0"
   },
   "devDependencies": {
     "assert": "^2.0.0",

@@ -20,9 +20,19 @@ class Freight {
   static async getInstance() {
     if(!this.instance) {
       this.instance = new Freight();
+      logger.debug("new all freights instance");
+      this.createdAt = new Date();
+      this.instance.freights = await syncFreights();
+    } else if (await this.checkExpired()) {
       this.instance.freights = await syncFreights();
     }
     return this.instance;
+  }
+  static async checkExpired() {
+    var stime = Date.parse(this.createdAt);
+    var etime = Date.parse(new Date());
+    var hours = Math.floor((etime - stime) / (3600 * 1000));
+    return hours > 1;
   }
 }
 
@@ -118,7 +128,6 @@ async function syncBoxInfo(freight, product) {
 var getFreightsAndProductingsByProduct = async function(product) {
   var freights = [];
   var producings = [];
-  // var allFreights = await syncFreights();
   const freightApi = await Freight.getInstance();
   var allFreights = freightApi.freights;
   console.log(`allFreights: ${allFreights.length}`);
@@ -136,7 +145,7 @@ var getFreightsAndProductingsByProduct = async function(product) {
     console.log(`checking: ${j + 1} purchase`);
     var unShippedAmount = purchases[j].qty;
     for (var i = 0; i < allFreights.length; i++) {
-      if (allFreights[i].orderId === purchases[j].orderId) {
+      if (allFreights[i].orderId === purchases[j].orderId && allFreights[i].delivery) {
         await syncBoxInfo(allFreights[i], product);
         unShippedAmount -= allFreights[i].qty;
         if (moment(allFreights[i].delivery).diff(moment(new Date()), 'days') > -10) {
@@ -155,6 +164,8 @@ var getFreightsAndProductingsByProduct = async function(product) {
       });
     }
   }
+  logger.debug(JSON.stringify(freights)); 
+  logger.debug(JSON.stringify(purchases)); 
   console.log('before stock');
   var stock = await getStockByProduct(product);
   console.log('stock', stock.inventory);

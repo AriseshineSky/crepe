@@ -1,10 +1,6 @@
 var express = require('express');
 var router = express.Router();
-
 var checkProductsInventory = require('../lib/checkProductsInventory')
-var getToken = require('../api/token')
-var getInventoryByASIN = require('../lib/getFbaInventoryByASIN')
-var getStockByProduct = require('../lib/getStockByProduct')
 
 yisucangApis = {
   inventory: '/OrderAPI/GetInventory',
@@ -33,17 +29,6 @@ router.get('/', function(req, res, next) {
 router.get('/check', async function(req, res, next) {
   await checkProductsInventory();
   res.render('index', {title: "regist"});
-})
-
-router.get('/inventory', async function(req, res, next) {
-  var inventory = await getInventoryByASIN(getToken, 'B0B69WKWFG');
-  console.log(inventory);
-  res.render('inventory', {inventory: inventory});
-})
-
-router.get('/stock', async function(req, res, next) {
-  var stock = await getStockByProduct('B091FZHF29');
-  res.render('stock', {stock: stock});
 })
 
 

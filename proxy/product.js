@@ -26,12 +26,7 @@ async function syncFreight(product) {
   product.producings = freightsAndProducings.producings;
   product.save(function (err) {
     if (err) {
-      logger.error("saved err");
-      logger.error(product.inboundShippeds);
-      logger.error(product.producings);
-      logger.error(product);
-      logger.error(err);
-      console.log(err);
+      logger.error(JSON.stringify(product));    
     }
   });
 }
@@ -733,23 +728,25 @@ async function getProducingFreightPlan(producing, product, freight, sales, inbou
 }
 
 exports.getProducingFreightPlan = getProducingFreightPlan;
-async function getOrderDue(product, totalInventory, sales, freight, inboundShippeds) {
+async function getOrderDue(product, totalInventory, sales, freight) {
   var freightType = ['airExpress', 'seaExpress', 'sea'];
   if (product.airDelivery) {
     freightType = ['airExpress', 'airDelivery', 'seaExpress', 'sea'];
   }
   var quantity = totalInventory;
   
-  for (var inbound of inboundShippeds) {
-    var total = totalInventory;
-    for (var fasterInbound of inboundShippeds) {
-      if (moment(fasterInbound.deliveryDue).isBefore(inbound.deliveryDue)) {
-        total += inbound.quantity;
+  if (product.inboundShippeds) {
+    for (var inbound of product.inboundShippeds) {
+      var total = totalInventory;
+      for (var fasterInbound of product.inboundShippeds) {
+        if (moment(fasterInbound.deliveryDue).isBefore(inbound.deliveryDue)) {
+          total += inbound.quantity;
+        }
       }
-    }
-    var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
-    if (total > sales.minAvgSales * (delivery.diff(moment(), "days") + 1)) {
-      quantity += Number(inbound.quantity);
+      var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
+      if (total > sales.minAvgSales * (delivery.diff(moment(), "days") + 1)) {
+        quantity += Number(inbound.quantity);
+      }
     }
   }
   var orderDues = {};
@@ -800,21 +797,28 @@ async function checkProducingsCreated(orderDues, quantity, product, sales) {
 }
 exports.checkProducingsCreated = checkProducingsCreated;
 exports.getQuantity = getQuantity;
-async function getQuantity(sales, totalInventory, product, inboundShippeds, producings) {
+async function getQuantity(sales, totalInventory, product) {
   var total = totalInventory;
-
-  for (var inboundShipped of inboundShippeds) {
-    var delivery = moment(inboundShipped.deliveryDue, "YYYY-MM-DD");
-    if (delivery.diff(moment(), "days") + 1 <= 90) {
-      total += Number(inboundShipped.quantity);
+  if (product.inboundShippeds) {
+    for (var inboundShipped of product.inboundShippeds) {
+      var delivery = moment(inboundShipped.deliveryDue, "YYYY-MM-DD");
+      if (delivery.diff(moment(), "days") + 1 <= 90) {
+        total += Number(inboundShipped.quantity);
+      }
     }
   }
-  if (producings) {
-    for (var producing of producings) {
+  if (product.producings) {
+    for (var producing of product.producings) {
       total += Number(producing.quantity);
     }
   }
+
+  if (product.unitsPerBox === 0) {
+    product.unitsPerBox = 30;
+  }
+
   var boxes = Math.ceil((sales.maxAvgSales * 90 - total) / product.unitsPerBox);
+
   if (boxes > 0) {
     var quantity = boxes * product.unitsPerBox;
     return {boxes: boxes, quantity: quantity};

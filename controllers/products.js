@@ -1,7 +1,6 @@
 var Product = require('../proxy').Product;
 var Csv = require('../proxy').Csv;
 var Freight = require('../proxy').Freight;
-var plan = require('../lib/plan')
 var mongoose = require('mongoose');
 var syncProducts = require('../lib/getInfoFromGoogleSheet')
 exports.show = async function (req, res, next) {

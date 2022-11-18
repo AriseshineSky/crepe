@@ -167,6 +167,7 @@
 <script>
   $(document).ready(function() {
     $(".btn[data-bs-target='#myModal']").click(function() {
+      console.log(1)
       var modalBody = $('<div id="myModal"></div>');
       var productId = $(this).data('product-id');
       var modalForm = $(`<div class="modal-dialog modal-confirm"> \
@@ -190,5 +191,5 @@
     $('.modal-footer .btn-danger').click(function() {
       $('form[name="modalForm"]').submit();
     });
-  })
+  });
 </script>

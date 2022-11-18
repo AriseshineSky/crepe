@@ -1,20 +1,23 @@
-Nathanael	B0B4PW6ZKY		airExpress	14800	2022-10-09	错过空运时间，请尽快申请采购
-Nathanael 	B0B4PW6ZKY 	 {"airExpress":{"boxes":6}}	{"airExpress":{"boxes":10}}	
-Nathanael 	B0B98XCZFX 	 {"sea":{"boxes":14},"seaExpress":{"boxes":11},"airExpress":{"boxes":31}}	{"sea":{"boxes":14},"seaExpress":{"boxes":11},"airExpress":{"boxes":31}}	
-Nathanael 	B0B69VTXWX 	 {"sea":{"boxes":30},"seaExpress":{"boxes":4},"airExpress":{"boxes":11}}	
-Trenton 	B097KP7MQZ 	 {"seaExpress":{"boxes":26},"airDelivery":{"boxes":93},"airExpress":{"boxes":20}}	{"seaExpress":{"boxes":13},"airDelivery":{"boxes":93},"airExpress":{"boxes":33}}	
+Nathanael	B0B4PW6ZKY		airExpress	15000	2022-10-08	错过空运时间，请尽快申请采购
+Nathanael 	B0B4PW6ZKY 	 {"airExpress":{"boxes":4}}	{"airExpress":{"boxes":7}}	
+Nathanael 	B0B98XCZFX 	 {"sea":{"boxes":10},"seaExpress":{"boxes":9},"airExpress":{"boxes":23}}	{"sea":{"boxes":10},"seaExpress":{"boxes":9},"airExpress":{"boxes":23}}	
+Trenton 	B097KP7MQZ 	 {"seaExpress":{"boxes":18},"airDelivery":{"boxes":93},"airExpress":{"boxes":28}}	{"seaExpress":{"boxes":13},"airDelivery":{"boxes":93},"airExpress":{"boxes":33}}	
 Trenton	B0B8F27R5H		seaExpress	3180	2022-11-02	错过海运时间，请尽快申请采购
 Lan Yaling 	B0B2KPMF7D 	 {"sea":{"boxes":15},"seaExpress":{"boxes":11},"airExpress":{"boxes":21}}	{"airExpress":{"boxes":20}}	
 Lan Yaling	B0B8Q142K3		airExpress	6336	2022-10-22	错过空运时间，请尽快申请采购
 Lan Yaling 	B0BF2KJKN8 	 {"sea":{"boxes":23},"seaExpress":{"boxes":2},"airExpress":{"boxes":4}}	
 Lan Yaling 	B0B88RMHG2 	 {"sea":{"boxes":1},"seaExpress":{"boxes":1},"airExpress":{"boxes":2}}	
 Lan Yaling	B0BCKYQS3J		airExpress	27000	2022-10-09	错过空运时间，请尽快申请采购
-Rachel Vu 	B0B3Y4QZPK 	 {"sea":{"boxes":25},"seaExpress":{"boxes":4},"airExpress":{"boxes":1}}	
-Lan Yaling 	B0BCL3DQL5 	 {"sea":{"boxes":15},"seaExpress":{"boxes":4},"airExpress":{"boxes":1}}	
+Lan Yaling 	B0BJMVPPLX 	 {"sea":{"boxes":3}}	
+Rachel Vu 	B0B3Y4QZPK 	 {"sea":{"boxes":24},"seaExpress":{"boxes":5},"airExpress":{"boxes":1}}	
 Lan Yaling	B0BCL3DQL5		sea	7350	2022-11-10	快到海运截止时间，请尽快申请采购
-Nathanael 	B0B69WKWFG 	 {"sea":{"boxes":66},"seaExpress":{"boxes":6},"airDelivery":{"boxes":13},"airExpress":{"boxes":5}}	
+Lan Yaling 	B0BCL3DQL5 	 {"sea":{"boxes":15},"seaExpress":{"boxes":4},"airExpress":{"boxes":1}}	
+Nathanael 	B0B69WKWFG 	 {"sea":{"boxes":76},"seaExpress":{"boxes":6},"airDelivery":{"boxes":13},"airExpress":{"boxes":5}}	
 Nathanael 	B0BGNFW2BN 	 {"sea":{"boxes":8},"seaExpress":{"boxes":1},"airExpress":{"boxes":3}}	
+Bryan 	B0B6D78GY4 	 {"sea":{"boxes":7}}	
 Oliver 	B0B9T9QPPL 	 {"sea":{"boxes":5},"seaExpress":{"boxes":4},"airExpress":{"boxes":11}}	
-Trenton	B0BBPCRH9Q		sea	1800	2022-11-22	快到海运截止时间，请尽快申请采购
+Trenton	B0BBPCRH9Q		sea	1800	2022-11-21	快到海运截止时间，请尽快申请采购
+Josh 	B0BF2NG1G5 	 {"seaExpress":{"boxes":1},"airExpress":{"boxes":5}}	{"airExpress":{"boxes":3}}	
 Shamus	B0B19711Z8		sea	2000	2022-11-20	快到海运截止时间，请尽快申请采购
 Josh 	B0BHM8H696 	 {"sea":{"boxes":6},"seaExpress":{"boxes":1},"airDelivery":{"boxes":3}}	
+Trenton	B09CQSCDHD		airExpress	196	2022-11-05	错过空运时间，请尽快申请采购
