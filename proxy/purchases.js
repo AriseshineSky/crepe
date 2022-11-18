@@ -18,7 +18,9 @@ async function getPurchasesByProductId(productId) {
   var purchases = [];
   var plwhsPurchases = await plwhsPurchase.purchases(productId);
   for(var purchase of plwhsPurchases) {
-    purchases.push(await formatPurchase(purchase));
+    if (purchase.status !== "canceled") {
+      purchases.push(await formatPurchase(purchase));
+    }
   }
   return purchases;
 }

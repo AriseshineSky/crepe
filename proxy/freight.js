@@ -4,6 +4,7 @@ var sheetApi = require('./sheetApi');
 var Purchase = require('./purchases');
 var moment = require('moment');
 var getStockByProduct = require('../lib/getStockByProduct');
+var logger = require('../common/logger');
 const HEADER = ['pm', 'asin', 'plwhsId', 
 'yisucangId', 'cycle', 
 'maxAvgSales', 
@@ -90,7 +91,7 @@ var sumFreights = async function(freights) {
 var checkFreights = async function(freights, pendingStorageNumber) {
   freights = await sortFreightsByDelivery(freights);
   while (Number(pendingStorageNumber > 0) && ((await sumFreights(freights)) > Number(pendingStorageNumber))) {
-    freights.shift;
+    freights.shift();
   }
 }
 
@@ -116,15 +117,16 @@ var getFreightsAndProductingsByProduct = async function(product) {
   console.log(`allFreights: ${allFreights.length}`);
   var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
   console.log(`purchases: ${purchases.length}`);
-  var lastestFreight = moment().subtract(1, 'year').format('YYYY-MM-DD');
-  var lastestFreightOrderId = moment().subtract(1, 'year').format('YYYY-MM-DD');
-  for (var i = 0; i < allFreights.length; i++) {
-    if (moment(allFreights[i].delivery).isAfter(moment(lastestFreight))) {
-      lastestFreight = allFreights[i].delivery;
-      lastestFreightOrderId = allFreights[i].orderId;
-    }
-  }
+  // var lastestFreight = moment().subtract(1, 'year').format('YYYY-MM-DD');
+  // var lastestFreightOrderId = moment().subtract(1, 'year').format('YYYY-MM-DD');
+  // for (var i = 0; i < allFreights.length; i++) {
+  //   if (moment(allFreights[i].delivery).isAfter(moment(lastestFreight))) {
+  //     lastestFreight = allFreights[i].delivery;
+  //     lastestFreightOrderId = allFreights[i].orderId;
+  //   }
+  // }
   for (var j = 0; j < purchases.length; j++) {
+    console.log(`checking: ${j + 1} purchase`);
     var unShippedAmount = purchases[j].qty;
     for (var i = 0; i < allFreights.length; i++) {
       if (allFreights[i].orderId === purchases[j].orderId) {
@@ -135,7 +137,7 @@ var getFreightsAndProductingsByProduct = async function(product) {
         }
       }
     }
-    if ((unShippedAmount / purchases[j].qty) > 0.15 && moment(new Date()).diff(moment(purchases[j].created), 'days') < 60) {
+    if ((unShippedAmount / purchases[j].qty) > 0.15 && moment(new Date()).diff(moment(purchases[j].created), 'days') < 90) {
     // if (!shipped && purchases[j].orderId > lastestFreightOrderId) {
     // if (!shipped && purchases[j].orderId > lastestFreightOrderId && moment(purchases[j].delivery).isAfter(moment.now())) {
       producings.push({
@@ -146,10 +148,11 @@ var getFreightsAndProductingsByProduct = async function(product) {
       });
     }
   }
+  console.log('before stock');
   var stock = await getStockByProduct(product);
-  console.log('stock', stock);
+  console.log('stock', stock.inventory);
   if (stock.inventory && stock.inventory !== 0) {
-    await checkFreights(freights, stock.inventory.pendingStorageNumber);
+    await checkFreights(freights, stock.inventory.PendingStorageNumber);
   } else {
     await checkFreights(freights, 20000);
   }
@@ -182,12 +185,10 @@ var parseOrderId = async function(orderId) {
   }
 }
 
-var parseBox = async function(boxInfo) {
-  boxInfo = "6箱，250/箱，14kg/箱，54*40*34cm"
-  var box = {};
+var parseQuantity = async function(quantity, boxInfo) {
   if (boxInfo) {
-    var diRe = /\d*(\*|\×)\d*(\*|\×)\d*/;
-    var diStr = boxInfo.match(diRe);
+    var boxQtyRe = /\d+箱.*?\d+\/箱/;
+    var diStr = boxInfo.match(boxQtyRe);
     if (diStr[0]) {
       var di = diStr[0].split('*');
       box = {
@@ -196,16 +197,44 @@ var parseBox = async function(boxInfo) {
         height: Number(di[2])
       }
     }
+  }
+}
+
+var parseBox = async function(boxInfo) {
+  var box = {};
+  if (boxInfo) {
+    var diRe = /[\d\.]+(\*|\×)[\d\.]+(\*|\×)[\d\.]+/;
+    var diStr = boxInfo.match(diRe);
+    if (diStr) {
+      var di = diStr[0].split('*');
+      box = {
+        length: Number(di[0]),
+        width: Number(di[1]),
+        height: Number(di[2])
+      }
+    } else {
+      logger.info(boxInfo)
+      console.log(boxInfo)
+    }
 
     var weightRe = /[\d\s\.]*(kg|KG)/;
     diStr = boxInfo.match(weightRe);
-    if (diStr[0]) {
+    
+    if (diStr) {
       box.weight = Number(diStr[0].match(/[\d\.]+/)[0]);
+    } else {
+      logger.info(boxInfo)
+      console.log(boxInfo)
     }
 
-    var unitsRe = /\d+(盒)?\/箱/;
-    box.units = Number(boxInfo.match(unitsRe)[0].match(/[\d]+/)[0]);
-
+    var unitsRe = /\d+(盒|瓶)?\/箱/;
+    var unitsStr = boxInfo.match(unitsRe);
+    if (unitsStr) {
+      box.units = Number(unitsStr[0].match(/[\d]+/)[0]);
+    } else {
+      logger.info(boxInfo)
+      console.log(boxInfo)
+    }
     return box;
   }
 }

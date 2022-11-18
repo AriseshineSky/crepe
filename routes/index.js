@@ -14,7 +14,7 @@ var getYisucangInventories = require('../api/yisucang/inventories')
 var getPlwhsProductByASIN = require('../lib/getPlwhsProductByASIN')
 var getInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByProduct = require('../lib/getStockByProduct')
-
+var logger = require('../common/logger');
 
 yisucangApis = {
   inventory: '/OrderAPI/GetInventory',
@@ -39,11 +39,6 @@ open_apis = {
 router.get('/', function(req, res, next) {
   res.redirect('/products');
 });
-
-router.get('/regist', function(req, res, next) {
-  checkProductsInventory()
-  res.render('index', {title: "regist"});
-})
 
 router.get('/check', async function(req, res, next) {
   await checkProductsInventory();

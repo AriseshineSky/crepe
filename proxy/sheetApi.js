@@ -90,7 +90,7 @@ async function listFreights() {
   const sheets = google.sheets({version: 'v4', auth});
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: '1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE',
-    range: 'freight!A1:P700',
+    range: 'freight!A1:P928',
   });
   const rows = res.data.values;
   if (!rows || rows.length === 0) {

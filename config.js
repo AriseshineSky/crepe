@@ -1,7 +1,8 @@
 var path = require('path');
 
 var config = {
-  log_dir: path.join(__dirname, 'logs')
+  log_dir: path.join(__dirname, 'logs'),
+  debug: true
 }
 
 // if (process.env.NODE_ENV === 'test') {

@@ -8,8 +8,8 @@
     <tr>
       <th data-editable="true" data-sortable="true">orderId:</th>
       <th data-editable="true" data-sortable="true">数量:</th>
+      <th data-editable="true" data-sortable="true">采购创建日期:</th>
       <th data-editable="true" data-sortable="true">预估收货日期:</th>
-      
       <th class="">Action</th>
     </tr>
   </thead>
@@ -19,6 +19,7 @@
       <tr>
         <td><%= producing.orderId %></td>
         <td><%= producing.quantity %></td>
+        <td><%= producing.created %></td>
         <td><%= producing.deliveryDue %></td>
         <td style="text-align:center;">
           <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-inbound-id="<%=producing._id%>" >Delete</button>
