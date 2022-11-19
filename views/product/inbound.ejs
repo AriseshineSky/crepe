@@ -14,7 +14,6 @@
     </tr>
   </thead>
   <tbody>
-    
     <% product.producings.forEach(function(producing){ %>
       <tr>
         <td><%= producing.orderId %></td>
@@ -24,6 +23,8 @@
         <td style="text-align:center;">
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
           <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
+          <a class="btn btn-primary" >Plan</button>
+          <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-link">Plan</a>
         </td>
       </tr>
     <% }) %>
@@ -86,31 +87,31 @@
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Are you sure to delete this inbound shipment?</h4>
-          </div>
-          <div class="modal-body"></div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-danger">Delete</button>
-          </div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Are you sure to delete this inbound shipment?</h4>
       </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModal" aria-hidden="true">
   <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="editModalLabel">Purchase</h4>
-          </div>
-          <div class="producing-modal-body"></div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary editProducing">Submit</button>
-          </div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="editModalLabel">Purchase</h4>
       </div>
+      <div class="producing-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary editProducing">Submit</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -176,9 +177,7 @@
                             </div> \
                           </div> \
                         </form>`);
-                        console.log(modalBody);
       modalBody.append(modalForm);
-      console.log(modalForm);
       $('.producing-modal-body').html(modalBody);
     })
     $('.modal-footer .editProducing').click(function() {

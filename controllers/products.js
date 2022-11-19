@@ -98,7 +98,8 @@ exports.plan = async function (req, res, next) {
 
 exports.producingPlan = async function (req, res, next) {
   var asin = req.params.asin;
-  var purchase = await Product.getProducingPlan(asin);
+  var producingId = req.params.producingId;
+  var purchase = await Product.getProducingPlan(asin, producingId);
   // if (purchase.plan) {
   //   console.log(`${purchase.seaFreightDue}\t${purchase.quantity.quantity}\t${purchase.plan.airExpress.units}\t \t${purchase.plan.seaExpress.units}\t${purchase.plan.sea.units}\t`)
   // }
@@ -316,9 +317,10 @@ exports.deleteInbound = async function(req, res, next) {
 
 exports.updateProducing = async function(req, res, next) {
   var asin = req.body.asin;
+  var quantity = req.body.quantity;
   var deliveryDue = req.body.deliveryDue;
   var producingId = req.body.producingId;
-  await Product.updateProducing(producingId, deliveryDue);
+  await Product.updateProducing(producingId, deliveryDue, quantity);
   res.redirect('/products/' + asin + '/inbounds');
 }
 exports.showInbounds = async function (req, res, next) {

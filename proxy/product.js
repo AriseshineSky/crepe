@@ -422,10 +422,10 @@ exports.getPlanV2 = async function(asin) {
   //   minAvgSales: product.maxAvgSales,
   //   maxAvgSales: product.maxAvgSales
   // };
-  await removeDeliveredInbounds(product);
+  // await removeDeliveredInbounds(product);
   var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
-  var quantity = await getQuantity(sales, totalInventory, product, inboundShippeds);
+  var quantity = await getQuantity(sales, totalInventory, product);
   console.log(quantity);
   if (quantity.boxes < 0) {
     console.log("Inventory is enough, do not need to purchase any more");
@@ -438,11 +438,9 @@ exports.getPlanV2 = async function(asin) {
   
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
   var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
-  var orderDues = await getOrderDue(product, totalInventory, sales, FREIGHT, inboundShippeds)
+  var orderDues = await getOrderDue(product, totalInventory, sales, FREIGHT);
  
   console.log(orderDues);
-  var quantity = await getQuantity(sales, totalInventory, product, inboundShippeds);
-  console.log(quantity);
   var deliveryDue = await getDeliveryDue(totalInventory, inboundShippeds, sales, inboundShippeds);
   console.log(deliveryDue);
   
@@ -567,7 +565,7 @@ async function convertProducingQtyIntoBox(producing, product) {
   }
   return quantity;
 }
-exports.getProducingPlan = async function(asin) {
+exports.getProducingPlan = async function(asin, producingId) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
@@ -588,13 +586,20 @@ exports.getProducingPlan = async function(asin) {
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
   console.log(inbounds)
+  var plan = null;
+  console.log(producingId)
   for (var producing of product.producings) {
-    console.log('producing', producing);
-    var plan = await getProducingFreightPlan(producing, product, FREIGHT, sales, inbounds);
-    console.log('plan', plan);
+    console.log(producing._id.toString())
+    if (producing._id.toString() === producingId) {
+      console.log('producing', producing);
+      plan = await getProducingFreightPlan(producing, product, FREIGHT, sales, inbounds);
+      console.log('plan', plan);
+    }
   }
-
-
+  if (!plan) {
+    console.log("can not find this producing");
+    return "can not find this producing";
+  }
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
   var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
   var orderDues = await getOrderDue(product, totalInventory, sales, FREIGHT, inboundShippeds)
@@ -1403,9 +1408,10 @@ var deleteInbound = async function(inboundId) {
   await Product.update({"inboundShippeds._id": objId}, { $pull:{'inboundShippeds': {"_id": objId}}})
 }
 
-async function updateProducing(producingId, deliveryDue) {
+async function updateProducing(producingId, deliveryDue, quantity) {
   var objId = mongoose.Types.ObjectId(producingId);
-  await Product.updateOne({"producings._id":objId},{$set: {'producings.$.deliveryDue': deliveryDue}})
+  console.log(quantity)
+  await Product.updateOne({"producings._id":objId},{$set: {'producings.$.deliveryDue': deliveryDue, 'producings.$.quantity': quantity}});
 }
 
 var remove = async function(asin, productId) {
