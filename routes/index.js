@@ -27,7 +27,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/check', async function(req, res, next) {
-  await checkProductsInventory();
+  await checkProductsInventory.checkProductsInventory();
   res.render('index', {title: "regist"});
 })
 

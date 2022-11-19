@@ -20,8 +20,19 @@ async function syncAllProductsFreights() {
   });
 }
 
+async function checkProducings(product, freightsAndProducings) {
+  for(var j = 0; j < freightsAndProducings.producings.length; j++) {
+    for(var i = 0; i < product.producings.length; i++) {
+      if (product.producings[i].orderId === freightsAndProducings.producings[j].orderId) {
+        freightsAndProducings.producings[j].deliveryDue = product.producings[i].deliveryDue;
+      }
+    }
+  }
+}
+
 async function syncFreight(product) {
   var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
+  await checkProducings(product, freightsAndProducings);
   product.inboundShippeds = freightsAndProducings.inboundShippeds;
   product.producings = freightsAndProducings.producings;
   product.save(function (err) {

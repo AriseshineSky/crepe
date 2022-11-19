@@ -54,7 +54,8 @@ exports.syncFreight = async function (req, res, next) {
     res.render404('这个产品不存在。');
     return;
   } else {
-    Product.syncFreight(product);
+    await Product.syncFreight(product);
+    res.redirect('/products/' + product.asin + '/inbounds');
   }
 };
 

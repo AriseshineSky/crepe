@@ -21,3 +21,24 @@ Josh 	B0BF2NG1G5 	 {"seaExpress":{"boxes":1},"airExpress":{"boxes":5}}	{"airExpr
 Shamus	B0B19711Z8		sea	2000	2022-11-20	快到海运截止时间，请尽快申请采购
 Josh 	B0BHM8H696 	 {"sea":{"boxes":6},"seaExpress":{"boxes":1},"airDelivery":{"boxes":3}}	
 Trenton	B09CQSCDHD		airExpress	196	2022-11-05	错过空运时间，请尽快申请采购
+Nathanael 	B0B4PW6ZKY 	 {"airExpress":{"boxes":4}}	{"airExpress":{"boxes":7}}	
+Nathanael	B0B4PW6ZKY		airExpress	15600	2022-10-08	错过空运时间，请尽快申请采购
+Trenton 	B097KP7MQZ 	 {"seaExpress":{"boxes":4},"airDelivery":{"boxes":100},"airExpress":{"boxes":35}}	{"seaExpress":{"boxes":4},"airDelivery":{"boxes":100},"airExpress":{"boxes":35}}	
+Trenton	B0B8F27R5H		seaExpress	3240	2022-11-03	错过海运时间，请尽快申请采购
+Lan Yaling	B0B8Q142K3		airExpress	6336	2022-10-23	错过空运时间，请尽快申请采购
+Lan Yaling 	B0BF2KJKN8 	 {"sea":{"boxes":21},"seaExpress":{"boxes":2},"airExpress":{"boxes":6}}	
+Lan Yaling 	B0B88RMHG2 	 {"sea":{"boxes":2},"airExpress":{"boxes":2}}	
+Lan Yaling 	B0B2KPMF7D 	 {"sea":{"boxes":23},"seaExpress":{"boxes":9},"airExpress":{"boxes":15}}	{"airExpress":{"boxes":20}}	
+Lan Yaling	B0BCKYQS3J		airExpress	27000	2022-10-10	错过空运时间，请尽快申请采购
+Lan Yaling 	B0BJMVPPLX 	 {"sea":{"boxes":3}}	
+Rachel Vu 	B0B3Y4QZPK 	 {"sea":{"boxes":29},"seaExpress":{"boxes":1}}	
+Lan Yaling 	B0BCL3DQL5 	 {"sea":{"boxes":17},"seaExpress":{"boxes":3}}	
+Nathanael 	B0B69WKWFG 	 {"sea":{"boxes":84},"seaExpress":{"boxes":4},"airDelivery":{"boxes":10},"airExpress":{"boxes":2}}	
+Nathanael 	B0BGNFW2BN 	 {"sea":{"boxes":8},"seaExpress":{"boxes":1},"airExpress":{"boxes":3}}	
+Bryan 	B0B6D78GY4 	 {"sea":{"boxes":6},"seaExpress":{"boxes":1}}	
+Oliver 	B0B9T9QPPL 	 {"sea":{"boxes":6},"seaExpress":{"boxes":4},"airExpress":{"boxes":10}}	
+Trenton	B0BBPCRH9Q		sea	1800	2022-11-20	快到海运截止时间，请尽快申请采购
+Josh 	B0BF2NG1G5 	 {"seaExpress":{"boxes":1},"airExpress":{"boxes":5}}	{"airExpress":{"boxes":3}}	
+Shamus	B0B19711Z8		sea	2000	2022-11-20	快到海运截止时间，请尽快申请采购
+Josh 	B0BHM8H696 	 {"sea":{"boxes":6},"seaExpress":{"boxes":1},"airDelivery":{"boxes":3}}	
+Trenton	B09CQSCDHD		airExpress	210	2022-11-13	错过空运时间，请尽快申请采购
