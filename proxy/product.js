@@ -210,13 +210,21 @@ async function addFreightPlanToInbounds(freightPlan, freight, inbounds, product)
   }
   return newInbounds;
 }
-
-async function addProducingFreightPlanToInbounds(freightPlan, freight, inbounds, product, producing) {
-  var newInbounds = JSON.parse(JSON.stringify(inbounds));
-  var days = product.cycle - moment(producing.created).diff(moment(), "days");
+async function getProducingPeriod(product, producing) {
+  var days = 0;
+  if (producing.deliveryDue) {
+    days = moment(producing.deliveryDue).diff(moment(), "days");
+  } else {
+    days = product.cycle - moment(producing.created).diff(moment(), "days");
+  }
   if (days < 0) {
     days = 0;
   }
+  return days;
+}
+async function addProducingFreightPlanToInbounds(freightPlan, freight, inbounds, product, producing) {
+  var newInbounds = JSON.parse(JSON.stringify(inbounds));
+  var days = await getProducingPeriod(product, producing);
   for(var type in freightPlan) {
     if (freightPlan[type].boxes > 0) {
       var shipment = {
@@ -405,7 +413,6 @@ exports.getPlanV2 = async function(asin) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
-  // var product = PRODUCTS[asin];
   var stock = await prepareStock(product);
   var sales = {
     minAvgSales: Math.ceil(fbaInventorySales.sales),
@@ -1395,6 +1402,12 @@ var deleteInbound = async function(inboundId) {
   var objId = mongoose.Types.ObjectId(inboundId);
   await Product.update({"inboundShippeds._id": objId}, { $pull:{'inboundShippeds': {"_id": objId}}})
 }
+
+async function updateProducing(producingId, deliveryDue) {
+  var objId = mongoose.Types.ObjectId(producingId);
+  await Product.updateOne({"producings._id":objId},{$set: {'producings.$.deliveryDue': deliveryDue}})
+}
+
 var remove = async function(asin, productId) {
   if (asin) {
     await Product.deleteOne({"asin": asin})
@@ -1402,6 +1415,7 @@ var remove = async function(asin, productId) {
     await Product.deleteOne({"_id": mongoose.Types.ObjectId(productId)})
   }
 }
+exports.updateProducing = updateProducing;
 exports.deleteInbound = deleteInbound;
 exports.remove = remove;
 exports.prepareFbaInventoryAndSales = prepareFbaInventoryAndSales;

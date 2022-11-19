@@ -47,15 +47,15 @@ describe('checkProductsInventory', function() {
     it('should return true when product inventory is less than 10 days sals', async function () { 
       for (var inventoryShortage of inventoryShortages) {
         var data = await checkProductsInventory.getProductInventorySalesByCountry(listings[inventoryShortage.asin][inventoryShortage.country]);
-        var shortage = await checkProductsInventory.checkProductInventoryShortage(data, 10);
-        assert.equal(shortage, true);
+        var status = await checkProductsInventory.checkProductInventoryShortage(data, 10);
+        assert.equal(status.shortage, true);
       }
     });
     it('should return false when product inventory is more than 10 days sals', async function () {
       for (var inventoryEnough of inventoryEnoughs) {
         var data = await checkProductsInventory.getProductInventorySalesByCountry(listings[inventoryEnough.asin][inventoryEnough.country]);
-        var shortage = await checkProductsInventory.checkProductInventoryShortage(data, 10);
-        assert.equal(shortage, false);
+        var status = await checkProductsInventory.checkProductInventoryShortage(data, 10);
+        assert.equal(status.shortage, false);
       }
     });
   });

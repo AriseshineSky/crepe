@@ -312,8 +312,14 @@ exports.deleteInbound = async function(req, res, next) {
   await Product.deleteInbound(inboundId);
   var product = await Product.getProductByAsin(asin);
   res.redirect('/products/' + product.asin + '/inbounds');
-  
+}
 
+exports.updateProducing = async function(req, res, next) {
+  var asin = req.body.asin;
+  var deliveryDue = req.body.deliveryDue;
+  var producingId = req.body.producingId;
+  await Product.updateProducing(producingId, deliveryDue);
+  res.redirect('/products/' + asin + '/inbounds');
 }
 exports.showInbounds = async function (req, res, next) {
   var asin = req.params.asin;
