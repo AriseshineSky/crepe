@@ -1,13 +1,12 @@
 const schedule = require('node-schedule');
+var checkProductsInventory = require('../lib/checkProductsInventory');
 
-// 定义规则
-let rule = new schedule.RecurrenceRule();
-rule.hour = 0;
-rule.minute = 0;
-rule.second = 0;
+const scheduleCronstyle = ()=>{
+  schedule.scheduleJob('0 6 * * * *', () => {
+    checkProductsInventory.checkProductsInventory();
+  });
+}
 
-
-// 启动任务
-let job = schedule.scheduleJob(rule, () => {
-  console.log('job schedule', new Date());
-});
+exports.initScheduledJobs = () => {
+  scheduleCronstyle();
+}

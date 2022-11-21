@@ -70,20 +70,6 @@ async function authorize() {
  * @see https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
-async function listProducts() {
-  var auth = await authorize();
-  const sheets = google.sheets({version: 'v4', auth});
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: '1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE',
-    range: 'crepe!A1:X100',
-  });
-  const rows = res.data.values;
-  if (!rows || rows.length === 0) {
-    console.log('No data found.');
-    return;
-  }
-  return rows;
-}
 
 async function listFreights() {
   var auth = await authorize();
@@ -99,5 +85,20 @@ async function listFreights() {
   }
   return rows;
 }
+async function listProducts() {
+  var auth = await authorize();
+  const sheets = google.sheets({version: 'v4', auth});
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: '1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE',
+    range: 'crepe!A1:X100',
+  });
+  const rows = res.data.values;
+  if (!rows || rows.length === 0) {
+    console.log('No data found.');
+    return;
+  }
+  return rows;
+}
+
 exports.listProducts = listProducts;
 exports.listFreights = listFreights;

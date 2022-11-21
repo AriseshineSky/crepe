@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var checkProductsInventory = require('../lib/checkProductsInventory')
+var checkProductsInventory = require('../lib/checkProductsInventory');
 
 yisucangApis = {
   inventory: '/OrderAPI/GetInventory',
