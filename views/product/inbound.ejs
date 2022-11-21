@@ -23,8 +23,7 @@
         <td style="text-align:center;">
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
           <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
-          <a class="btn btn-primary" >Plan</button>
-          <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-link">Plan</a>
+          <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
         </td>
       </tr>
     <% }) %>
