@@ -7,7 +7,9 @@ router.get('/csv', products.csv);
 
 router.get('/:asin/inbounds', products.showInbounds);
 router.post('/:asin/inbounds', products.addInbound);
-router.post('/:asin/inbound', products.deleteInbound);
+router.post('/:asin/inbound', products.updateInbound);
+router.post('/:asin/inbound/:inboundId', products.deleteInbound);
+router.post('/:asin/producing/:producingId', products.deleteProducing);
 router.post('/:asin/producing', products.updateProducing);
 router.post('/:asin/save', products.save);
 router.get('/:asin/edit', products.edit);

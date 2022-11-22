@@ -304,13 +304,17 @@ exports.addInbound = async function (req, res, next) {
   }
 };
 exports.deleteInbound = async function(req, res, next) {
-  var asin = req.body.asin;
-  var quantity = req.body.quantity;
-  var deliveryDue = req.body.deliveryDue;
-  var inboundId = req.body.inboundId;
-  console.log(inboundId)
-
+  var asin = req.params.asin;
+  var inboundId = req.params.inboundId;
+  console.log(inboundId);
   await Product.deleteInbound(inboundId);
+  var product = await Product.getProductByAsin(asin);
+  res.redirect('/products/' + product.asin + '/inbounds');
+}
+exports.deleteProducing = async function(req, res, next) {
+  var asin = req.params.asin;
+  var producingId = req.params.producingId;
+  await Product.deleteProducing(producingId);
   var product = await Product.getProductByAsin(asin);
   res.redirect('/products/' + product.asin + '/inbounds');
 }
@@ -321,6 +325,14 @@ exports.updateProducing = async function(req, res, next) {
   var deliveryDue = req.body.deliveryDue;
   var producingId = req.body.producingId;
   await Product.updateProducing(producingId, deliveryDue, quantity);
+  res.redirect('/products/' + asin + '/inbounds');
+}
+exports.updateInbound = async function(req, res, next) {
+  var asin = req.body.asin;
+  var quantity = req.body.quantity;
+  var deliveryDue = req.body.deliveryDue;
+  var inboundId = req.body.inboundId;
+  await Product.updateInbound(inboundId, deliveryDue, quantity);
   res.redirect('/products/' + asin + '/inbounds');
 }
 exports.showInbounds = async function (req, res, next) {

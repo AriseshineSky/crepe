@@ -1419,23 +1419,32 @@ exports.findAll = findAll;
 
 var deleteInbound = async function(inboundId) {
   var objId = mongoose.Types.ObjectId(inboundId);
-  await Product.update({"inboundShippeds._id": objId}, { $pull:{'inboundShippeds': {"_id": objId}}})
+  await Product.update({"inboundShippeds._id": objId}, { $pull:{'inboundShippeds': {"_id": objId}}});
+}
+var deleteProducing = async function(producingId) {
+  var objId = mongoose.Types.ObjectId(producingId);
+  await Product.update({"producings._id": objId}, { $pull:{'producings': {"_id": objId}}});
+}
+var updateInbound = async function(inboundId, deliveryDue, quantity) {
+  var objId = mongoose.Types.ObjectId(inboundId);
+  await Product.updateOne({"inboundShippeds._id": objId}, { $set:{'inboundShippeds.$.deliveryDue': deliveryDue, 'inboundShippeds.$.quantity': quantity}});
 }
 
 async function updateProducing(producingId, deliveryDue, quantity) {
   var objId = mongoose.Types.ObjectId(producingId);
-  console.log(quantity)
   await Product.updateOne({"producings._id":objId},{$set: {'producings.$.deliveryDue': deliveryDue, 'producings.$.quantity': quantity}});
 }
 
 var remove = async function(asin, productId) {
   if (asin) {
-    await Product.deleteOne({"asin": asin})
+    await Product.deleteOne({"asin": asin});
   } else if (productId) {
-    await Product.deleteOne({"_id": mongoose.Types.ObjectId(productId)})
+    await Product.deleteOne({"_id": mongoose.Types.ObjectId(productId)});
   }
 }
 exports.updateProducing = updateProducing;
+exports.deleteProducing = deleteProducing;
+exports.updateInbound = updateInbound;
 exports.deleteInbound = deleteInbound;
 exports.remove = remove;
 exports.prepareFbaInventoryAndSales = prepareFbaInventoryAndSales;
