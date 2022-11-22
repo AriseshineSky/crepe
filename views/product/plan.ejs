@@ -37,6 +37,10 @@
           <span class="form-control" ><%- purchase.product.maxAvgSales %></span>
         </div>
         <div class="input-group mb-3">
+          <span class="input-group-text">维持最小库存量(天):</span>
+          <span class="form-control" ><%- purchase.product.minInventory %></span>
+        </div>
+        <div class="input-group mb-3">
           <span class="input-group-text">7天平均销量:</span>
           <span class="form-control" ><%- purchase.sales.minAvgSales %></span>
         </div>
@@ -57,10 +61,6 @@
         <div class="input-group mb-3">
           <span class="input-group-text">慢船数量(个)：</span>
           <span class="form-control" ><%- purchase.plan.sea.units || 0 %></span>
-        </div>
-        <div class="input-group mb-3">
-          <span class="input-group-text">采购数量(个)：</span>
-          <span class="form-control" ><%- purchase.quantity.quantity || 0 %></span>
         </div>
       </div>
       <table
