@@ -485,6 +485,7 @@ exports.getPlanV2 = async function(asin) {
   var product = await getProductByAsin(asin);
   var stock = await prepareStock(product);
   var sales = await getSales(fbaInventorySales, product);
+  console.log(sales);
   var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
   var quantity = await getQuantity(sales, totalInventory, product);
@@ -888,7 +889,7 @@ async function getQuantity(sales, totalInventory, product) {
   if (product.unitsPerBox === 0) {
     product.unitsPerBox = 30;
   }
-
+  console.log(total);
   var boxes = Math.ceil((sales.minAvgSales * 90 - total) / product.unitsPerBox);
 
   if (boxes > 0) {
@@ -1215,9 +1216,9 @@ async function bestPlanWithAirDelivery(quantity, product, freight, sales, inboun
     minInventory: 0,
     totalAmount: quantity.boxes * freight.airExpress.price * product.box.weight
   };
-  for (var i = quantity.boxes; i >= 0; i--) {
-    for (var j = quantity.boxes - i; j >= 0; j--) {
-      for (var k = quantity.boxes - i - j; k >= 0; k--) {
+  for (var i = quantity.boxes; i >= 0; i-=3) {
+    for (var j = quantity.boxes - i; j >= 0; j-=3) {
+      for (var k = quantity.boxes - i - j; k >= 0; k-=2) {
         freightPlan = {
           sea: {
             boxes: i
@@ -1289,8 +1290,8 @@ async function bestPlanWithoutAirDelivery(quantity, product, freight, sales, inb
     gap: 100000,
     minInventory: 0
   };
-  for (var i = quantity.boxes; i >= 0; i--) {
-    for (var j = quantity.boxes - i; j >= 0; j--) {
+  for (var i = quantity.boxes; i >= 0; i-=3) {
+    for (var j = quantity.boxes - i; j >= 0; j-=3) {
       freightPlan = {
         sea: {
           boxes: i

@@ -90,10 +90,11 @@ exports.sync = async function(req, res, next) {
 exports.plan = async function (req, res, next) {
   var asin = req.params.asin;
   var purchase = await Product.getPlanV2(asin);
-  // if (purchase.plan) {
-  //   console.log(`${purchase.seaFreightDue}\t${purchase.quantity.quantity}\t${purchase.plan.airExpress.units}\t \t${purchase.plan.seaExpress.units}\t${purchase.plan.sea.units}\t`)
-  // }
-  res.render('product/plan', {purchase: purchase, freight: FREIGHT});
+  if (purchase.plan) {
+    res.render('product/plan', {purchase: purchase, freight: FREIGHT});
+  } else {
+    res.render('product/inventory');
+  }
 };
 
 exports.producingPlan = async function (req, res, next) {
@@ -210,6 +211,7 @@ exports.save = async function (req, res, next) {
   var plwhsId = req.body.plwhsId;
   var yisucangId = req.body.yisucangId;
   var airDelivery = req.body.airDelivery;
+  var avgSales = req.body.avgSales;
   var product = await Product.getProductByAsin(asin);
   if (!product) {
     var newProduct = {
@@ -219,6 +221,7 @@ exports.save = async function (req, res, next) {
       box: box,
       maxAvgSales: maxAvgSales,
       plwhsId: plwhsId,
+      avgSales: avgSales,
       yisucangId: yisucangId,
       airDelivery: airDelivery,
       minInventory: minInventory
@@ -232,7 +235,8 @@ exports.save = async function (req, res, next) {
     });
   } else {
     product.cycle = cycle;
-    product.maxAvgSales = maxAvgSales;
+    product.cycle = cycle;
+    product.avgSales = avgSales;
     product.unitsPerBox = unitsPerBox;
     product.box = box;
     product.plwhsId = plwhsId;

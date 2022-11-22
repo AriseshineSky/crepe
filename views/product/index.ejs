@@ -24,10 +24,12 @@
         <tr>
           <th>ASIN</th>
           <th>Cycle</th>
-          <th>unitsPerBox</th>
-          <th>boxD</th>
+          <th>需要空派</th>
           <th>avgSales</th>
           <th>maxAvgSales</th>
+          <th>亚马逊近7天平均销量</th>
+          <th>unitsPerBox</th>
+          <th>boxD</th>
           <th>plwhsId</th>
           <th>yisucangId</th>
           <th>Actions</th>
@@ -38,10 +40,12 @@
           <tr>
             <td><%= product.asin %></td>
             <td><%= product.cycle %></td>
-            <td><%= product.unitsPerBox %></td>
-            <td><%= product.box %></td>
+            <td><%= product.airDelivery %></td>
             <td><%= product.avgSales %></td>
             <td><%= product.maxAvgSales %></td>
+            <td><%= product.ps %></td>
+            <td><%= product.unitsPerBox %></td>
+            <td><%= product.box %></td>
             <td><%= product.plwhsId %></td>
             <td><%= product.yisucangId %></td>
             <td>
