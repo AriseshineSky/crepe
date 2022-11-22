@@ -120,34 +120,6 @@ function getProductInventorySalesByAccount(data) {
   })
 }
 
-// async function getProductInventorySalesByCountry(data) {
-//   return new Promise(async (resolve, reject)=>{
-//     var availableQuantity = 0;
-//     var reservedFCTransfer = 0;
-//     var inboundWorking = 0;
-//     var sales = 0;
-//     for(var account in data) {
-//       console.log('----')
-//       console.log(sales)
-//       await getProductInventorySalesByAccount(data[account]).then((data)=>{
-//         availableQuantity = availableQuantity + data.availableQuantity;
-//         reservedFCTransfer = reservedFCTransfer + data.reservedFCTransfer;
-//         inboundWorking = inboundWorking + data.inboundWorking;
-//         sales = sales + data.sales;
-//         console.log(data.sales)
-//         console.log(sales)
-//       })
-//     }
-//     console.log(sales)
-//     resolve({
-//       availableQuantity: availableQuantity,
-//       reservedFCTransfer: reservedFCTransfer,
-//       inboundWorking: inboundWorking,
-//       sales: sales
-//     })
-//   })
-// }
-
 async function getProductInventorySalesByCountry(data) {
   return new Promise(async (resolve, reject)=>{
     var availableQuantity = 0;

@@ -393,10 +393,7 @@ var getInventoryReport = async function(asin) {
 
   await addCurrentInventoryToInbounds(fbaInventorySales.inventory + stock, inbounds);
   var newInbounds = await convertInboundsToSortedQueue(inbounds);
-  var sales = {
-    minAvgSales: Math.ceil(fbaInventorySales.sales),
-    maxAvgSales: product.maxAvgSales
-  };
+  var sales = await getSales(fbaInventorySales, product);
   var inboundQueue = await calculateInboundQueue(newInbounds, sales);
   var status = await recalculateInboundQueue(inboundQueue, sales);
   var gap = await calculateOutOfStockPeriod(status);
@@ -413,15 +410,7 @@ exports.getPlanWithProducings = async function(asin) {
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
   var stock = await prepareStock(product);
-  var sales = {
-    minAvgSales: Math.ceil(fbaInventorySales.sales),
-    maxAvgSales: product.maxAvgSales
-  };
-  // var sales = {
-  //   minAvgSales: product.maxAvgSales,
-  //   maxAvgSales: product.maxAvgSales
-  // };
-  // await removeDeliveredInbounds(product);
+  var sales = await getSales(fbaInventorySales, product);
   var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
   var quantity = await getQuantity(sales, totalInventory, product);
@@ -474,20 +463,28 @@ exports.getPlanWithProducings = async function(asin) {
   console.log(purchase);
   return(purchase);
 }
+
+async function getSales(fbaInventorySales, product) {
+  product.ps = Math.ceil(fbaInventorySales.sales);
+  product.save();
+  if (product.avgSales && product.avgSales > 0) {
+    var avgSales = product.avgSales;
+  } else {
+    var avgSales = Math.ceil((fbaInventorySales.sales + product.maxAvgSales) / 2);
+  }
+  var sales = {
+    minAvgSales: avgSales,
+    maxAvgSales: product.maxAvgSales
+  };
+  return sales;
+}
+exports.getSales = getSales;
 exports.getPlanV2 = async function(asin) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
   var stock = await prepareStock(product);
-  var sales = {
-    minAvgSales: Math.ceil(fbaInventorySales.sales),
-    maxAvgSales: product.maxAvgSales
-  };
-  // var sales = {
-  //   minAvgSales: product.maxAvgSales,
-  //   maxAvgSales: product.maxAvgSales
-  // };
-  // await removeDeliveredInbounds(product);
+  var sales = await getSales(fbaInventorySales, product);
   var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
   var quantity = await getQuantity(sales, totalInventory, product);
@@ -499,8 +496,6 @@ exports.getPlanV2 = async function(asin) {
 
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
-  console.log(inbounds)
-  
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
   var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
   var orderDues = await getOrderDue(product, totalInventory, sales, FREIGHT);
@@ -547,10 +542,7 @@ exports.getPlan = async function(asin) {
   // var product = PRODUCTS[asin];
   var stock = await prepareStock(product);
   // console.log(stock);
-  var sales = {
-    minAvgSales: Math.ceil(fbaInventorySales.sales),
-    maxAvgSales: product.maxAvgSales
-  };
+  var sales = await getSales(fbaInventorySales, product);
   var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
@@ -636,14 +628,7 @@ exports.getProducingPlan = async function(asin, producingId) {
   var product = await getProductByAsin(asin);
   // var product = PRODUCTS[asin];
   var stock = await prepareStock(product);
-  var sales = {
-    minAvgSales: Math.ceil(fbaInventorySales.sales),
-    maxAvgSales: product.maxAvgSales
-  };
-  // var sales = {
-  //   minAvgSales: product.maxAvgSales,
-  //   maxAvgSales: product.maxAvgSales
-  // };
+  var sales = await getSales(fbaInventorySales, product);
   await removeDeliveredInbounds(product);
   var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
@@ -842,7 +827,6 @@ async function getOrderDue(product, totalInventory, sales, freight) {
     orderDues[type] = moment(moment().add(quantity / sales.minAvgSales - product.cycle - freight[type].period - GAP, 'days')).format('YYYY-MM-DD');
   }
   return orderDues;
-  // return moment(moment().add(quantity / sales.minAvgSales - product.cycle - freight[type].period - GAP, 'days')).format('YYYY-MM-DD');
 }
 exports.getOrderDue = getOrderDue;
 
@@ -905,7 +889,7 @@ async function getQuantity(sales, totalInventory, product) {
     product.unitsPerBox = 30;
   }
 
-  var boxes = Math.ceil((sales.maxAvgSales * 90 - total) / product.unitsPerBox);
+  var boxes = Math.ceil((sales.minAvgSales * 90 - total) / product.unitsPerBox);
 
   if (boxes > 0) {
     var quantity = boxes * product.unitsPerBox;
