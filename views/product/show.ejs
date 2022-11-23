@@ -100,7 +100,11 @@
             </div>
           </div>
           <div class="card-footer text-muted">
-            <a href="/products/<%- product.asin %>/edit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Edit</a>
+            <a href="/products/<%= product.asin %>/edit" target="_blank" type="button" class="btn btn-link">Edit</a>
+            <a href="/products/<%= product.asin %>/inbounds" target="_blank" type="button" class="btn btn-link">Inbound</a>
+            <a href="/products/<%= product.asin %>/plan" target="_blank" type="button" class="btn btn-link">Plan</a>
+            <a href="/products/<%= product.asin %>/syncFreight" target="_blank" type="button" class="btn btn-link">syncFreight</a>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-product-id="<%=product._id%>" >Delete</button>
           </div>
         </div>
 

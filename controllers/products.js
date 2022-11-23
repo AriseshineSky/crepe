@@ -211,6 +211,7 @@ exports.save = async function (req, res, next) {
   var sea = req.body.sea;
   var avgSales = req.body.avgSales;
   var product = await Product.getProductByAsin(asin);
+  console.log(product);
   if (!product) {
     var newProduct = {
       asin: asin,
@@ -230,10 +231,12 @@ exports.save = async function (req, res, next) {
       if (err) {
         return next(err);
       }
-      res.redirect('/products' + product.asin);
+      console.log(product.asin);
+      res.redirect('/products/' + product.asin);
     });
   } else {
-    product.cycle = cycle;
+    console.log(asin);
+    product.asin = asin;
     product.cycle = cycle;
     product.avgSales = avgSales;
     product.unitsPerBox = unitsPerBox;
@@ -247,6 +250,7 @@ exports.save = async function (req, res, next) {
       if (err) {
         return next(err);
       }
+      console.log(product.asin);
       res.redirect('/products/' + product.asin);
     });
   }

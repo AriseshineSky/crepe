@@ -1,72 +1,84 @@
 <%- contentFor('pageSection') %>
-<table
-  data-toggle="table"
-  data-pagination="true"
-  data-editable-emptytext="Default empty text."
->
-  <thead>
-    <tr>
-      <th data-editable="true" data-sortable="true">orderId:</th>
-      <th data-editable="true" data-sortable="true">数量:</th>
-      <th data-editable="true" data-sortable="true">采购创建日期:</th>
-      <th data-editable="true" data-sortable="true">预估出货日期:</th>
-      <th class="">Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% product.producings.forEach(function(producing){ %>
-      <tr>
-        <td><%= producing.orderId %></td>
-        <td><%= producing.quantity %></td>
-        <td><%= producing.created %></td>
-        <td><%= producing.deliveryDue %></td>
-        <td style="text-align:center;">
-          <button class="btn btn-primary producing" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
-          <button class="btn btn-danger producing" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
-          <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
-        </td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+<div class="card text-center">
+  <div class="card-header">
+    <h4>采购计划</h4>
+  </div>
+  <div class="card-body">
+    <table
+      data-toggle="table"
+      data-pagination="true"
+      data-editable-emptytext="Default empty text."
+    >
+      <thead>
+        <tr>
+          <th data-editable="true" data-sortable="true">orderId:</th>
+          <th data-editable="true" data-sortable="true">数量:</th>
+          <th data-editable="true" data-sortable="true">采购创建日期:</th>
+          <th data-editable="true" data-sortable="true">预估出货日期:</th>
+          <th class="">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% product.producings.forEach(function(producing){ %>
+          <tr>
+            <td><%= producing.orderId %></td>
+            <td><%= producing.quantity %></td>
+            <td><%= producing.created %></td>
+            <td><%= producing.deliveryDue %></td>
+            <td style="text-align:center;">
+              <button class="btn btn-primary producing" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
+              <button class="btn btn-danger producing" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
+              <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <br/>
-
-<table
-  data-toggle="table"
-  data-pagination="true"
-  data-editable-emptytext="Default empty text."
->
-  <thead>
-    <tr>
-      <th data-editable="true" data-sortable="true">orderId:</th>
-      <th data-editable="true" data-sortable="true">数量:</th>
-      <th data-editable="true" data-sortable="true">预估收货日期:</th>
-      <th data-editable="true" data-sortable="true">装箱信息:</th>
-      <th class="">Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    
-    <% inbounds.forEach(function(inbound){ %>
-      <tr>
-        <td><%= inbound.orderId %></td>
-        <td><%= inbound.quantity %></td>
-        <td><%= inbound.deliveryDue %></td>
-        <td><%= inbound.box %></td>
-        <td style="text-align:center;">
-          <button class="btn btn-primary inbound" data-bs-toggle="modal" data-bs-target="#editModal" data-inbound-id="<%=inbound._id%>" >Edit</button>
-          <button class="btn btn-danger inbound" data-bs-toggle="modal" data-bs-target="#myModal" data-inbound-id="<%=inbound._id%>" >Delete</button>
-        </td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
-
+<div class="card text-center">
+  <div class="card-header">
+    <h4>运输中货物</h4>
+  </div>
+  <div class="card-body">
+    <table
+      data-toggle="table"
+      data-pagination="true"
+      data-editable-emptytext="Default empty text."
+    >
+      <thead>
+        <tr>
+          <th data-editable="true" data-sortable="true">orderId:</th>
+          <th data-editable="true" data-sortable="true">数量:</th>
+          <th data-editable="true" data-sortable="true">预估收货日期:</th>
+          <th data-editable="true" data-sortable="true">装箱信息:</th>
+          <th class="">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% inbounds.forEach(function(inbound){ %>
+          <tr>
+            <td><%= inbound.orderId %></td>
+            <td><%= inbound.quantity %></td>
+            <td><%= inbound.deliveryDue %></td>
+            <td><%= inbound.box %></td>
+            <td style="text-align:center;">
+              <button class="btn btn-primary inbound" data-bs-toggle="modal" data-bs-target="#editModal" data-inbound-id="<%=inbound._id%>" >Edit</button>
+              <button class="btn btn-danger inbound" data-bs-toggle="modal" data-bs-target="#myModal" data-inbound-id="<%=inbound._id%>" >Delete</button>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<br/>
 <div class="card" style="width: 30rem;">
   <form id='create_product_inbound_form' action='/products/<%- product.asin %>/inbounds' method='post'>
     <div class="card-header">
-      Product
+      <h4>添加运输中货物</h4>
     </div>
     <div class="card-body">
       <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >

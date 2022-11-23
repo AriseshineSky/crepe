@@ -30,7 +30,7 @@
               <div class="card-body">
                 <div class="input-group mb-3">
                   <span class="input-group-text">ASIN：</span>
-                  <input class="form-control" name="asin" value="<%= product.asin %>"/>
+                  <input class="form-control" name="asin" readonly value="<%= product.asin %>"/>
                 </div>
                 <div class="input-group mb-3">
                   <span class="input-group-text">生产周期(天):</span>
@@ -65,12 +65,12 @@
                   <input class="form-control" name="maxAvgSales" value="<%= product.maxAvgSales %>">
                 </div>
                 <div class="input-group mb-3">
-                  <span class="input-group-text">预估平均销量:</span>
+                  <span class="input-group-text">设置平均销量:</span>
                   <input class="form-control" name="avgSales" value="<%= product.avgSales %>">
                 </div>
                 <div class="input-group mb-3">
                   <span class="input-group-text">亚马逊7天平均销量:</span>
-                  <input class="form-control" name="ps" value="<%= product.ps %>">
+                  <input class="form-control" name="ps" readonly value="<%= product.ps %>">
                 </div>
                 <div class="input-group mb-3">
                   <span class="input-group-text">plwhs产品id:</span>
