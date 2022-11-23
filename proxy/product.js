@@ -466,7 +466,11 @@ exports.getPlanWithProducings = async function(asin) {
 
 async function getSales(fbaInventorySales, product) {
   product.ps = Math.ceil(fbaInventorySales.sales);
-  product.save();
+  product.save(function(err) {
+    if (err) {
+      logger.error(err);
+    }
+  });
   if (product.avgSales && product.avgSales > 0) {
     var avgSales = product.avgSales;
   } else {
