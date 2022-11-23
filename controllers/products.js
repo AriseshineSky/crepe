@@ -95,7 +95,8 @@ exports.producingPlan = async function (req, res, next) {
   var producingId = req.params.producingId;
   var purchase = await Product.getProducingPlan(asin, producingId);
   if (purchase.plan) {
-    res.render('product/producing-plan', {purchase: purchase, freight: FREIGHT});
+    // res.render('product/producing-plan', {purchase: purchase, freight: FREIGHT});
+    res.render('product/plan', {purchase: purchase, freight: FREIGHT});
   } else {
     res.render('product/inventory');
   }

@@ -11,6 +11,7 @@
       <div id="freight" data-freight="<%= JSON.stringify(freight) %>"></div>
       <div id="inbounds" data-inbounds="<%= JSON.stringify(purchase.inboundsCheck) %>"></div>
       <div id="chart"></div>
+      <br/>
       <div class="row">
         <div class="col-sm-6">
           <div class="card">
@@ -19,10 +20,12 @@
                 <span class="input-group-text">ASIN：</span>
                 <span class="form-control" ><%- purchase.product.asin %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">采购数量(个)：</span>
-                <span class="form-control" ><%- purchase.quantity.quantity || 0 %></span>
-              </div>
+              <% if (purchase.quantity) {%>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">采购数量(个)：</span>
+                  <span class="form-control" ><%- purchase.quantity.quantity || 0 %></span>
+                </div>
+              <% }%>
               <div class="input-group mb-3">
                 <span class="input-group-text">生产周期(天):</span>
                 <span class="form-control" ><%- purchase.product.cycle %></span>
@@ -33,7 +36,7 @@
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">仓库库存:</span>
-                <span class="form-control" ><%- purchase.stock.inventory || 0 %></span>
+                <span class="form-control" ><%- purchase.stock %></span>
               </div>
               <div class="input-group mb-3">
                 <span class="input-group-text">空运数量(个)：</span>
@@ -86,31 +89,38 @@
           </div>
         </div>
       </div>
-      <table
-      data-toggle="table"
-      data-pagination="true"
-      data-editable-emptytext="Default empty text."
-      >
-        <thead>
-          <tr>
-            <th data-editable="true" data-sortable="true">orderId:</th>
-            <th data-editable="true" data-sortable="true">数量:</th>
-            <th data-editable="true" data-sortable="true">预估收货日期:</th>
-            <th data-editable="true" data-sortable="true">装箱信息:</th>
-            <th class="">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% purchase.inboundShippeds.forEach(function(inbound){ %>
-            <tr>
-              <td><%= inbound.orderId %></td>
-              <td><%= inbound.quantity %></td>
-              <td><%= inbound.deliveryDue %></td>
-              <td><%= inbound.box %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+      <br/>
+      <div class="card text-center">
+        <div class="card-header">
+          <h4>运输中货物</h4>
+        </div>
+        <div class="card-body">
+          <table
+          data-toggle="table"
+          data-pagination="true"
+          data-editable-emptytext="Default empty text."
+          >
+            <thead>
+              <tr>
+                <th data-editable="true" data-sortable="true">orderId:</th>
+                <th data-editable="true" data-sortable="true">数量:</th>
+                <th data-editable="true" data-sortable="true">预估收货日期:</th>
+                <th data-editable="true" data-sortable="true">装箱信息:</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% purchase.inboundShippeds.forEach(function(inbound){ %>
+                <tr>
+                  <td><%= inbound.orderId %></td>
+                  <td><%= inbound.quantity %></td>
+                  <td><%= inbound.deliveryDue %></td>
+                  <td><%= inbound.box %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
