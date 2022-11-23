@@ -26,7 +26,7 @@
         </div>
         <div class="input-group mb-3">
           <span class="input-group-text">仓库库存:</span>
-          <span class="form-control" ><%- purchase.stock.inventory || 0 %></span>
+          <span class="form-control" ><%- purchase.stock || 0 %></span>
         </div>
         <div class="input-group mb-3">
           <span class="input-group-text">预估最大销量:</span>
@@ -54,10 +54,12 @@
           <span class="input-group-text">快船数量(个)：</span>
           <span class="form-control" ><%- purchase.plan.seaExpress.units || 0 %></span>
         </div>
-        <div class="input-group mb-3">
-          <span class="input-group-text">慢船数量(个)：</span>
-          <span class="form-control" ><%- purchase.plan.sea.units || 0 %></span>
-        </div>
+        <% if (purchase.product.sea) { %>
+          <div class="input-group mb-3">
+            <span class="input-group-text">慢船数量(个)：</span>
+            <span class="form-control" ><%- purchase.plan.sea.units || 0 %></span>
+          </div>
+        <% } %>
       </div>
       <table
       data-toggle="table"

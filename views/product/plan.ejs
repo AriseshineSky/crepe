@@ -49,19 +49,21 @@
           <span class="form-control" ><%- purchase.plan.airExpress.units || 0 %></span>
         </div>
         <% if (purchase.product.airDelivery) { %>
-        <div class="input-group mb-3">
-          <span class="input-group-text">空派数量(个)：</span>
-          <span class="form-control" ><%- purchase.plan.airDelivery.units || 0 %></span>
-        </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text">空派数量(个)：</span>
+            <span class="form-control" ><%- purchase.plan.airDelivery.units || 0 %></span>
+          </div>
         <% } %>
         <div class="input-group mb-3">
           <span class="input-group-text">快船数量(个)：</span>
           <span class="form-control" ><%- purchase.plan.seaExpress.units || 0 %></span>
         </div>
-        <div class="input-group mb-3">
-          <span class="input-group-text">慢船数量(个)：</span>
-          <span class="form-control" ><%- purchase.plan.sea.units || 0 %></span>
-        </div>
+        <% if (purchase.product.sea) { %>
+          <div class="input-group mb-3">
+            <span class="input-group-text">慢船数量(个)：</span>
+            <span class="form-control" ><%- purchase.plan.sea.units || 0 %></span>
+          </div>
+        <% } %>
       </div>
       <table
       data-toggle="table"

@@ -494,7 +494,6 @@ exports.getProducingPlan = async function(asin, producingId) {
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
   var plan = null;
-  console.log(producingId)
   for (var producing of product.producings) {
     if (producing._id.toString() === producingId) {
       plan = await getProducingFreightPlan(producing, product, FREIGHT, sales, inbounds);
@@ -564,14 +563,17 @@ async function bestProducingsFreightPlanForAllDelivery(producing, product, freig
     plan: plan,
     status: "pending"
   }
-  await getFreightPlanByProducing(freightPlan, quantity.boxes, quantity.boxes, 0, freightType, freight, inbounds, product, sales, result, producing);
+  await getFreightPlanByProducing(freightPlan, quantity.boxes, 0, freightType, freight, inbounds, product, sales, result, producing);
   return await formatPlan(result.plan, product.unitsPerBox);
 }
 
 async function getProducingFreightPlan(producing, product, freight, sales, inbounds) {
-  var freightType = ['airExpress', 'seaExpress', 'sea'];
+  var freightType = ['airExpress', 'seaExpress'];
   if (product.airDelivery) {
-    freightType = ['airExpress', 'airDelivery', 'seaExpress', 'sea'];
+    freightType = ['airExpress', 'airDelivery', 'seaExpress'];
+  }
+  if (product.sea) {
+    freightType.push('sea');
   }
   return await bestProducingsFreightPlanForAllDelivery(producing, product, freight, sales, freightType, inbounds);
 }
@@ -768,7 +770,7 @@ async function calculateProducingPlan(freightPlan, freightType, freight, inbound
   return result;
 }
 
-async function getFreightPlan(freightPlan, total, left, index, freightType, freight, inbounds, product, sales, result) {
+async function getFreightPlan(freightPlan, left, index, freightType, freight, inbounds, product, sales, result) {
   if (result.status === "done") {
     return null;
   }
@@ -781,12 +783,12 @@ async function getFreightPlan(freightPlan, total, left, index, freightType, frei
         return null;
       }
     } else {
-      return await getFreightPlan(freightPlan, total, total - i, index + 1, freightType, freight, inbounds, product, sales, result);
+      return await getFreightPlan(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result);
     }
   }
 }
 
-async function getFreightPlanByProducing(freightPlan, total, left, index, freightType, freight, inbounds, product, sales, result, producing) {
+async function getFreightPlanByProducing(freightPlan, left, index, freightType, freight, inbounds, product, sales, result, producing) {
   if (result.status === "done") {
     return null;
   }
@@ -794,12 +796,13 @@ async function getFreightPlanByProducing(freightPlan, total, left, index, freigh
     freightPlan[freightType[index]] = { boxes: i };
     if (index === freightType.length - 1) {
       var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
+      console.log(freightPlanDup);
       await calculateProducingPlan(freightPlanDup, freightType, freight, inbounds, product, sales, result, producing);
       if (result.status === "done") {
         return null;
       }
     } else {
-      return await getFreightPlanByProducing(freightPlan, total, total - i, index + 1, freightType, freight, inbounds, product, sales, result, producing);
+      return await getFreightPlanByProducing(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result, producing);
     }
   }
 }
@@ -821,7 +824,7 @@ async function bestPlanForAllDelivery(quantity, product, freight, sales, inbound
     plan: plan,
     status: "pending"
   }
-  await getFreightPlan(freightPlan, quantity.boxes, quantity.boxes, 0, freightType, freight, inbounds, product, sales, result)
+  await getFreightPlan(freightPlan, quantity.boxes, 0, freightType, freight, inbounds, product, sales, result)
   
   return await formatPlan(result.plan, product.unitsPerBox);
 }
@@ -851,9 +854,13 @@ async function getNewProducingFreightPlan(freightPlan, freight, freightType, pro
 }
 
 async function bestPlanV4(quantity, product, freight, sales, inbounds) {
-  var freightType = ['airExpress', 'seaExpress', 'sea'];
+  var freightType = ['airExpress', 'seaExpress'];
   if (product.airDelivery) {
-    freightType = ['airExpress', 'airDelivery', 'seaExpress', 'sea'];
+    freightType = ['airExpress', 'airDelivery', 'seaExpress'];
+  }
+
+  if (product.sea) {
+    freightType.push('sea');
   }
 
   return await bestPlanForAllDelivery(quantity, product, freight, sales, inbounds, freightType);
