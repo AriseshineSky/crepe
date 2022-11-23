@@ -125,7 +125,7 @@ async function syncBoxInfo(freight, product) {
   }
 }
 
-var getFreightsAndProductingsByProduct = async function(product) {
+var getFreightsAndProductingsByProduct = async function(product, days) {
   var freights = [];
   var producings = [];
   const freightApi = await Freight.getInstance();
@@ -133,14 +133,6 @@ var getFreightsAndProductingsByProduct = async function(product) {
   console.log(`allFreights: ${allFreights.length}`);
   var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
   console.log(`purchases: ${purchases.length}`);
-  // var lastestFreight = moment().subtract(1, 'year').format('YYYY-MM-DD');
-  // var lastestFreightOrderId = moment().subtract(1, 'year').format('YYYY-MM-DD');
-  // for (var i = 0; i < allFreights.length; i++) {
-  //   if (moment(allFreights[i].delivery).isAfter(moment(lastestFreight))) {
-  //     lastestFreight = allFreights[i].delivery;
-  //     lastestFreightOrderId = allFreights[i].orderId;
-  //   }
-  // }
   for (var j = 0; j < purchases.length; j++) {
     console.log(`checking: ${j + 1} purchase`);
     var unShippedAmount = purchases[j].qty;
@@ -148,14 +140,13 @@ var getFreightsAndProductingsByProduct = async function(product) {
       if (allFreights[i].orderId === purchases[j].orderId && allFreights[i].delivery) {
         await syncBoxInfo(allFreights[i], product);
         unShippedAmount -= allFreights[i].qty;
-        if (moment(allFreights[i].delivery).diff(moment(new Date()), 'days') > -10) {
+        if (moment(new Date()).diff(moment(allFreights[i].delivery), 'days') < days) {
           freights.push(allFreights[i]);
         }
       }
     }
+    
     if ((unShippedAmount / purchases[j].qty) > 0.15 && moment(new Date()).diff(moment(purchases[j].created), 'days') < 90) {
-    // if (!shipped && purchases[j].orderId > lastestFreightOrderId) {
-    // if (!shipped && purchases[j].orderId > lastestFreightOrderId && moment(purchases[j].delivery).isAfter(moment.now())) {
       producings.push({
         orderId: purchases[j].orderId,
         qty: unShippedAmount,

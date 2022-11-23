@@ -20,8 +20,8 @@ async function checkProducings(product, freightsAndProducings) {
   }
 }
 
-async function syncFreight(product) {
-  var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product);
+async function syncFreight(product, days) {
+  var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product, days);
   await checkProducings(product, freightsAndProducings);
   product.inboundShippeds = freightsAndProducings.inboundShippeds;
   product.producings = freightsAndProducings.producings;
@@ -216,7 +216,7 @@ async function getProducingPeriod(product, producing) {
   if (producing.deliveryDue) {
     days = moment(producing.deliveryDue).diff(moment(), "days");
   } else {
-    days = product.cycle - moment(producing.created).diff(moment(), "days");
+    days = product.cycle - moment().diff(moment(producing.created), "days");
   }
   if (days < 0) {
     days = 0;
