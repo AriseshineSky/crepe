@@ -631,7 +631,6 @@ exports.getProducingPlan = async function(asin, producingId) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
-  // var product = PRODUCTS[asin];
   var stock = await prepareStock(product);
   var sales = await getSales(fbaInventorySales, product);
   await removeDeliveredInbounds(product);
@@ -640,17 +639,16 @@ exports.getProducingPlan = async function(asin, producingId) {
 
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
-  console.log(inbounds)
   var plan = null;
   console.log(producingId)
   for (var producing of product.producings) {
-    console.log(producing._id.toString())
     if (producing._id.toString() === producingId) {
       console.log('producing', producing);
       plan = await getProducingFreightPlan(producing, product, FREIGHT, sales, inbounds);
       console.log('plan', plan);
     }
   }
+  logger.debug(plan);
   if (!plan) {
     console.log("can not find this producing");
     return "can not find this producing";
@@ -713,8 +711,8 @@ async function bestProducingsFreightPlanWithAirDelivery(producing, product, frei
     minInventory: 0,
     totalAmount: quantity.boxes * freight.airExpress.price * product.box.weight
   };
-  for (var i = quantity.boxes; i >= 0; i--) {
-    for (var j = quantity.boxes - i; j >= 0; j--) {
+  for (var i = quantity.boxes; i >= 0; i-=3) {
+    for (var j = quantity.boxes - i; j >= 0; j-=2) {
       for (var k = quantity.boxes - i - j; k >= 0; k--) {
         freightPlan = {
           sea: {
@@ -765,8 +763,8 @@ async function bestProducingsFreightPlanWithoutAirDelivery(producing, product, f
     gap: 100000,
     minInventory: 0
   };
-  for (var i = quantity.boxes; i >= 0; i--) {
-    for (var j = quantity.boxes - i; j >= 0; j--) {
+  for (var i = quantity.boxes; i >= 0; i-=3) {
+    for (var j = quantity.boxes - i; j >= 0; j-=2) {
       freightPlan = {
         sea: {
           boxes: i
