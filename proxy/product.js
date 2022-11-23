@@ -402,10 +402,13 @@ async function getSales(fbaInventorySales, product) {
       logger.error(err);
     }
   });
+  var avgSales;
   if (product.avgSales && product.avgSales > 0) {
-    var avgSales = product.avgSales;
+    avgSales = product.avgSales;
+  } else if (product.maxAvgSales > 0) {
+    avgSales = Math.ceil(fbaInventorySales.sales * 0.4 + product.maxAvgSales * 0.6);
   } else {
-    var avgSales = Math.ceil(fbaInventorySales.sales * 0.4 + product.maxAvgSales * 0.6);
+    avgSales = Math.ceil(fbaInventorySales.sales);
   }
   var sales = {
     minAvgSales: avgSales,
