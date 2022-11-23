@@ -43,6 +43,7 @@ var ProductSchema = new Schema({
     maxSales: { type: Number }
   },
   airDelivery: {type: Boolean, default: false},
+  sea: {type: Boolean, default: false},
   plwhsId: {type: Number, default: 0 },
   yisucangId: {type: Number, default: 0 },
   createAt: { type: Date, default: Date.now },

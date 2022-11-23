@@ -41,7 +41,6 @@
                   <input class="form-control" name="minInventory" value="<%= product.minInventory %>">
                 </div>
                 <div class="form-check">
-                  <input type="hidden" name="foo" value="false">
                   <% if (product.airDelivery) { %>
                     <input class="form-check-input" type="checkbox" name="airDelivery" value="true" checked id="defaultCheck1">
                   <% } else { %>
@@ -49,6 +48,16 @@
                   <% } %>
                   <label class="form-check-label" for="defaultCheck1">
                     需要空派
+                  </label>
+                </div>
+                <div class="form-check">
+                  <% if (product.sea) { %>
+                    <input class="form-check-input" type="checkbox" name="sea" value="true" checked id="defaultCheck1">
+                  <% } else { %>
+                    <input class="form-check-input" type="checkbox" name="sea" value="true" id="defaultCheck1">
+                  <% } %>
+                  <label class="form-check-label" for="defaultCheck1">
+                    需要慢船
                   </label>
                 </div>
                 <div class="input-group mb-3">
