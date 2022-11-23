@@ -161,6 +161,12 @@ var getFreightsAndProductingsByProduct = async function(product, days) {
   var stock = await getStockByProduct(product);
   console.log('stock', stock.inventory);
   if (stock.inventory && stock.inventory !== 0) {
+    product.stock = stock.inventory.SumNumber;
+    product.save(function(err) {
+      if (err) {
+        logger.error(err);
+      }
+    });
     await checkFreights(freights, stock.inventory.PendingStorageNumber);
   } else {
     await checkFreights(freights, 20000);

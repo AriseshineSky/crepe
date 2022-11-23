@@ -75,27 +75,46 @@
   </div>
 </div>
 <br/>
-<div class="card" style="width: 30rem;">
-  <form id='create_product_inbound_form' action='/products/<%- product.asin %>/inbounds' method='post'>
-    <div class="card-header">
-      <h4>添加运输中货物</h4>
-    </div>
-    <div class="card-body">
-      <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
-      <div class="input-group mb-3">
-        <span class="input-group-text">数量:</span>
-        <input type="number" class="form-control" name="quantity">
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-header">
+        <h4>仓库库存</h4>
       </div>
-      <div class="input-group mb-3">
-        <span class="input-group-text">预估收货日期:</span>
-        <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker">
+      <div class="card-body">
+        <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
+        <div class="input-group mb-3">
+          <span class="input-group-text">数量:</span>
+          <span class="form-control" ><%- product.stock %></span>
+        </div>
       </div>
     </div>
-    <div class="card-footer text-muted">
-      <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
+  </div>
+  <div class="col-sm-6">
+    <div class="card">
+      <form id='create_product_inbound_form' action='/products/<%- product.asin %>/inbounds' method='post'>
+        <div class="card-header">
+          <h4>添加运输中货物</h4>
+        </div>
+        <div class="card-body">
+          <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
+          <div class="input-group mb-3">
+            <span class="input-group-text">数量:</span>
+            <input type="number" class="form-control" name="quantity">
+          </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text">预估收货日期:</span>
+            <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker">
+          </div>
+        </div>
+        <div class="card-footer text-muted">
+          <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
 </div>
+
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
