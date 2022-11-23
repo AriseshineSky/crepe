@@ -405,7 +405,7 @@ async function getSales(fbaInventorySales, product) {
   if (product.avgSales && product.avgSales > 0) {
     var avgSales = product.avgSales;
   } else {
-    var avgSales = Math.ceil((fbaInventorySales.sales + product.maxAvgSales) / 2);
+    var avgSales = Math.ceil(fbaInventorySales.sales * 0.4 + product.maxAvgSales * 0.6);
   }
   var sales = {
     minAvgSales: avgSales,
