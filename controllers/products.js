@@ -2,7 +2,8 @@ var Product = require('../proxy').Product;
 var Csv = require('../proxy').Csv;
 var Freight = require('../proxy').Freight;
 var mongoose = require('mongoose');
-var syncProducts = require('../lib/getInfoFromGoogleSheet')
+var syncProducts = require('../lib/getInfoFromGoogleSheet');
+var logger = require('../common/logger');
 exports.show = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);
@@ -78,14 +79,6 @@ exports.sync = async function(req, res, next) {
   syncProducts.syncProducts();
   res.render('index');
 }
-// exports.plan = async function (req, res, next) {
-//   var asin = req.params.asin;
-//   var purchase = await Product.getPlan(asin);
-//   if (purchase.plan) {
-//     console.log(`${purchase.seaFreightDue}\t${purchase.quantity.quantity}\t${purchase.plan.airExpress.units}\t \t${purchase.plan.seaExpress.units}\t${purchase.plan.sea.units}\t`)
-//   }
-//   res.render('product/plan', {purchase: purchase, freight: FREIGHT});
-// };
 
 exports.plan = async function (req, res, next) {
   var asin = req.params.asin;

@@ -109,6 +109,26 @@ async function calculateMinInventory(freight, freightType, status, sales, produc
       }
     }
   }
+  logger.debug('minInventory', minInventory);
+  return minInventory;
+}
+
+async function calculateProducingMinInventory(freight, freightType, status, sales, product, producing) {
+  var period = 0;
+  var minInventory = 100000;
+  var days = await getProducingPeriod(product, producing);
+  for (var j = 1; j < freightType.length; j++) {
+    for (var i = 0; i < status.length; i++) {
+      var type = freightType[j];
+      if (status[i].period === freight[type].period + days) {
+        period = Math.floor(status[i].before / sales.minAvgSales);
+        if (period < minInventory) {
+          minInventory = period;
+        }
+      }
+    }
+  }
+  logger.debug('minInventory', minInventory);
   return minInventory;
 }
 
@@ -729,6 +749,7 @@ async function bestProducingsFreightPlanWithAirDelivery(producing, product, frei
           }
         }
         var newPlan = await getNewProducingFreightPlan(freightPlan, freight, freightType, product, sales, producing, inbounds);
+        
         if (newPlan.minInventory >= product.minInventory) {
           if (newPlan.gap == 0) {
             plan = JSON.parse(JSON.stringify(newPlan));
@@ -1236,6 +1257,7 @@ async function bestPlanWithAirDelivery(quantity, product, freight, sales, inboun
           }
         }
         var newPlan = await getNewFreightPlan(freightPlan, freight, freightType, inbounds, product, sales);
+        
         if (newPlan.minInventory >= product.minInventory) {
           if (newPlan.gap == 0) {
             plan = JSON.parse(JSON.stringify(newPlan));
@@ -1273,7 +1295,7 @@ async function getNewProducingFreightPlan(freightPlan, freight, freightType, pro
   var status = await recalculateInboundQueue(inboundQueue, sales);
   var newPlan = await calculatePlanAmounts(freightPlan, freight, product);
   newPlan.gap = await calculateOutOfStockPeriod(status);
-  newPlan.minInventory = await calculateMinInventory(freight, freightType, status, sales, product);
+  newPlan.minInventory = await calculateProducingMinInventory(freight, freightType, status, sales, product, producing);
   newPlan.inventoryStatus = status;
   return newPlan;
 }
