@@ -669,7 +669,6 @@ async function getQuantity(sales, totalInventory, product) {
   if (product.unitsPerBox === 0) {
     product.unitsPerBox = 30;
   }
-  console.log(total);
   var boxes = Math.ceil((sales.minAvgSales * 90 - total) / product.unitsPerBox);
 
   if (boxes > 0) {
@@ -777,25 +776,36 @@ async function getFreightPlan(freightPlan, left, index, freightType, freight, in
   if (result.status === "done") {
     return null;
   }
-  for (var i = left; i >= 0; i-=2) {
-    freightPlan[freightType[index]] = { boxes: i };
-    if (index === freightType.length - 1) {
-      var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
-      await calculatePlan(freightPlanDup, freightType, freight, inbounds, product, sales, result);
-      if (result.status === "done") {
-        return null;
-      }
-    } else {
-      return await getFreightPlan(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result);
+  if (index === freightType.length - 1) {
+    freightPlan[freightType[index]] = { boxes: left };
+    var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
+    await calculatePlan(freightPlanDup, freightType, freight, inbounds, product, sales, result);
+    if (result.status === "done") {
+      return null;
     }
-  }
+  } else {
+    var i = 0;
+    while(i <= left) {
+      console.log('freightPlan', freightPlan);
+      console.log('i', i);
+      freightPlan[freightType[index]] = { boxes: i }
+      return await getFreightPlan(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result);
+      if ( i + 2 <= left ) {
+        i+=2;
+      } else {
+        i++;
+      }
+    }
+      }
+  
 }
 
 async function getFreightPlanByProducing(freightPlan, left, index, freightType, freight, inbounds, product, sales, result, producing) {
   if (result.status === "done") {
     return null;
   }
-  for (var i = left; i >= 0; i-=2) {
+  var i = left;
+  while(i >=0) {
     freightPlan[freightType[index]] = { boxes: i };
     if (index === freightType.length - 1) {
       var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
@@ -805,7 +815,12 @@ async function getFreightPlanByProducing(freightPlan, left, index, freightType, 
         return null;
       }
     } else {
-      return await getFreightPlanByProducing(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result, producing);
+      await getFreightPlanByProducing(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result, producing);
+    }
+    if ( i >=2 ) {
+      i-=2;
+    } else {
+      i--;
     }
   }
 }
