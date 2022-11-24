@@ -6,7 +6,7 @@ var ProductSchema = new Schema({
   cycle: { type: Number, default: 0 },
   unitsPerBox: { type: Number, default: 0 },
   maxAvgSales: { type: Number, default: 0 },
-  avgSales: { type: Number, default: 0 },
+  avgSales: { type: Number },
   ps: { type: Number, default: 0 },
   stock: { type: Number, default: 0 },
   minInventory: { type: Number, default: 0 },

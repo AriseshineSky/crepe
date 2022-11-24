@@ -9,6 +9,11 @@
         <% include menu.ejs %>
         <div id="page-wrapper">
             <div class="container">
+                <div class='header'>
+                    <ol class='breadcrumb'>
+                      <li><a href='/'>主页</a><span class='divider'>/</span></li>
+                    </ol>
+                </div>
                 <%- defineContent('pageSection') %>
             </div>
         </div>

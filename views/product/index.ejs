@@ -7,11 +7,14 @@
   .like {
     margin-right: 10px;
   }
+  td,th {
+    max-width: 3em;
+  }
 </style>
 
 <div class="card text-center">
   <div class="card-header">
-    Product List
+    <h4>产品列表</h4>
   </div>
   <div class="card-body">
     
@@ -19,18 +22,19 @@
       data-toggle="table"
       data-pagination="true"
       data-search="true"
+      class="table table-hover"
     >
       <thead>
         <tr>
           <th>ASIN</th>
-          <th>Cycle</th>
+          <th>货期</th>
           <th>需要空派</th>
           <th>需要慢船</th>
-          <th>avgSales</th>
-          <th>maxAvgSales</th>
+          <th>设置平均销量</th>
+          <th>预估最大销量</th>
           <th>亚马逊近7天平均销量</th>
-          <th>unitsPerBox</th>
-          <th>boxD</th>
+          <th>每箱数量</th>
+          <th>箱规</th>
           <th>plwhsId</th>
           <th>yisucangId</th>
           <th>Actions</th>
@@ -41,20 +45,32 @@
           <tr>
             <td><%= product.asin %></td>
             <td><%= product.cycle %></td>
-            <td><%= product.airDelivery %></td>
-            <td><%= product.sea %></td>
+            <td>
+              <% if (product.airDelivery) { %>
+                需要
+              <% } else { %>
+                不需要
+              <% } %>
+            </td>
+            <td>
+              <% if (product.sea) { %>
+                需要
+              <% } else { %>
+                不需要
+              <% } %>
+            </td>
             <td><%= product.avgSales %></td>
             <td><%= product.maxAvgSales %></td>
             <td><%= product.ps %></td>
             <td><%= product.unitsPerBox %></td>
-            <td><%= product.box %></td>
+            <td><%= product.box.length %>*<%= product.box.width %>*<%= product.box.height %>cm</td>
             <td><%= product.plwhsId %></td>
             <td><%= product.yisucangId %></td>
             <td>
-              <a href="/products/<%= product.asin %>/edit" target="_blank" type="button" class="btn btn-link">Edit</a>
-              <a href="/products/<%= product.asin %>/inbounds" target="_blank" type="button" class="btn btn-link">Inbound</a>
-              <a href="/products/<%= product.asin %>/plan" target="_blank" type="button" class="btn btn-link">Plan</a>
-              <a href="/products/<%= product.asin %>/syncFreight" target="_blank" type="button" class="btn btn-link">syncFreight</a>
+              <a href="/products/<%= product.asin %>/edit" target="_blank" type="button" class="btn btn-primary">Edit</a>
+              <a href="/products/<%= product.asin %>/inbounds" target="_blank" type="button" class="btn btn-primary">Inbound</a>
+              
+              
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-product-id="<%=product._id%>" >Delete</button>
             </td>
           </tr>
