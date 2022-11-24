@@ -804,8 +804,8 @@ async function getFreightPlanByProducing(freightPlan, left, index, freightType, 
     return null;
   }
   if (index === freightType.length - 1) {
-    var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
     freightPlan[freightType[index]] = { boxes: left };
+    var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
     await calculateProducingPlan(freightPlanDup, freightType, freight, inbounds, product, sales, result, producing);
     if (result.status === "done") {
       return null;
