@@ -789,38 +789,37 @@ async function getFreightPlan(freightPlan, left, index, freightType, freight, in
       console.log('freightPlan', freightPlan);
       console.log('i', i);
       freightPlan[freightType[index]] = { boxes: i }
-      return await getFreightPlan(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result);
+      await getFreightPlan(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result);
       if ( i + 2 <= left ) {
         i+=2;
       } else {
         i++;
       }
     }
-      }
-  
+  }
 }
 
 async function getFreightPlanByProducing(freightPlan, left, index, freightType, freight, inbounds, product, sales, result, producing) {
   if (result.status === "done") {
     return null;
   }
-  var i = left;
-  while(i >=0) {
-    freightPlan[freightType[index]] = { boxes: i };
-    if (index === freightType.length - 1) {
-      var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
-      console.log(freightPlanDup);
-      await calculateProducingPlan(freightPlanDup, freightType, freight, inbounds, product, sales, result, producing);
-      if (result.status === "done") {
-        return null;
-      }
-    } else {
-      await getFreightPlanByProducing(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result, producing);
+  if (index === freightType.length - 1) {
+    var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
+    freightPlan[freightType[index]] = { boxes: left };
+    await calculateProducingPlan(freightPlanDup, freightType, freight, inbounds, product, sales, result, producing);
+    if (result.status === "done") {
+      return null;
     }
-    if ( i >=2 ) {
-      i-=2;
-    } else {
-      i--;
+  } else {
+    var i = 0;
+    while(i <= left) {
+      freightPlan[freightType[index]] = { boxes: i };
+      await getFreightPlanByProducing(freightPlan, left - i, index + 1, freightType, freight, inbounds, product, sales, result, producing);
+      if ( i + 2 <= left ) {
+        i+=2;
+      } else {
+        i++;
+      }
     }
   }
 }
