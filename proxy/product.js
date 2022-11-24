@@ -411,6 +411,10 @@ async function getSales(fbaInventorySales, product) {
     avgSales = Math.ceil(fbaInventorySales.sales);
   }
   var sales = {
+    airExpress: (fbaInventorySales.sales * 0.9 + product.maxAvgSales * 0.1),
+    airDelivery: (fbaInventorySales.sales * 0.8 + product.maxAvgSales * 0.2),
+    seaExpress: avgSales,
+    sea: avgSales,
     minAvgSales: avgSales,
     maxAvgSales: product.maxAvgSales
   };
@@ -605,7 +609,7 @@ async function getOrderDue(product, totalInventory, sales, freight) {
   }
   var orderDues = {};
   for (var type of freightType) {
-    orderDues[type] = moment(moment().add(quantity / sales.minAvgSales - product.cycle - freight[type].period - GAP, 'days')).format('YYYY-MM-DD');
+    orderDues[type] = moment(moment().add(quantity / sales[type] - product.cycle - freight[type].period - GAP, 'days')).format('YYYY-MM-DD');
   }
   return orderDues;
 }
