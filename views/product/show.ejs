@@ -120,9 +120,50 @@
               </div>
             <% }) %>
         </div>
-
-       
     </div>
     <% } %>
   </div>
 </div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Are you sure to delete this product?</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger">Delete</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $("#myModal").on('shown.bs.modal', function(e) {
+      var modalBody = $('<div id="myModal"></div>');
+      var productId = $(e.relatedTarget).data('product-id');
+      var modalForm = $(`<div class="modal-dialog modal-confirm"> \
+                          <div class="modal-content">\
+                            <div class="modal-header flex-column">\
+                              <h4 class="modal-title w-100">Are you sure?</h4>\
+                            </div>\
+                            <div class="modal-body">\
+                              <p>Do you really want to delete this product? This process cannot be undone.</p>\
+                            </div>\
+                            <form role="form" name="modalForm" id="delete_product" action="/products/delete" method="post"> \
+                              <div class="modal-footer justify-content-center"> \
+                                <input class="form-control" name="productId" value="${productId}" type="hidden" > \
+                              </div> \
+                            </form>\
+	                        </div>\
+                        </div>`);
+      modalBody.append(modalForm);
+      $('.modal-body').html(modalBody);
+    });
+    $('.modal-footer .btn-danger').click(function() {
+      $('form[name="modalForm"]').submit();
+    });
+  });
+</script>
