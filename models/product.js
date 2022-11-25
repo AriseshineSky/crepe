@@ -9,7 +9,7 @@ var ProductSchema = new Schema({
   avgSales: { type: Number },
   ps: { type: Number, default: 0 },
   stock: { type: Number, default: 0 },
-  minInventory: { type: Number, default: 0 },
+  minInventory: { type: Number, default: 7 },
   box: { 
     length: {type: Number, default: 0 },
     width: {type: Number, default: 0 },
