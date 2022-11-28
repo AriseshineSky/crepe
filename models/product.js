@@ -1,7 +1,9 @@
+const { ObjectId } = require('mongodb');
 var mongoose  = require('mongoose');
 var BaseModel = require("./base_model");
 var Schema    = mongoose.Schema;
 var ProductSchema = new Schema({
+  pm: { type: Schema.Types.ObjectId, ref: 'User'},
   asin: { type: String},
   cycle: { type: Number, default: 0 },
   unitsPerBox: { type: Number, default: 0 },
@@ -9,6 +11,8 @@ var ProductSchema = new Schema({
   avgSales: { type: Number },
   ps: { type: Number, default: 0 },
   stock: { type: Number, default: 0 },
+  plwhs: { type: Number, default: 0 },
+  purchase: { type: Number, default: 0 },
   minInventory: { type: Number, default: 7 },
   box: { 
     length: {type: Number, default: 0 },

@@ -12,5 +12,6 @@ mongoose.connect(config.db, {
 });
 
 require('./product');
-
+require('./user');
 exports.Product = mongoose.model('Product');
+exports.User = mongoose.model('User');

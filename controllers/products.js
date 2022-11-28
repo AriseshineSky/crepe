@@ -80,6 +80,11 @@ exports.sync = async function(req, res, next) {
   res.render('index');
 }
 
+exports.syncpm = async function(req, res, next) {
+  Product.syncPm();
+  res.render('index');
+}
+
 exports.plan = async function (req, res, next) {
   var asin = req.params.asin;
   var purchase = await Product.getPlanV2(asin);

@@ -21,6 +21,7 @@ router.get('/:asin/syncFreight', products.syncFreight);
 router.get('/:asin/report', products.generateReport);
 router.post('/create', products.create);
 router.get('/sync', products.sync);
+router.get('/syncpm', products.syncpm);
 router.post('/delete', products.delete);
 router.get('/', products.index);
 router.get('/:asin', products.show);

@@ -13,87 +13,90 @@
           <strong><%= error %></strong>
         </div>
       <% }else{ %>
-        <div class="card" style="width: 30rem;">
+        <div class="card p-4">
           <div class="card-header">
             Product
           </div>
-          <div class="card-body">
-            <div class="input-group mb-3">
-              <span class="input-group-text">ASIN：</span>
+
+            <div class="input-group input-group-static mb-4">
+              <label>ASIN：</label>
               <span class="form-control" ><%- product.asin %></span>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">生产周期(天):</span>
+            <div class="input-group input-group-static mb-4">
+              <label>生产周期(天):</label>
               <span class="form-control" ><%- product.cycle %></span>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">最小库存保有量(天):</span>
+            <div class="input-group input-group-static mb-4">
+              <label>最小库存保有量(天):</label>
               <span class="form-control" ><%- product.minInventory %></span>
             </div>
-            <div class="form-check">
-              <% if (product.airDelivery) { %>
-                <input class="form-check-input" type="checkbox" name="airDelivery" value="true" checked id="defaultCheck1">
-              <% } else { %>
-                <input class="form-check-input" type="checkbox" name="airDelivery" value="true" id="defaultCheck1">
-              <% } %>
-              <label class="form-check-label" for="defaultCheck1">
-                需要空派
-              </label>
-            </div>
-            <div class="form-check">
-              <% if (product.sea) { %>
-                <input class="form-check-input" type="checkbox" name="sea" value="true" checked id="defaultCheck1">
-              <% } else { %>
-                <input class="form-check-input" type="checkbox" name="sea" value="true" id="defaultCheck1">
-              <% } %>
-              <label class="form-check-label" for="defaultCheck1">
-                需要慢船
-              </label>
-            </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">预估最大销量:</span>
+            <div class="input-group input-group-static mb-4">
+              <label>运输类型(默认有空运和海运快船):</label>
+              <div class="form-check">
+                <% if (product.airDelivery) { %>
+                  <input class="form-check-input" type="checkbox" name="airDelivery" value="true" checked id="defaultCheck1">
+                <% } else { %>
+                  <input class="form-check-input" type="checkbox" name="airDelivery" value="true" id="defaultCheck1">
+                <% } %>
+                <label class="form-check-label" for="defaultCheck1">
+                  需要空派
+                </label>
+              </div>
+              <div class="form-check">
+                <% if (product.sea) { %>
+                  <input class="form-check-input" type="checkbox" name="sea" value="true" checked id="defaultCheck1">
+                <% } else { %>
+                  <input class="form-check-input" type="checkbox" name="sea" value="true" id="defaultCheck1">
+                <% } %>
+                <label class="form-check-label" for="defaultCheck1">
+                  需要慢船
+                </label>
+              </div>
+              </div>
+            <div class="input-group input-group-static mb-4">
+              <label>预估最大销量:</label>
               <span class="form-control" ><%- product.maxAvgSales %></span>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">预估平均销量:</span>
+            <div class="input-group input-group-static mb-4">
+              <label>预估平均销量:</label>
               <span class="form-control" ><%- product.avgSales %></span>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">亚马逊7天平均销量:</span>
+            <div class="input-group input-group-static mb-4">
+              <label>亚马逊7天平均销量:</label>
               <span class="form-control" ><%- product.ps %></span>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">plwhs产品id:</span>
+            <div class="input-group input-group-static mb-4">
+              <label>plwhs产品id:</label>
               <span class="form-control" ><%- product.plwhsId %></span>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">yisucang产品id:</span>
+            <div class="input-group input-group-static mb-4">
+              <label>yisucang产品id:</label>
               <span class="form-control" ><%- product.yisucangId %></span>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">装箱尺寸：</span>
-              <div class="input-group mb-3">
-                <span class="input-group-text">长(cm)：</span>
+            <div class="input-group input-group-static mb-4">
+              <label>装箱尺寸：</label>
+              <div class="input-group input-group-static mb-4">
+                <label>长(cm)：</label>
                 <span class="form-control" ><%- product.box.length %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">宽(cm)：</span>
+              <div class="input-group input-group-static mb-4">
+                <label>宽(cm)：</label>
                 <span class="form-control" ><%- product.box.width %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">高(cm)：</span>
+              <div class="input-group input-group-static mb-4">
+                <label>高(cm)：</label>
                 <span class="form-control" ><%- product.box.height %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">重(kg)：</span>
+              <div class="input-group input-group-static mb-4">
+                <label>重(kg)：</label>
                 <span class="form-control" ><%- product.box.weight %></span>
               </div>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text">每箱数量(个)：</span>
+            <div class="input-group input-group-static mb-4">
+              <label>每箱数量(个)：</label>
               <span class="form-control" ><%- product.unitsPerBox %></span>
             </div>
-          </div>
+
           <div class="card-footer text-muted">
             <a href="/products/<%= product.asin %>/edit" target="_blank" type="button" class="btn btn-primary">Edit</a>
             <a href="/products/<%= product.asin %>/inbounds" target="_blank" type="button" class="btn btn-info">Inbound</a>
@@ -101,20 +104,19 @@
           </div>
         </div>
 
-
-        <div class="card" style="width: 30rem;">
+        <br/>
+        <div class="card">
             <div class="card-header">
-              Inbound
+              运输中货物
             </div>
-
             <% product.inboundShippeds.forEach(function(inboundShipped){ %>
               <div class="card-body">
-                <div class="input-group mb-3">
-                  <span class="input-group-text">数量:</span>
+                <div class="input-group input-group-static mb-4">
+                  <label>数量:</label>
                   <span class="form-control" ><%- inboundShipped.quantity %></span>
                 </div>
-                <div class="input-group mb-3">
-                  <span class="input-group-text">预估收货日期:</span>
+                <div class="input-group input-group-static mb-4">
+                  <label>预估收货日期:</label>
                   <span class="form-control" ><%- inboundShipped.deliveryDue %></span>
                 </div>
               </div>

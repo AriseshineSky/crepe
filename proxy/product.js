@@ -1,10 +1,13 @@
 var models  = require('../models');
 var Product = models.Product;
+var user = require('./user');
 var mongoose = require('mongoose');
+const getPm = require('../api/getPM');
 var moment = require('moment');
 const GAP = 4;
 var getFbaInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByProduct = require('../lib/getStockByProduct');
+var getPlwhsByProduct = require('../lib/getPlwhsByProduct');
 var Freight = require('./freight');
 var logger = require('../common/logger');
 async function getFreight(product) {
@@ -20,11 +23,19 @@ async function checkProducings(product, freightsAndProducings) {
   }
 }
 
+async function getProducingsQuantity(producings) {
+  var quantity = 0;
+  for(var i = 0; i < producings.length; i++) {
+    quantity += producings[i].quantity
+  }
+  return quantity;
+}
 async function syncFreight(product, days) {
   var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product, days);
   await checkProducings(product, freightsAndProducings);
   product.inboundShippeds = freightsAndProducings.inboundShippeds;
   product.producings = freightsAndProducings.producings;
+  product.purchase = await getProducingsQuantity(product.producings);
   product.save(function (err) {
     if (err) {
       logger.error(JSON.stringify(product));    
@@ -38,6 +49,22 @@ async function checkStatus(inbound, units, sales) {
   return(units - inbound.period * sales.minAvgSales);
 }
 
+async function syncPm() {
+  var products = await findAll();
+  for (var product of products) {
+    var name = await getPm(product.asin, 'US');
+    logger.debug(name);
+    var pm = await user.findOrCreate(name);
+    logger.debug(pm);
+    product.pm = pm;
+    product.save(function(error) {
+      if (error) {
+        logger.error(error);
+      }
+    })
+  }
+}
+exports.syncPm = syncPm;
 function compare(type) {
   return function(m, n) {
     return m[type] - n[type];
@@ -249,18 +276,39 @@ async function addProducingFreightPlanToInbounds(freightPlan, freight, inbounds,
   }
   return newInbounds;
 }
-
-async function prepareStock(product) {
-  var stock = await getStockByProduct(product);
-  if (stock.inventory) {
-    return stock.inventory.SumNumber;
-  } else {
-    return 0;
+async function updateProduct(product, attrs) {
+  for(var key in attrs) {
+    product[key] = attrs[key];
   }
+  logger.debug(product);
+  logger.debug(attrs);
+  await product.save(function(error) {
+    if (error) {
+      logger.error(error);
+    }
+  })
+  logger.debug(product);
+}
+async function prepareStock(product) {
+  var quantity = 0;
+  var yStock = 0;
+  var pStock = 0;
+  var stock = await getStockByProduct(product);
+  var plwhs = await getPlwhsByProduct(product);
+  if (stock.inventory) {
+    quantity += stock.inventory.SumNumber;
+    yStock = stock.inventory.SumNumber;
+  }
+  if (plwhs) {
+    quantity += plwhs.qty;
+    pStock = plwhs.qty; 
+  }
+  await updateProduct(product, {stock: yStock, plwhs: pStock});
+  return quantity;
 }
 exports.prepareStock = prepareStock;
 var findAll = async function() {
-  return Product.find({});
+  return await Product.find({}).populate('pm');
 }
 
 var findAllAsins = async function() {
@@ -409,11 +457,11 @@ exports.getPlanWithProducings = async function(asin) {
 
 async function getSales(fbaInventorySales, product) {
   product.ps = Math.ceil(fbaInventorySales.sales);
-  product.save(function(err) {
-    if (err) {
-      logger.error(err);
-    }
-  });
+  // product.save(function(err) {
+  //   if (err) {
+  //     logger.error(err);
+  //   }
+  // });
   var avgSales;
   if (product.avgSales && product.avgSales > 0) {
     avgSales = product.avgSales;
@@ -525,6 +573,7 @@ exports.getProducingPlan = async function(asin, producingId) {
   var plan = null;
   for (var producing of product.producings) {
     if (producing._id.toString() === producingId) {
+      logger.debug(producing);
       plan = await getProducingFreightPlan(producing, product, await prepareFreight(FREIGHT, 7), sales, inbounds);
     }
   }

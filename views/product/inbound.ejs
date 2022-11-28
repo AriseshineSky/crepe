@@ -101,8 +101,8 @@
       </div>
       <div class="card-body">
         <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
-        <div class="input-group mb-3">
-          <span class="input-group-text">数量:</span>
+        <div class="input-group input-group-static mb-4">
+          <label>数量:</label>
           <span class="form-control" ><%- product.stock %></span>
         </div>
       </div>
@@ -116,12 +116,12 @@
         </div>
         <div class="card-body">
           <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
-          <div class="input-group mb-3">
-            <span class="input-group-text">数量:</span>
+          <div class="input-group input-group-static mb-4">
+            <label>数量:</label>
             <input type="number" class="form-control" name="quantity">
           </div>
-          <div class="input-group mb-3">
-            <span class="input-group-text">预估收货日期:</span>
+          <div class="input-group input-group-static mb-4">
+            <label>预估收货日期:</label>
             <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker">
           </div>
         </div>
@@ -142,8 +142,8 @@
       </div>
       <div class="modal-body"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn btn-secondary bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger bg-gradient-primary">Delete</button>
       </div>
     </div>
   </div>
@@ -155,7 +155,7 @@
       <div class="modal-header">
         <h4 class="modal-title" id="editModalLabel">Purchase</h4>
       </div>
-      <div class="edit-modal-body"></div>
+      <div class="edit-modal-body modal-body"></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary edit">Submit</button>
@@ -177,18 +177,18 @@
       var modalBody = $('<div id="modalContent"></div>');
       var inboundId = $(this).data('inbound-id')
       var modalForm = $(`<form role="form" name="modalForm" id="update_inbound_form" action="/products/<%= product.asin %>/inbound/${inboundId}" method="post"> \
-                          <div class="card-body"> \
+                          
                             <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
                             <input class="form-control" name="inboundId" value="${inboundId}" type="hidden" > \
-                            <div class="form-group"> \
-                              <label class="input-group-text">数量:</label> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>数量:</label> \
                               <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
                             </div> \
-                            <div class="form-group"> \
-                              <label class="input-group-text">预估收货日期:</label> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>预估收货日期:</label> \
                               <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[2]}"> \
                             </div> \
-                          </div> \
+                        
                         </form>`);
                         console.log(modalBody);
       modalBody.append(modalForm);
@@ -210,12 +210,12 @@
                           <div class="card-body"> \
                             <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
                             <input class="form-control" name="inboundId" value="${producingId}" type="hidden" > \
-                            <div class="form-group"> \
-                              <label class="input-group-text">数量:</label> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>数量:</label> \
                               <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
                             </div> \
-                            <div class="form-group"> \
-                              <label class="input-group-text">预估出货日期:</label> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>预估出货日期:</label> \
                               <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[3]}"> \
                             </div> \
                           </div> \
@@ -245,12 +245,12 @@
                             <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
                             <input class="form-control" name="productId" value="<%= product._id %>" type="hidden" > \
                             <input class="form-control" name="producingId" value="${producingId}" type="hidden" > \
-                            <div class="form-group"> \
-                              <label class="input-group-text">数量:</label> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>数量:</label> \
                               <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
                             </div> \
-                            <div class="form-group"> \
-                              <label class="input-group-text">预估收货日期:</label> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>预估出货日期:</label> \
                               <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[3]}"> \
                             </div> \
                           </div> \
@@ -274,12 +274,12 @@
                             <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
                             <input class="form-control" name="productId" value="<%= product._id %>" type="hidden" > \
                             <input class="form-control" name="inboundId" value="${inboundId}" type="hidden" > \
-                            <div class="form-group"> \
-                              <label class="input-group-text">数量:</label> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>数量:</label> \
                               <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
                             </div> \
-                            <div class="form-group"> \
-                              <label class="input-group-text">预估收货日期:</label> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>预估收货日期:</label> \
                               <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[2]}"> \
                             </div> \
                           </div> \

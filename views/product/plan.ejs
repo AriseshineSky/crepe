@@ -1,11 +1,7 @@
 <%- contentFor('pageSection') %>
 <div id='content'>
   <div class='panel'>
-    <div class='header'>
-      <ol class='breadcrumb'>
-        <li><a href='/'>主页</a><span class='divider'>/</span></li>
-      </ol>
-    </div>
+ 
     <div class='inner post'>
       <div id="purchase" data-purchase="<%= JSON.stringify(purchase) %>"></div>
       <div id="freight" data-freight="<%= JSON.stringify(freight) %>"></div>
@@ -16,45 +12,45 @@
         <div class="col-sm-6">
           <div class="card">
             <div class="card-body">
-              <div class="input-group mb-3">
-                <span class="input-group-text">ASIN：</span>
+              <div class="input-group input-group-static mb-4">
+                <label>ASIN：</label>
                 <span class="form-control" ><%- purchase.product.asin %></span>
               </div>
               <% if (purchase.quantity) {%>
-                <div class="input-group mb-3">
-                  <span class="input-group-text">采购数量(个)：</span>
+                <div class="input-group input-group-static mb-4">
+                  <label>采购数量(个)：</label>
                   <span class="form-control" ><%- purchase.quantity.quantity || 0 %></span>
                 </div>
               <% }%>
-              <div class="input-group mb-3">
-                <span class="input-group-text">生产周期(天):</span>
+              <div class="input-group input-group-static mb-4">
+                <label>生产周期(天):</label>
                 <span class="form-control" ><%- purchase.product.cycle %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">亚马逊库存:</span>
+              <div class="input-group input-group-static mb-4">
+                <label>亚马逊库存:</label>
                 <span class="form-control" ><%- purchase.fbaInventory %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">仓库库存:</span>
+              <div class="input-group input-group-static mb-4">
+                <label>仓库库存:</label>
                 <span class="form-control" ><%- purchase.stock %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">空运数量(个)：</span>
+              <div class="input-group input-group-static mb-4">
+                <label>空运数量(个)：</label>
                 <span class="form-control" ><%- purchase.plan.airExpress.units || 0 %></span>
               </div>
               <% if (purchase.product.airDelivery) { %>
-                <div class="input-group mb-3">
-                  <span class="input-group-text">空派数量(个)：</span>
+                <div class="input-group input-group-static mb-4">
+                  <label>空派数量(个)：</label>
                   <span class="form-control" ><%- purchase.plan.airDelivery.units || 0 %></span>
                 </div>
               <% } %>
-              <div class="input-group mb-3">
-                <span class="input-group-text">快船数量(个)：</span>
+              <div class="input-group input-group-static mb-4">
+                <label>快船数量(个)：</label>
                 <span class="form-control" ><%- purchase.plan.seaExpress.units || 0 %></span>
               </div>
               <% if (purchase.product.sea) { %>
-                <div class="input-group mb-3">
-                  <span class="input-group-text">慢船数量(个)：</span>
+                <div class="input-group input-group-static mb-4">
+                  <label>慢船数量(个)：</label>
                   <span class="form-control" ><%- purchase.plan.sea.units || 0 %></span>
                 </div>
               <% } %>
@@ -64,24 +60,24 @@
         <div class="col-sm-6">
           <div class="card">
             <div class="card-body">
-              <div class="input-group mb-3">
-                <span class="input-group-text">预估最大销量:</span>
+              <div class="input-group input-group-static mb-4">
+                <label>预估最大销量:</label>
                 <span class="form-control" ><%- purchase.product.maxAvgSales %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">设置平均销量:</span>
+              <div class="input-group input-group-static mb-4">
+                <label>设置平均销量:</label>
                 <span class="form-control" ><%- purchase.product.avgSales %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">亚马逊最近7天平均销量:</span>
+              <div class="input-group input-group-static mb-4">
+                <label>亚马逊最近7天平均销量:</label>
                 <span class="form-control" ><%- purchase.product.ps %></span>
               </div>
-              <div class="input-group mb-3">
-                <span class="input-group-text">计算使用的平均销量:</span>
+              <div class="input-group input-group-static mb-4">
+                <label>计算使用的平均销量:</label>
                 <span class="form-control" ><%- purchase.sales.minAvgSales %></span>
               </div>   
-              <div class="input-group mb-3">
-                <span class="input-group-text">维持最小库存量(天):</span>
+              <div class="input-group input-group-static mb-4">
+                <label>维持最小库存量(天):</label>
                 <span class="form-control" ><%- purchase.product.minInventory %></span>
               </div>
               <a href="/products/<%- purchase.product.asin %>/edit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Edit</a>
