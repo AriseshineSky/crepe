@@ -104,7 +104,7 @@ async function calculateInboundQueue(inbounds, sales) {
 async function calculateOutOfStockPeriod(status) {
   var period = 0;
 
-  for (var i = 0; i < status.length; i++) {
+  for (var i = 0; i < status.length-1; i++) {
     if (status[i].before === 0 && status[i].after === 0) {
       period += (status[i+1].period - status[i].period + 1);
     }
@@ -943,10 +943,12 @@ async function getNewProducingFreightPlan(freightPlan, freight, freightType, pro
   newInbounds = await convertInboundsToSortedQueue(newInbounds);
   var inboundQueue = await calculateInboundQueue(newInbounds, sales);
   var status = await recalculateInboundQueue(inboundQueue, sales);
+  logger.debug('recalculateInboundQueue', status);
   var newPlan = await calculatePlanAmounts(freightPlan, freight, product);
   newPlan.gap = await calculateOutOfStockPeriod(status);
   newPlan.minInventory = await calculateProducingMinInventory(freight, freightType, status, sales, product, producing);
   newPlan.inventoryStatus = status;
+  logger.debug('inventoryStatus', newPlan.inventoryStatus);
   return newPlan;
 }
 
