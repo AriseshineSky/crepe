@@ -104,7 +104,18 @@ async function calculateInboundQueue(inbounds, sales) {
 async function calculateOutOfStockPeriod(status) {
   var period = 0;
 
-  for (var i = 0; i < status.length-1; i++) {
+  for (var i = 0; i < status.length - 1; i++) {
+    if (status[i].before === 0 && status[i].after === 0) {
+      period += (status[i+1].period - status[i].period + 1);
+    }
+  }
+  return period;
+}
+
+async function calculateProducingFirstOutOfStockPeriod(status) {
+  var period = 0;
+
+  for (var i = 0; i < status.length; i++) {
     if (status[i].before === 0 && status[i].after === 0) {
       period += (status[i+1].period - status[i].period + 1);
     }
@@ -844,7 +855,7 @@ async function calculateProducingPlan(freightPlan, freightType, freight, inbound
     } else if (newPlan.gap < result.plan.gap) {
       result.plan = JSON.parse(JSON.stringify(newPlan));
     }
-  } else if (newPlan.minInventory > result.plan.minInventory) {
+  } else if (newPlan.gap < result.plan.gap) {
     result.plan = JSON.parse(JSON.stringify(newPlan));
   }
   logger.debug('freightPlan',freightPlan);
