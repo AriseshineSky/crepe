@@ -623,7 +623,7 @@ async function bestProducingsFreightPlanForAllDelivery(producing, product, freig
       boxes: quantity.boxes
     },
     gap: 100000,
-    minInventory: 0,
+    minInventory: -100,
     totalAmount: quantity.boxes * freight.airExpress.price * product.box.weight
   };
   for (var i = 1; i < freightType.length; i++) {
