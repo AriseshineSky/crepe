@@ -114,17 +114,17 @@ async function syncBoxInfo(freight, product) {
     product.box.weight = freight.box.weight || product.box.weight;
     product.save(function (err) {
       if (err) {
-        logger.error("saved error");
-        logger.error(freight.box);
-        logger.error(product);
-        logger.error(product.box);
         logger.error(err);
-        console.log(err);
+        return false;
+      } else {
+        return true;
       }
     });
   }
 }
-
+async function checkFreightBox(freight){
+  return (freight.box.units !== 1 && freight.box.length !== 1 && freight.box.width !== 1 && freight.box.height !== 1 && freight.box.weight !== 1)
+}
 var getFreightsAndProductingsByProduct = async function(product, days) {
   var freights = [];
   var producings = [];
@@ -133,12 +133,16 @@ var getFreightsAndProductingsByProduct = async function(product, days) {
   console.log(`allFreights: ${allFreights.length}`);
   var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
   console.log(`purchases: ${purchases.length}`);
+  var syncBoxFlag = false;
   for (var j = 0; j < purchases.length; j++) {
     console.log(`checking: ${j + 1} purchase`);
     var unShippedAmount = purchases[j].qty;
     for (var i = 0; i < allFreights.length; i++) {
       if (allFreights[i].orderId === purchases[j].orderId && allFreights[i].delivery) {
-        await syncBoxInfo(allFreights[i], product);
+        if (!syncBoxFlag && await checkFreightBox(allFreights[i])) {
+          syncBoxFlag = await syncBoxInfo(allFreights[i], product);
+        }
+        
         unShippedAmount -= allFreights[i].qty;
         if (moment(new Date()).diff(moment(allFreights[i].delivery), 'days') < days) {
           freights.push(allFreights[i]);

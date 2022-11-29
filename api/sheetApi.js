@@ -8,6 +8,7 @@ const path = require('path');
 const process = require('process');
 const {authenticate} = require('@google-cloud/local-auth');
 const {google} = require('googleapis');
+const logger = require('../common/logger');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -114,26 +115,57 @@ async function findOrCreate(name) {
   doc.useOAuth2Client(auth);
   await doc.loadInfo(); 
   console.log(doc.title);
-  var sheet = doc.sheetsByTitle[name]; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
-  if (!sheet) {
-    sheet = await doc.addSheet({ title: name });
-    // var headerValues = ["PM", "ASIN",	"country", "AVAILABLE",	"reservedFCTransfer", "inboundShipped", "Daily sales", "AVAILABLE DAYS LEFT", "TOTAL DAYS LEFT", "老铁初步检查结果", "PM复查结果及反馈原因", "DEV排查原因"];
-    // await sheet.setHeaderRow(headerValues, 1);
-    
+  
+  for (var i = 0; i < 5; i++) {
+    try {
+      var sheet = doc.sheetsByTitle[name]; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+      if (!sheet) {
+        sheet = await doc.addSheet({ title: name });
+      }
+      break;
+    } catch (e) {
+      logger.error(e);
+      await resolveAterOneSecond();
+    }
   }
   return sheet;
 }
 
 async function setHeader(sheet, row) {
   if (sheet) {
-    await sheet.setHeaderRow(row, 1);
+    for (var i = 0; i < 5; i++) {
+      try {
+        await sheet.setHeaderRow(row, 1);
+        break;
+      } catch (e) {
+        logger.error(e);
+        await resolveAterOneSecond();
+      }
+    }
   }
   return sheet;
 }
 
+function resolveAterOneSecond() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve('resolved');
+    }, 2000);
+  });
+}
+
 async function append(sheet, row) {
   if (sheet) {
-    await sheet.addRow(row);
+    for (var i = 0; i < 10; i++) {
+      try {
+        await sheet.addRow(row);
+        break;
+      } catch (e) {
+        logger.error(e);
+        await resolveAterOneSecond();
+      }
+    }
+    
   }
   return sheet;
 }

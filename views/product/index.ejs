@@ -17,6 +17,7 @@
         <th>设置平均销量</th>
         <th>预估最大销量</th>
         <th>亚马逊近7天平均销量</th>
+        <th>亚马逊fba库存</th>
         <th>箱规</th>
         <th>采购中数量</th>
         <th>仓库库存</th>
@@ -52,6 +53,7 @@
           <td><%= product.avgSales %></td>
           <td><%= product.maxAvgSales %></td>
           <td><%= product.ps %></td>
+          <td><%= product.fbaInventory %></td>
           <td>
             <%= product.box.length %>*<%= product.box.width %>*<%= product.box.height %>cm<br/>
             <%= product.box.weight %>kg<br/>
