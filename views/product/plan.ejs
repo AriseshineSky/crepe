@@ -101,6 +101,7 @@
                 <th data-editable="true" data-sortable="true">orderId:</th>
                 <th data-editable="true" data-sortable="true">数量:</th>
                 <th data-editable="true" data-sortable="true">预估收货日期:</th>
+                <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
                 <th data-editable="true" data-sortable="true">装箱信息:</th>
               </tr>
             </thead>
@@ -109,8 +110,23 @@
                 <tr>
                   <td><%= inbound.orderId %></td>
                   <td><%= inbound.quantity %></td>
-                  <td><%= inbound.deliveryDue %></td>
-                  <td><%= inbound.box %></td>
+                  <td>
+                    <% if (inbound.deliveryDue) {%>
+                      <%= `${inbound.deliveryDue.getMonth() + 1}/${inbound.deliveryDue.getDate()}/${inbound.deliveryDue.getFullYear()}` %>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (inbound.deliveryDue) {%>
+                      <% var date = new Date(inbound.deliveryDue) %>
+                      <% date.setDate(date.getDate() + 7) %>
+                      <%= `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}` %>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (inbound.box) {%>
+                      <%= inbound.box.length %>*<%= inbound.box.width %>*<%= inbound.box.height %>cm
+                    <% } %>
+                  </td>
                 </tr>
               <% }) %>
             </tbody>
