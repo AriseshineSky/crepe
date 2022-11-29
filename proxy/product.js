@@ -38,7 +38,7 @@ async function syncFreight(product, days) {
   product.purchase = await getProducingsQuantity(product.producings);
   product.save(function (err) {
     if (err) {
-      logger.error(JSON.stringify(product));    
+      logger.error(err);    
     }
   });
 }
@@ -276,18 +276,11 @@ async function addProducingFreightPlanToInbounds(freightPlan, freight, inbounds,
   }
   return newInbounds;
 }
+
 async function updateProduct(product, attrs) {
   for(var key in attrs) {
     product[key] = attrs[key];
   }
-  logger.debug(product);
-  logger.debug(attrs);
-  await product.save(function(error) {
-    if (error) {
-      logger.error(error);
-    }
-  })
-  logger.debug(product);
 }
 async function prepareStock(product) {
   var quantity = 0;
@@ -456,12 +449,8 @@ exports.getPlanWithProducings = async function(asin) {
 }
 
 async function getSales(fbaInventorySales, product) {
-  product.ps = Math.ceil(fbaInventorySales.sales);
-  // product.save(function(err) {
-  //   if (err) {
-  //     logger.error(err);
-  //   }
-  // });
+  // product.ps = Math.ceil(fbaInventorySales.sales);
+  await updateProduct(product, {ps: Math.ceil(fbaInventorySales.sales), fbaInventory: fbaInventorySales.inventory});
   var avgSales;
   if (product.avgSales && product.avgSales > 0) {
     avgSales = product.avgSales;
@@ -483,6 +472,7 @@ async function getSales(fbaInventorySales, product) {
 exports.getSales = getSales;
 exports.getPlanV2 = async function(asin) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
   var stock = await prepareStock(product);
@@ -496,7 +486,6 @@ exports.getPlanV2 = async function(asin) {
     console.log("Inventory is enough, do not need to purchase any more");
     return quantity;
   }
-
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
   var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
@@ -509,6 +498,11 @@ exports.getPlanV2 = async function(asin) {
   
   var producingsStatus = await checkProducingsCreated(orderDues, quantity, product, sales);
   console.log(producingsStatus);
+  product.save(function(error){
+    if (error) {
+      logger.error(error);
+    }
+  })
   var plan = await bestPlanV4(quantity, product, await prepareFreight(FREIGHT, 7), sales, inbounds);
   var volumeWeightCheck = true;
   for (var type in plan) {

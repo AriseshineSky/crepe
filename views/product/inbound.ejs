@@ -103,7 +103,9 @@
         <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
         <div class="input-group input-group-static mb-4">
           <label>数量:</label>
-          <span class="form-control" ><%- product.stock %></span>
+          <span data-bs-toggle="tooltip" class="form-control" data-bs-placement="top" title="Yisucang: <%= product.stock %> | Plwhs:<%= product.plwhs %>">
+            <%= product.stock + product.plwhs %>
+          </span>
         </div>
       </div>
     </div>
@@ -291,5 +293,6 @@
     $('.modal-footer .edit').click(function() {
       $('form#update_form').submit();
     });
+    $("[data-bs-toggle='tooltip']").tooltip();
   })
 </script>
