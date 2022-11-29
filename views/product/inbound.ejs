@@ -37,8 +37,8 @@
             </td>
             <td style="text-align:center;">
               <button class="btn btn-primary producing" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
-              <button class="btn btn-danger producing" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
               <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
+              <button class="btn btn-danger producing" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
             </td>
           </tr>
         <% }) %>
@@ -63,6 +63,7 @@
           <th data-editable="true" data-sortable="true">orderId:</th>
           <th data-editable="true" data-sortable="true">数量:</th>
           <th data-editable="true" data-sortable="true">预估收货日期:</th>
+          <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
           <th data-editable="true" data-sortable="true">装箱信息:</th>
           <th class="">Action</th>
         </tr>
@@ -75,6 +76,13 @@
             <td>
               <% if (inbound.deliveryDue) {%>
                 <%= `${inbound.deliveryDue.getMonth() + 1}/${inbound.deliveryDue.getDate()}/${inbound.deliveryDue.getFullYear()}` %>
+              <% } %>
+            </td>
+            <td>
+              <% if (inbound.deliveryDue) {%>
+                <% var date = new Date(inbound.deliveryDue) %>
+                <% date.setDate(date.getDate() + 7) %>
+                <%= `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}` %>
               <% } %>
             </td>
             <td>

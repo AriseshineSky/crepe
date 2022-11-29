@@ -197,7 +197,7 @@ async function recalculateInboundQueue(inboundQueue, sales) {
 
 
 async function convertDeliveryDueToPeroid(inbound) {
-  var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
+  var delivery = moment(inbound.deliveryDue);
   return(delivery.diff(moment(), "days") + 7);
 }
 
@@ -666,7 +666,7 @@ async function getOrderDue(product, totalInventory, sales, freight) {
           total += inbound.quantity;
         }
       }
-      var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
+      var delivery = moment(inbound.deliveryDue);
       if (total > sales.minAvgSales * (delivery.diff(moment(), "days") + 1)) {
         quantity += Number(inbound.quantity);
       }
@@ -723,7 +723,7 @@ async function getQuantity(sales, totalInventory, product) {
   var total = totalInventory;
   if (product.inboundShippeds) {
     for (var inboundShipped of product.inboundShippeds) {
-      var delivery = moment(inboundShipped.deliveryDue, "YYYY-MM-DD");
+      var delivery = moment(inboundShipped.deliveryDue);
       if (delivery.diff(moment(), "days") + 1 <= 90) {
         total += Number(inboundShipped.quantity);
       }
@@ -762,7 +762,7 @@ async function getDeliveryDue(totalInventory, inboundShippeds, sales) {
         total += inbound.quantity;
       }
     }
-    var delivery = moment(inbound.deliveryDue, "YYYY-MM-DD");
+    var delivery = moment(inbound.deliveryDue);
     if (total > sales.maxAvgSales * (delivery.diff(moment(), "days") + 1)) {
       total += inbound.quantity;
     }
