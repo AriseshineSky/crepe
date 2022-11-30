@@ -4,7 +4,6 @@
  
     <div class='inner post'>
       <div id="purchase" data-purchase="<%= JSON.stringify(purchase) %>"></div>
-      <div id="freight" data-freight="<%= JSON.stringify(freight) %>"></div>
       <div id="inbounds" data-inbounds="<%= JSON.stringify(purchase.inboundsCheck) %>"></div>
       <div id="chart"></div>
       <br/>
@@ -140,7 +139,6 @@
   $(document).ready(function() {
     const FREIGHT_TYPES = ['sea', 'seaExpress', 'airDelivery', 'airExpress'];
     var purchase =$('#purchase').data('purchase');
-    var freight =$('#freight').data('freight');
     var data = { 0: {
                       before: purchase.totalInventory,
                       after: purchase.totalInventory

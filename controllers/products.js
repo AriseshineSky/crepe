@@ -56,6 +56,7 @@ exports.syncFreight = async function (req, res, next) {
     return;
   } else {
     await Product.syncFreight(product, 5);
+    await Product.save(product);
     res.redirect('/products/' + product.asin + '/inbounds');
   }
 };
@@ -89,7 +90,7 @@ exports.plan = async function (req, res, next) {
   var asin = req.params.asin;
   var purchase = await Product.getPlanV2(asin);
   if (purchase.plan) {
-    res.render('product/plan', {purchase: purchase, freight: FREIGHT});
+    res.render('product/plan', {purchase: purchase});
   } else {
     res.render('product/inventory');
   }
@@ -100,7 +101,7 @@ exports.producingPlan = async function (req, res, next) {
   var producingId = req.params.producingId;
   var purchase = await Product.getProducingPlan(asin, producingId);
   if (purchase.plan) {
-    res.render('product/plan', {purchase: purchase, freight: FREIGHT});
+    res.render('product/plan', {purchase: purchase});
   } else {
     res.render('product/inventory');
   }

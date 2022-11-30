@@ -44,23 +44,5 @@ app.use(function(err, req, res, next) {
 
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
-FREIGHT = {
-  sea: {
-    period: 45,
-    price: 9
-  },
-  seaExpress: {
-    period: 35,
-    price: 15
-  },
-  airDelivery: {
-    period: 15,
-    price: 32
-  },
-  airExpress: {
-    period: 8,
-    price: 55
-  }
-};
 
 module.exports = app;
