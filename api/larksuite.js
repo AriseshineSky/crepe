@@ -4,14 +4,14 @@ const client = new lark.Client({
   appSecret: '1TNnz4zetlpYLUuwBVh1IctkeUhPvjBe'
 });
 var token = {
-  app_access_token: 't-g004bt5wB3LCXD7UMBR5B5O2PF6N7FOIEFTCBZYT',
+  app_access_token: 't-g104bube2DE5LVTAIUREHOPFP6SZOAOZKASMWR5X',
   code: 0,
   expire: 4085,
   msg: 'ok',
-  tenant_access_token: 't-g004bt5wB3LCXD7UMBR5B5O2PF6N7FOIEFTCBZYT'
+  tenant_access_token: 't-g104bube2DE5LVTAIUREHOPFP6SZOAOZKASMWR5X'
 }
 const axios = require('axios');
-async function test() {
+async function getToken() {
 
     var data = {
       "app_id": "cli_a30fa365ccb8900d",
@@ -23,22 +23,23 @@ async function test() {
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
       },
-      url: 'https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal'
+      url: 'https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal',
+      data: data
     };
 
-    // axios(options).then(
-    //   function(res){
-    //     console.log(res.data);
-    //   }
-    // ).catch(
-    //   function(error){
-    //     console.log(error)
-    //   }
-    // );
+    axios(options).then(
+      function(res){
+        console.log(res.data);
+      }
+    ).catch(
+      function(error){
+        console.log(error)
+      }
+    );
 
 
 }
-
+// getToken()
 async function files() {
 
   var data = {
@@ -71,14 +72,17 @@ async function files() {
 }
 // files();
 
-async function createfiles() {
+async function readfiles() {
 
   const options = {
     method: 'GET',
     headers: { 
       'Authorization': `Bearer ${token.app_access_token}`,
     },
-    url: 'https://open.feishu.cn/open-apis/sheets/v3/spreadsheets/shtcnPnNplKg1n5UlbWM7sJlole/sheets/Sheet1'
+    // url: 'https://open.feishu.cn/open-apis/sheets/v3/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/sheets/Sheet1'
+    url: 'https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/metainfo'
+
+
   };
 
   axios(options).then(
@@ -93,7 +97,36 @@ async function createfiles() {
 
 
 }
-createfiles();
+// readfiles();
+
+async function readfilesContent() {
+
+  const options = {
+    method: 'GET',
+    headers: { 
+      'Authorization': `Bearer ${token.app_access_token}`,
+    },
+    url: 'https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/values/58f474!A1:P9'
+    // url: 'https://open.feishu.cn/open-apis/sheets/v3/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/sheets/58f474'
+    // url: 'https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/metainfo'
+
+
+  };
+
+  axios(options).then(
+    function(res){
+      console.log(res.data.data.valueRange.values);
+    }
+  ).catch(
+    function(error){
+      console.log(error)
+    }
+  );
+
+
+}
+readfilesContent();
+
 
 var fileToken =  {
     id: '7171201256826912769',
