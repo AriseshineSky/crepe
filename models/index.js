@@ -13,5 +13,7 @@ mongoose.connect(config.db, {
 
 require('./product');
 require('./user');
+require('./freight');
 exports.Product = mongoose.model('Product');
 exports.User = mongoose.model('User');
+exports.Freight = mongoose.model('Freight');

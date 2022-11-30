@@ -1,7 +1,8 @@
-var Product = require('../proxy').Product;
-var Csv = require('../proxy').Csv;
 var sheetApi = require('./sheetApi');
 var Purchase = require('./purchases');
+var models  = require('../models');
+var FreightType = models.Freight;
+
 var moment = require('moment');
 var getStockByProduct = require('../lib/getStockByProduct');
 var logger = require('../common/logger');
@@ -310,5 +311,51 @@ var parseRow = async function(row, orderIndex, deliveryIndex, deliveryDueIndex, 
     box: box
   }
 }
-module.exports.syncFreights = syncFreights;
-module.exports.getFreightsAndProductingsByProduct = getFreightsAndProductingsByProduct;
+
+const TYPES = {
+  '空运': 'airExpress',
+  '空派': 'airDelivery',
+  '快船': 'seaExpress',
+  '慢船': 'sea'
+}
+
+async function freightTypes() {
+  return await FreightType.find({});
+}
+
+async function syncFreightTypes() {
+  var rows = await sheetApi.listFreightTypes();
+  logger.debug(rows);
+  for (var row of rows) {
+    if (row[0] in TYPES) {
+      var freightTpye = await FreightType.findOne({'type':  TYPES[row[0]]});
+      logger.debug(' freightTpye',freightTpye);
+      
+      if (freightTpye) {
+        freightTpye.period = Number(row[1]);
+        freightTpye.price = Number(row[2]);
+        freightTpye.save(function(error) {
+          if (error) {
+            logger.error(error);
+          }
+        })
+      } else {
+        freightTpye = new FreightType();
+        freightTpye.type =  TYPES[row[0]];
+        freightTpye.period = Number(row[1]);
+        freightTpye.price = Number(row[2]);
+        logger.debug(freightTpye);
+        freightTpye.save(function(error) {
+          if (error) {
+            logger.error(error);
+          }
+        })
+      }
+    }
+  }
+}
+exports.TYPES = TYPES;
+exports.syncFreightTypes = syncFreightTypes;
+exports.freightTypes = freightTypes;
+exports.syncFreights = syncFreights;
+exports.getFreightsAndProductingsByProduct = getFreightsAndProductingsByProduct;

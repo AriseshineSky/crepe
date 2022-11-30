@@ -1,0 +1,35 @@
+<%- contentFor('pageSection') %>
+
+<% const TYPES = {
+  'airExpress': '空运',
+  'airDelivery': '空派',
+  'seaExpress': '快船',
+  'sea': '慢船'
+} %>
+
+<div class="card text-center">
+  <h4>运输类型列表</h4>
+  <table
+    data-toggle="table"
+    data-pagination="true"
+    data-search="true"
+    class="table table-hover"
+  >
+    <thead>
+      <tr>
+        <th>运输类型</th>
+        <th>周期</th>
+        <th>单价</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% freightTypes.forEach(function(freightType) { %>
+        <tr>
+          <td><%= TYPES[freightType.type] %></td>
+          <td><%= freightType.period %></td>
+          <td><%= freightType.price %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
