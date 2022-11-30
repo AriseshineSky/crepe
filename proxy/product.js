@@ -252,9 +252,9 @@ async function getProducingPeriod(product, producing) {
     days = moment(producing.deliveryDue).diff(moment(), "days");
   } else {
     days = product.cycle - moment().diff(moment(producing.created), "days");
-  }
-  if (days < 0) {
-    days = 0;
+    if (days < 0) {
+      days = 0;
+    }
   }
   return days;
 }
@@ -277,6 +277,7 @@ async function updateProduct(product, attrs) {
     product[key] = attrs[key];
   }
 }
+exports.updateProduct = updateProduct;
 async function prepareStock(product) {
   var quantity = 0;
   var yStock = 0;
@@ -489,6 +490,7 @@ exports.getPlanV2 = async function(asin) {
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
   var stock = await prepareStock(product);
+  logger.debug('stock',stock);
   var sales = await getSales(fbaInventorySales, product);
   console.log(sales);
   var inboundShippeds = product.inboundShippeds;
@@ -617,6 +619,66 @@ exports.getProducingPlan = async function(asin, producingId) {
   return(purchase);
 }
 
+exports.getProducingsPlan = async function(asin) {
+  var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+  console.log(fbaInventorySales);
+  var product = await getProductByAsin(asin);
+  var stock = await prepareStock(product);
+  var sales = await getSales(fbaInventorySales, product);
+  var inboundShippeds = product.inboundShippeds;
+  var totalInventory = fbaInventorySales.inventory + stock;
+
+  var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
+  await addCurrentInventoryToInbounds(totalInventory, inbounds);
+  var plan = null;
+  plan = await getProducingsFreightPlan(product, sales, inbounds);
+  
+  logger.debug(plan);
+  if (!plan) {
+    console.log("can not find this producing");
+    return "can not find this producing";
+  }
+  var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
+  var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
+  var orderDues = await getOrderDue(product, totalInventory, sales);
+ 
+  console.log(orderDues);
+  var quantity = await getQuantity(sales, totalInventory, product, product.inboundShippeds, product.producings);
+  console.log(product.asin, 'quantity done');
+  if (quantity.boxes <= 0) {
+    console.log("Inventory is enough, do not need to purchase any more");
+    
+  }
+  var producingStatus = await checkProducingsCreated(orderDues, quantity, product, sales);
+  console.log(producingStatus);
+  var volumeWeightCheck = true;
+  for (var type in plan) {
+    if (plan[type].units > 0) {
+      if (!checkVolumeWeight(product.box, type)) {
+        volumeWeightCheck = false;
+      }
+    }
+  }
+  var freights = await Freight.freightTypes();
+  var purchase = {
+    asin: asin,
+    plan: plan,
+    freights: freights,
+    sales: sales,
+    minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
+    maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
+    totalInventory: totalInventory,
+    fbaInventory: fbaInventorySales.inventory,
+    stock: stock,
+    inboundShippeds: inboundShippeds,
+    volumeWeightCheck: volumeWeightCheck,
+    orderDues: orderDues,
+    product: product
+  }
+  console.log(purchase);
+  return(purchase);
+}
+
 async function bestProducingsFreightPlanForAllDelivery(producing, product, sales, freightType, inbounds) {
   var quantity = await convertProducingQtyIntoBox(producing, product);
   var freight = await findFreightByType('airExpress');
@@ -651,6 +713,35 @@ async function getProducingFreightPlan(producing, product, sales, inbounds) {
     freightType.push('sea');
   }
   return await bestProducingsFreightPlanForAllDelivery(producing, product, sales, freightType, inbounds);
+}
+
+async function getProducingsFreightPlan(product, sales, inbounds) {
+  var freightType = ['airExpress', 'seaExpress'];
+  if (product.airDelivery) {
+    freightType = ['airExpress', 'airDelivery', 'seaExpress'];
+  }
+  if (product.sea) {
+    freightType.push('sea');
+  }
+  var plan = {plans: []};
+  for (var producing of product.producings) {
+    if (plan.inbounds) {
+      var producingPlan = await bestProducingsFreightPlanForAllDelivery(producing, product, sales, freightType, plan.inbounds);
+    } else {
+      var producingPlan = await bestProducingsFreightPlanForAllDelivery(producing, product, sales, freightType, inbounds);
+
+    }
+    producingPlan.deliveryDue = producing.deliveryDue;
+    producingPlan.deliveryPeriod = await getProducingPeriod(product, producing);
+    producingPlan.orderId = producing.orderId;
+    plan.plans.push(producingPlan);
+    plan.gap = producingPlan.gap;
+    plan.inventoryStatus = producingPlan.inventoryStatus;
+    plan.minInventory = producingPlan.minInventory;
+    plan.totalAmount = producingPlan.totalAmount;
+    plan.inbounds = producingPlan.inbounds;
+  }
+  return plan;
 }
 
 exports.getProducingFreightPlan = getProducingFreightPlan;
@@ -717,7 +808,7 @@ async function getOrderDueWithAllQuantity(product, totalInventory, sales) {
   }
   return orderDues;
 }
-
+exports.getOrderDue = getOrderDue;
 exports.getOrderDueWithAllQuantity = getOrderDueWithAllQuantity;
 
 async function checkProducingsCreated(orderDues, quantity, product, sales) {
@@ -990,6 +1081,7 @@ async function getNewProducingFreightPlan(freightPlan, freightType, product, sal
   newPlan.gap = await calculateOutOfStockPeriod(status);
   newPlan.minInventory = await calculateProducingMinInventory(freightType, status, sales, product, producing);
   newPlan.inventoryStatus = status;
+  newPlan.inbounds = newInbounds;
   return newPlan;
 }
 

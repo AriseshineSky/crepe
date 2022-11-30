@@ -15,6 +15,7 @@ var ProductSchema = new Schema({
   plwhs: { type: Number, default: 0 },
   purchase: { type: Number, default: 0 },
   minInventory: { type: Number, default: 7 },
+  orderQuantity: { type: Number },
   orderDues: [
     {
       type: { type: String},

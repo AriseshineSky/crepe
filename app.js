@@ -6,7 +6,7 @@ var logger = require('morgan');
 var errorPageMiddleware = require('./middlewares/error_page');
 var indexRouter = require('./routes/index');
 const scheduledFunctions = require('./cron/checkInventoryScheduler');
-
+var moment = require('moment');
 var productsRouter = require('./routes/products');
 var freightsRouter = require('./routes/freights');
 var expressLayouts = require('express-ejs-layouts');
@@ -44,5 +44,5 @@ app.use(function(err, req, res, next) {
 
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
-
+app.locals.moment = moment;
 module.exports = app;

@@ -107,6 +107,16 @@ exports.producingPlan = async function (req, res, next) {
   }
 };
 
+exports.producingsPlan = async function (req, res, next) {
+  var asin = req.params.asin;
+  var purchase = await Product.getProducingsPlan(asin);
+  if (purchase.plan) {
+    res.render('product/plan', {purchase: purchase});
+  } else {
+    res.render('product/inventory');
+  }
+};
+
 exports.report = async function(req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);

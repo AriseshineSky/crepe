@@ -1,5 +1,11 @@
 <%- contentFor('pageSection') %>
 <br/>
+<% const TYPES = {
+  'airExpress': '空运',
+  'airDelivery': '空派',
+  'seaExpress': '快船',
+  'sea': '慢船'
+} %>
 <div class="card text-center">
   <h4>产品列表</h4>
   <table
@@ -12,6 +18,7 @@
       <tr>
         <th>PM</th>
         <th>ASIN</th>
+        <th>采购计划</th>
         <th>货期</th>
         <th>需要空派</th>
         <th>需要慢船</th>
@@ -36,6 +43,17 @@
             <% } %>
           </td>
           <td><%= product.asin %></td>
+          <td>
+            <% if (product.orderQuantity && product.orderQuantity > 0) {%>
+              <% orderDuesInfo = []
+                  product.orderDues.forEach(function(orderDue) {
+                  orderDuesInfo.push(`${TYPES[orderDue.type]}: ${moment(orderDue.due).format('MM-DD-YYYY')}`)
+                    }) %>
+              <span data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="<%= orderDuesInfo.join('<br/>') %>"><%= product.orderQuantity %></span>
+            <% } else { %>
+              <span>不需要采购</span>
+            <% } %>
+          </td>
           <td><%= product.cycle %></td>
           <td>
             <% if (product.airDelivery) { %>
