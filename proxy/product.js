@@ -715,6 +715,14 @@ async function getProducingFreightPlan(producing, product, sales, inbounds) {
   return await bestProducingsFreightPlanForAllDelivery(producing, product, sales, freightType, inbounds);
 }
 
+async function prepareProducings(product) {
+  var producings = JSON.parse(JSON.stringify(product.producings));
+  for (var producing of producings) {
+    producing.period = await getProducingPeriod(product, producing);
+  }
+  return await sortQueue(producings);
+}
+
 async function getProducingsFreightPlan(product, sales, inbounds) {
   var freightType = ['airExpress', 'seaExpress'];
   if (product.airDelivery) {
@@ -724,16 +732,16 @@ async function getProducingsFreightPlan(product, sales, inbounds) {
     freightType.push('sea');
   }
   var plan = {plans: []};
-  for (var producing of product.producings) {
+  var producings = await prepareProducings(product)
+  for (var i = 0; i < producings.length; i++) {
     if (plan.inbounds) {
-      var producingPlan = await bestProducingsFreightPlanForAllDelivery(producing, product, sales, freightType, plan.inbounds);
+      var producingPlan = await bestProducingsFreightPlanForAllDelivery(producings[i], product, sales, freightType, plan.inbounds);
     } else {
-      var producingPlan = await bestProducingsFreightPlanForAllDelivery(producing, product, sales, freightType, inbounds);
-
+      var producingPlan = await bestProducingsFreightPlanForAllDelivery(producings[i], product, sales, freightType, inbounds);
     }
-    producingPlan.deliveryDue = producing.deliveryDue;
-    producingPlan.deliveryPeriod = await getProducingPeriod(product, producing);
-    producingPlan.orderId = producing.orderId;
+    producingPlan.deliveryDue = producings[i].deliveryDue;
+    producingPlan.deliveryPeriod = await getProducingPeriod(product, producings[i]);
+    producingPlan.orderId = producings[i].orderId;
     plan.plans.push(producingPlan);
     plan.gap = producingPlan.gap;
     plan.inventoryStatus = producingPlan.inventoryStatus;
