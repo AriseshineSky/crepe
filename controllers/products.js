@@ -95,6 +95,15 @@ exports.plan = async function (req, res, next) {
     res.render('product/inventory');
   }
 };
+exports.getPlanWithProducings = async function (req, res, next) {
+  var asin = req.params.asin;
+  var purchase = await Product.getPlanWithProducings(asin);
+  if (purchase.plan) {
+    res.render('product/plan', {purchase: purchase});
+  } else {
+    res.render('product/inventory');
+  }
+};
 
 exports.producingPlan = async function (req, res, next) {
   var asin = req.params.asin;
@@ -131,7 +140,6 @@ exports.report = async function(req, res, next) {
     });
   }
 }
-
 
 exports.edit = async function (req, res, next) {
   var asin = req.params.asin;

@@ -14,6 +14,7 @@ router.post('/:asin/producing', products.updateProducing);
 router.post('/:asin/save', products.save);
 router.get('/:asin/edit', products.edit);
 router.get('/:asin/plan', products.plan);
+router.get('/:asin/getPlanWithProducings', products.getPlanWithProducings);
 router.get('/:asin/producing-plan', products.producingPlan);
 router.get('/:asin/producings/plan', products.producingsPlan);
 router.get('/:asin/producings/:producingId/plan', products.producingPlan);

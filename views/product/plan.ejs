@@ -9,7 +9,6 @@
 
 <div id='content'>
   <div class='panel'>
- 
     <div class='inner post'>
       <div id="purchase" data-purchase="<%= JSON.stringify(purchase) %>"></div>
       <div id="inbounds" data-inbounds="<%= JSON.stringify(purchase.inboundsCheck) %>"></div>
@@ -69,6 +68,7 @@
             </table>
           </div>
         </div>
+      <% } %>
         <div class="row">
           <div class="col-sm-6">
             <div class="card">
@@ -148,7 +148,7 @@
             </div>
           </div>
         </div>
-      <% } %>
+      
       <br/>
       <div class="card text-center">
         <div class="card-header">

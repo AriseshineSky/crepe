@@ -385,64 +385,6 @@ var getInventoryReport = async function(asin) {
   report.gap = gap;
   return report;
 }
-exports.getPlanWithProducings = async function(asin) {
-  var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
-  console.log(fbaInventorySales);
-  var product = await getProductByAsin(asin);
-  var stock = await prepareStock(product);
-  var sales = await getSales(fbaInventorySales, product);
-  var inboundShippeds = product.inboundShippeds;
-  var totalInventory = fbaInventorySales.inventory + stock;
-  var quantity = await getQuantity(sales, totalInventory, product);
-  console.log(quantity);
-  if (quantity.boxes < 0) {
-    console.log("Inventory is enough, do not need to purchase any more");
-    return quantity;
-  }
-
-  var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
-  await addCurrentInventoryToInbounds(totalInventory, inbounds);
-  console.log(inbounds)
-  
-  var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
-  var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
-  var orderDues = await getOrderDue(product, totalInventory, sales);
- 
-  console.log(orderDues);
-  var deliveryDue = await getDeliveryDue(totalInventory, inboundShippeds, sales, inboundShippeds);
-  console.log(deliveryDue);
-  
-  var producingsStatus = await checkProducingsCreated(orderDues, quantity, product, sales);
-  console.log(producingsStatus);
-  var plan = await bestPlanV4(quantity, product, sales, inbounds);
-  var volumeWeightCheck = true;
-  for (var type in plan) {
-    if (plan[type].units > 0) {
-      if (!checkVolumeWeight(product.box, type)) {
-        volumeWeightCheck = false;
-      }
-    }
-  }
-  var purchase = {
-    asin: asin,
-    plan: plan,
-    sales: sales,
-    minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
-    maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
-    totalInventory: totalInventory,
-    fbaInventory: fbaInventorySales.inventory,
-    stock: stock,
-    inboundShippeds: inboundShippeds,
-    volumeWeightCheck: volumeWeightCheck,
-    orderDues: orderDues,
-    producingsStatus: producingsStatus,
-    quantity: quantity,
-    deliveryDue: deliveryDue,
-    product: product
-  }
-
-  return(purchase);
-}
 
 async function getSales(fbaInventorySales, product) {
   // product.ps = Math.ceil(fbaInventorySales.sales);
@@ -486,7 +428,6 @@ async function updateOrderDues(product, producingStatus) {
 exports.updateOrderDues = updateOrderDues;
 exports.getPlanV2 = async function(asin) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
-
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
   var stock = await prepareStock(product);
@@ -515,7 +456,6 @@ exports.getPlanV2 = async function(asin) {
   console.log(producingsStatus);
   await save(product);
   var plan = await bestPlanV4(quantity, product, sales, inbounds);
-  // var plan = await bestPlanV4(quantity, product, await prepareFreight(FREIGHT, 7), sales, inbounds);
   var volumeWeightCheck = true;
   for (var type in plan) {
     if (plan[type].units > 0) {
@@ -539,6 +479,74 @@ exports.getPlanV2 = async function(asin) {
     producingsStatus: producingsStatus,
     quantity: quantity,
     deliveryDue: deliveryDue,
+    product: product
+  }
+  console.log(purchase);
+  return(purchase);
+}
+
+exports.getPlanWithProducings = async function(asin) {
+  var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+  console.log(fbaInventorySales);
+  var product = await getProductByAsin(asin);
+  var stock = await prepareStock(product);
+  var sales = await getSales(fbaInventorySales, product);
+  var inboundShippeds = product.inboundShippeds;
+  var totalInventory = fbaInventorySales.inventory + stock;
+
+  var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
+  await addCurrentInventoryToInbounds(totalInventory, inbounds);
+
+  var minTotalSalesPeriod =  totalInventory / sales.maxAvgSales;
+  var maxTotalSalesPeriod =  totalInventory / sales.minAvgSales;
+  var orderDues = await getOrderDue(product, totalInventory, sales);
+
+  var quantity = await getQuantity(sales, totalInventory, product);
+  console.log(quantity);
+  if (quantity.boxes < 0) {
+    console.log("Inventory is enough, do not need to purchase any more");
+    return quantity;
+  }
+
+  var deliveryDue = await getDeliveryDue(totalInventory, inboundShippeds, sales);
+  console.log(deliveryDue);
+
+  var plan = null;
+  logger.debug('inbounds', inbounds);
+  
+  var producingsPlan = await getProducingsFreightPlan(product, sales, inbounds);
+  logger.debug('producingsPlan', producingsPlan.inbounds);
+  plan = await bestPlanV4(quantity, product, sales, producingsPlan.inbounds);
+  plan.plans = producingsPlan.plans;
+  logger.debug(plan);
+  if (!plan) {
+    console.log("can not find this producing");
+    return "can not find this producing";
+  }
+  
+ 
+  var volumeWeightCheck = true;
+  for (var type in plan) {
+    if (plan[type].units > 0) {
+      if (!checkVolumeWeight(product.box, type)) {
+        volumeWeightCheck = false;
+      }
+    }
+  }
+  var freights = await Freight.freightTypes();
+  var purchase = {
+    asin: asin,
+    plan: plan,
+    freights: freights,
+    sales: sales,
+    minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
+    maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
+    totalInventory: totalInventory,
+    fbaInventory: fbaInventorySales.inventory,
+    stock: stock,
+    inboundShippeds: inboundShippeds,
+    volumeWeightCheck: volumeWeightCheck,
+    orderDues: orderDues,
     product: product
   }
   console.log(purchase);
@@ -1051,7 +1059,7 @@ async function bestPlanForAllDelivery(quantity, product, sales, inbounds, freigh
       boxes: quantity.boxes
     },
     gap: 100000,
-    minInventory: 0,
+    minInventory: -100,
     totalAmount: quantity.boxes * freight.price * product.box.weight
   };
   for (var i = 1; i < freightType.length; i++) {
