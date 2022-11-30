@@ -54,10 +54,10 @@
                           <%= moment().add(plan['deliveryPeriod'] + freight.period, 'days').format('MM-DD-YYYY') %>
                         </td>
                         <td>
-                          <%= moment().add(plan['deliveryPeriod'] + freight.period + 7, 'days').format('MM-DD-YYYY') %>
+                          <%= moment().add(plan['deliveryPeriod'] + freight.period + GAP, 'days').format('MM-DD-YYYY') %>
                         </td>
                         <td>
-                          <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['deliveryPeriod'] + freight.period}) %>
+                          <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['deliveryPeriod'] + freight.period + GAP}) %>
                           <%= status.before %>
                         </td>
                       </tr>
@@ -182,7 +182,7 @@
                   <td>
                     <% if (inbound.deliveryDue) {%>
                       <% var date = new Date(inbound.deliveryDue) %>
-                      <% date.setDate(date.getDate() + 7) %>
+                      <% date.setDate(date.getDate() + GAP) %>
                       <%= `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}` %>
                     <% } %>
                   </td>

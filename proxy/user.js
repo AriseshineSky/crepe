@@ -4,7 +4,6 @@ var User = models.User;
 var mongoose = require('mongoose');
 const getPm = require('../api/getPM');
 var moment = require('moment');
-const GAP = 4;
 
 var logger = require('../common/logger');
 

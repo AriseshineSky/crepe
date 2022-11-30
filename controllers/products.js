@@ -88,15 +88,6 @@ exports.syncpm = async function(req, res, next) {
 
 exports.plan = async function (req, res, next) {
   var asin = req.params.asin;
-  var purchase = await Product.getPlanV2(asin);
-  if (purchase.plan) {
-    res.render('product/plan', {purchase: purchase});
-  } else {
-    res.render('product/inventory');
-  }
-};
-exports.getPlanWithProducings = async function (req, res, next) {
-  var asin = req.params.asin;
   var purchase = await Product.getPlanWithProducings(asin);
   if (purchase.plan) {
     res.render('product/plan', {purchase: purchase});

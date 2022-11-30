@@ -45,4 +45,6 @@ app.use(function(err, req, res, next) {
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
 app.locals.moment = moment;
+GAP = 6;
+app.locals.GAP = GAP;
 module.exports = app;

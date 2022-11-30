@@ -3,7 +3,6 @@ var plwhsPurchase  = require('../api/plwhs/purchases');
 var Product = models.Product;
 var mongoose = require('mongoose');
 var moment = require('moment');
-const GAP = 4;
 
 async function formatPurchase(purchase) {
   return {
