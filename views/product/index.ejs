@@ -18,18 +18,18 @@
       <tr>
         <th>PM</th>
         <th>ASIN</th>
+        <th>亚马逊近7天平均销量</th>
+        <th>预估最大销量</th>
+        <th>亚马逊fba库存</th>
+        <th>仓库库存</th>
+        <th>采购中数量</th>
         <th>采购计划</th>
         <th>货期</th>
         <th>需要空派</th>
         <th>需要慢船</th>
         <th>设置平均销量</th>
-        <th>预估最大销量</th>
-        <th>亚马逊近7天平均销量</th>
-        <th>亚马逊fba库存</th>
-        <th>箱规</th>
-        <th>采购中数量</th>
-        <th>仓库库存</th>
         <th>Actions</th>
+        <th>箱规</th>
       </tr>
     </thead>
     <tbody>
@@ -43,18 +43,28 @@
             <% } %>
           </td>
           <td><%= product.asin %></td>
+          <td><%= product.ps %></td>
+          <td><%= product.maxAvgSales %></td>
+          <td><%= product.fbaInventory %></td>
+          <td data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= product.stock %> | Plwhs:<%= product.plwhs %>">
+            <%= product.stock + product.plwhs %>
+          </td>
+          <td><%= product.purchase %></td>
           <td>
             <% if (product.orderQuantity && product.orderQuantity > 0) {%>
-              <% orderDuesInfo = []
+              <%  orderDuesInfo = []
                   product.orderDues.forEach(function(orderDue) {
-                  orderDuesInfo.push(`${TYPES[orderDue.type]}: ${moment(orderDue.due).format('MM-DD-YYYY')}`)
-                    }) %>
+                    orderDuesInfo.push(`${TYPES[orderDue.type]}: ${moment(orderDue.due).format('MM-DD-YYYY')}`)
+                  })
+              %>
               <span data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="<%= orderDuesInfo.join('<br/>') %>"><%= product.orderQuantity %></span>
             <% } else { %>
               <span>不需要采购</span>
             <% } %>
           </td>
-          <td><%= product.cycle %></td>
+          <td>
+            <%= product.cycle %>
+          </td>
           <td>
             <% if (product.airDelivery) { %>
               需要
@@ -69,23 +79,20 @@
               不需要
             <% } %>
           </td>
-          <td><%= product.avgSales %></td>
-          <td><%= product.maxAvgSales %></td>
-          <td><%= product.ps %></td>
-          <td><%= product.fbaInventory %></td>
           <td>
-            <%= product.box.length %>*<%= product.box.width %>*<%= product.box.height %>cm<br/>
-            <%= product.box.weight %>kg<br/>
-            <%= product.unitsPerBox %>个/箱
-          </td>
-          <td><%= product.purchase %></td>
-          <td data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= product.stock %> | Plwhs:<%= product.plwhs %>">
-            <%= product.stock + product.plwhs %>
+            <% if (product.avgSales > 0) {%>
+              <%= product.avgSales %>
+            <% } %>
           </td>
           <td>
             <a href="/products/<%= product.asin %>/edit" target="_blank" type="button" class="btn btn-primary">Edit</a>
             <a href="/products/<%= product.asin %>/inbounds" target="_blank" type="button" class="btn btn-primary">Inbound</a>
             <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-product-id="<%=product._id%>" >Delete</button>
+          </td>
+          <td>
+            <%= product.box.length %>*<%= product.box.width %>*<%= product.box.height %>cm<br/>
+            <%= product.box.weight %>kg<br/>
+            <%= product.unitsPerBox %>个/箱
           </td>
         </tr>
       <% }) %>
@@ -136,6 +143,9 @@
     $('.modal-footer .btn-danger').click(function() {
       $('form[name="modalForm"]').submit();
     });
+    $('[data-toggle="table"]').on('post-body.bs.table', function() {
+      $("[data-bs-toggle='tooltip']").tooltip();
+    })
     $("[data-bs-toggle='tooltip']").tooltip();
   });
 </script>
