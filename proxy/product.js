@@ -57,9 +57,7 @@ async function syncPm() {
   var products = await findAll();
   for (var product of products) {
     var name = await getPm(product.asin, 'US');
-    logger.debug(name);
     var pm = await user.findOrCreate(name);
-    logger.debug(pm);
     product.pm = pm;
     await save(product);
   }
@@ -136,7 +134,6 @@ async function calculateMinInventory(freightType, status, sales, product) {
       }
     }
   }
-  logger.debug('minInventory', minInventory);
   return minInventory;
 }
 
@@ -154,7 +151,6 @@ async function calculateProducingMinInventory(freightType, status, sales, produc
       }
     }
   }
-  logger.debug('minInventory', minInventory);
   return minInventory;
 }
 
@@ -191,7 +187,8 @@ async function recalculateInboundQueue(inboundQueue, sales) {
 
 async function convertDeliveryDueToPeroid(inbound) {
   var delivery = moment(inbound.deliveryDue);
-  return(delivery.diff(moment(), "days") + 7);
+  var period = delivery.diff(moment(), "days");
+  return period;
 }
 
 async function convertInboundShippedsDeliveryDueToPeroid(inboundShippeds) {
@@ -458,7 +455,7 @@ exports.getPlanV2 = async function(asin) {
   var plan = await bestPlanV4(quantity, product, sales, inbounds);
   var volumeWeightCheck = true;
   for (var type in plan) {
-    if (plan[type].units > 0) {
+    if (plan[type].units && plan[type].units > 0) {
       if (!checkVolumeWeight(product.box, type)) {
         volumeWeightCheck = false;
       }
@@ -509,7 +506,7 @@ exports.getPlanWithProducings = async function(asin) {
   if (product.producings && product.producings.length > 0) {
     producingsPlan = await getProducingsFreightPlan(product, sales, inbounds);
   }
-
+  logger.debug('producingsPlan', producingsPlan);
   if (quantity.boxes > 0) {
     if (producingsPlan) {
       plan = await bestPlanV4(quantity, product, sales, producingsPlan.inbounds);
@@ -525,10 +522,11 @@ exports.getPlanWithProducings = async function(asin) {
       plan = producingsPlan;
     }
   }
+  console.log(plan.plans);
   var deliveryDue = await getDeliveryDue(totalInventory, inboundShippeds, sales);
   var volumeWeightCheck = true;
   for (var type in plan) {
-    if (plan[type].units > 0) {
+    if (plan[type].units && plan[type].units > 0) {
       if (!checkVolumeWeight(product.box, type)) {
         volumeWeightCheck = false;
       }
@@ -548,6 +546,7 @@ exports.getPlanWithProducings = async function(asin) {
     inboundShippeds: inboundShippeds,
     volumeWeightCheck: volumeWeightCheck,
     orderDues: orderDues,
+    quantity: quantity,
     product: product
   }
   console.log(purchase);
@@ -603,7 +602,7 @@ exports.getProducingPlan = async function(asin, producingId) {
   console.log(producingStatus);
   var volumeWeightCheck = true;
   for (var type in plan) {
-    if (plan[type].units > 0) {
+    if (plan[type].units && plan[type].units > 0) {
       if (!checkVolumeWeight(product.box, type)) {
         volumeWeightCheck = false;
       }
@@ -642,7 +641,6 @@ exports.getProducingsPlan = async function(asin) {
   var plan = null;
   plan = await getProducingsFreightPlan(product, sales, inbounds);
   
-  logger.debug(plan);
   if (!plan) {
     console.log("can not find this producing");
     return "can not find this producing";
@@ -662,7 +660,7 @@ exports.getProducingsPlan = async function(asin) {
   console.log(producingStatus);
   var volumeWeightCheck = true;
   for (var type in plan) {
-    if (plan[type].units > 0) {
+    if (plan[type].units && plan[type].units > 0) {
       if (!checkVolumeWeight(product.box, type)) {
         volumeWeightCheck = false;
       }
@@ -709,6 +707,7 @@ async function bestProducingsFreightPlanForAllDelivery(producing, product, sales
     plan: plan,
     status: "pending"
   }
+  
   await getFreightPlanByProducing(freightPlan, quantity.boxes, 0, freightType, inbounds, product, sales, result, producing);
   return await formatPlan(result.plan, product.unitsPerBox);
 }
@@ -743,12 +742,14 @@ async function getProducingsFreightPlan(product, sales, inbounds) {
   var plan = {plans: []};
   var producings = await prepareProducings(product)
   for (var i = 0; i < producings.length; i++) {
+    
     if (plan.inbounds) {
       var producingPlan = await bestProducingsFreightPlanForAllDelivery(producings[i], product, sales, freightType, plan.inbounds);
     } else {
       var producingPlan = await bestProducingsFreightPlanForAllDelivery(producings[i], product, sales, freightType, inbounds);
     }
     producingPlan.deliveryDue = producings[i].deliveryDue;
+    producingPlan.created = producings[i].created;
     producingPlan.deliveryPeriod = await getProducingPeriod(product, producings[i]);
     producingPlan.orderId = producings[i].orderId;
     plan.plans.push(producingPlan);
@@ -931,7 +932,7 @@ async function calculatePlanAmounts(freightPlan, product) {
   
   for (var type in freightPlan) {
     var freight = await findFreightByType(type);
-    freightPlan[type].amount = freightPlan[type].boxes * freight.price * product.box.weight;
+    freightPlan[type].amount = Math.ceil(freightPlan[type].boxes * freight.price * product.box.weight);
     amount += freightPlan[type].amount;
   }
   freightPlan.totalAmount = amount;
@@ -963,13 +964,13 @@ async function calculatePlan(freightPlan, freightType, inbounds, product, sales,
     if (newPlan.gap == 0) {
       result.plan = JSON.parse(JSON.stringify(newPlan));
       result.status = "done";
-    } else if (newPlan.gap === result.plan.gap && Number(result.plan.totalAmount) >= Number(newPlan.totalAmount)) {
+    } else if (newPlan.gap === result.plan.gap && Number(result.plan.totalAmount) >= Number(newPlan.totalAmount) || result.plan.minInventory < product.minInventory) {
       result.plan = JSON.parse(JSON.stringify(newPlan));
     } else if (newPlan.gap < result.plan.gap) {
       result.plan = JSON.parse(JSON.stringify(newPlan));
     }
-  } else if (newPlan.minInventory > result.plan.minInventory) {
-    result.plan = JSON.parse(JSON.stringify(newPlan));  
+  } else if (newPlan.gap < result.plan.gap) {
+    result.plan = JSON.parse(JSON.stringify(newPlan));
   }
   return result;
 }
@@ -988,6 +989,7 @@ async function calculateProducingPlan(freightPlan, freightType, inbounds, produc
   if (newPlan.minInventory >= product.minInventory) {
     if (newPlan.gap == 0) {
       result.plan = JSON.parse(JSON.stringify(newPlan));
+      
       result.status = "done";
     } else if (newPlan.gap === result.plan.gap && (Number(result.plan.totalAmount) >= Number(newPlan.totalAmount) || result.plan.minInventory < product.minInventory)) {
       result.plan = JSON.parse(JSON.stringify(newPlan));
@@ -997,8 +999,6 @@ async function calculateProducingPlan(freightPlan, freightType, inbounds, produc
   } else if (newPlan.gap < result.plan.gap) {
     result.plan = JSON.parse(JSON.stringify(newPlan));
   }
-  logger.debug('freightPlan',freightPlan);
-  logger.debug('result',result);
   return result;
 }
 
