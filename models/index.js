@@ -14,6 +14,8 @@ mongoose.connect(config.db, {
 require('./product');
 require('./user');
 require('./freight');
+require('./token');
 exports.Product = mongoose.model('Product');
 exports.User = mongoose.model('User');
 exports.Freight = mongoose.model('Freight');
+exports.Token = mongoose.model('Token');

@@ -31,8 +31,9 @@ var ProductSchema = new Schema({
   inboundShippeds: [
     {
       orderId: {type: String },
-      quantity: {type: Number, default: 0 },
-      deliveryDue: { type: Date, default: Date.now },
+      quantity: {type: Number },
+      shippedDate: { type: Date },
+      deliveryDue: { type: Date },
       box: { 
         length: {type: Number, default: 0 },
         width: {type: Number, default: 0 },

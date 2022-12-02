@@ -1,4 +1,5 @@
-var sheetApi = require('./sheetApi');
+// var sheetApi = require('./sheetApi');
+var larksuiteApi = require('../api/larksuite');
 var Purchase = require('./purchases');
 var models  = require('../models');
 var FreightType = models.Freight;
@@ -39,18 +40,20 @@ class Freight {
 
 var syncFreights = async function() {
   var freights = [];
-  var rows = await sheetApi.listFreights();
-  
+  // var rows = await sheetApi.listFreights();
+  var rows = await larksuiteApi.listFreights();
   var header = rows.shift();
+  var shippedDateIndex = header.indexOf("出货日期");
   var deliveryDueIndex = header.indexOf("预计到港时间");
   var deliveryIndex = header.indexOf("状态");
   var orderIndex = header.indexOf("系统订单");
   var qtyIndex = header.indexOf("出货数量");
   var boxIndex = header.indexOf("装箱信息");
+  var typeIndex = header.indexOf("PM要求");
 
   for(var row of rows) {
     if (row.length > 3) {
-      var freight = await parseRow(row, orderIndex, deliveryIndex, deliveryDueIndex, qtyIndex, boxIndex);
+      var freight = await parseRow(row, orderIndex, deliveryIndex, deliveryDueIndex, qtyIndex, boxIndex, shippedDateIndex, typeIndex);
       freights.push(freight);
     }
   }
@@ -126,9 +129,13 @@ async function syncBoxInfo(freight, product) {
 async function checkFreightBox(freight){
   return (freight.box.units !== 1 && freight.box.length !== 1 && freight.box.width !== 1 && freight.box.height !== 1 && freight.box.weight !== 1)
 }
+async function findFreightByType(freights, type) {
+  return freights.find((freight) => freight.type === type);
+}
 var getFreightsAndProductingsByProduct = async function(product, days) {
   var freights = [];
   var producings = [];
+  const types = await freightTypes();
   const freightApi = await Freight.getInstance();
   var allFreights = freightApi.freights;
   console.log(`allFreights: ${allFreights.length}`);
@@ -139,15 +146,21 @@ var getFreightsAndProductingsByProduct = async function(product, days) {
     console.log(`checking: ${j + 1} purchase`);
     var unShippedAmount = purchases[j].qty;
     for (var i = 0; i < allFreights.length; i++) {
-      if (allFreights[i].orderId === purchases[j].orderId && allFreights[i].delivery) {
+      if (allFreights[i].orderId === purchases[j].orderId) {
         if (!syncBoxFlag && await checkFreightBox(allFreights[i])) {
           syncBoxFlag = await syncBoxInfo(allFreights[i], product);
         }
         
         unShippedAmount -= allFreights[i].qty;
+        logger.debug('allFreights1', allFreights[i])
+        if (!allFreights[i].delivery) {
+          var freightType = await findFreightByType(types, allFreights[i].type);
+          allFreights[i].delivery = moment(allFreights[i].shippedDate).add(freightType.period, 'days')
+        }
         if (moment(new Date()).diff(moment(allFreights[i].delivery), 'days') < days) {
           freights.push(allFreights[i]);
         }
+        logger.debug('allFreights2', allFreights[i], freights)
       }
     }
     
@@ -295,7 +308,35 @@ var parseBox = async function(boxInfo) {
   }
 }
 
-var parseRow = async function(row, orderIndex, deliveryIndex, deliveryDueIndex, qtyIndex, boxIndex) {
+async function parseShippedDate(dateInfo) {
+  if (dateInfo) {    
+    return moment('1900/01/01').add(dateInfo, 'days');
+    // return moment(dateInfo, 'MM/DD/YY');
+  }
+}
+
+async function parseType(type) {
+  if (type) {
+    console.log(type);
+    if (type.includes("海运")) {
+      if (type.includes("限时达")) {
+        return 'seaExpress';
+      } else {
+        return 'sea';
+      }
+    }
+  
+    if (type.includes("空运")) {
+      if (type.includes("快递")) {
+        return 'airExpress';
+      } else {
+        return 'airDelivery';
+      }
+    }
+  }
+}
+
+var parseRow = async function(row, orderIndex, deliveryIndex, deliveryDueIndex, qtyIndex, boxIndex, shippedDateIndex, typeIndex) {
   var delivery = null;
   if (row[deliveryIndex]) {
     delivery = await parseDate(row[deliveryIndex]);
@@ -304,10 +345,15 @@ var parseRow = async function(row, orderIndex, deliveryIndex, deliveryDueIndex, 
   }
   var orderId = await parseOrderId(row[orderIndex]);
   var box = await parseBox(row[boxIndex]);
+  var shippedDate = await parseShippedDate(row[shippedDateIndex]);
+  logger.debug('shippedDate', shippedDate, row[shippedDateIndex], shippedDateIndex, row);
+  var type = await parseType(row[typeIndex]);
   return {
     orderId: orderId,
     delivery: delivery,
     qty: row[qtyIndex],
+    shippedDate: shippedDate,
+    type: type,
     box: box
   }
 }

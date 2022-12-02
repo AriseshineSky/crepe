@@ -62,6 +62,7 @@
         <tr>
           <th data-editable="true" data-sortable="true">orderId:</th>
           <th data-editable="true" data-sortable="true">数量:</th>
+          <th data-editable="true" data-sortable="true">出货日期:</th>
           <th data-editable="true" data-sortable="true">预估收货日期:</th>
           <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
           <th data-editable="true" data-sortable="true">装箱信息:</th>
@@ -73,6 +74,9 @@
           <tr>
             <td><%= inbound.orderId %></td>
             <td><%= inbound.quantity %></td>
+            <td>
+              <%= moment(inbound.shippedDate).format('YYYY-MM-DD') %>
+            </td>
             <td>
               <% if (inbound.deliveryDue) {%>
                 <%= `${inbound.deliveryDue.getMonth() + 1}/${inbound.deliveryDue.getDate()}/${inbound.deliveryDue.getFullYear()}` %>

@@ -1,137 +1,164 @@
-const lark = require('@larksuiteoapi/node-sdk');
-const client = new lark.Client({
-  appId: 'cli_a30fa365ccb8900d',
-  appSecret: '1TNnz4zetlpYLUuwBVh1IctkeUhPvjBe'
-});
-var token = {
-  app_access_token: 't-g104bube2DE5LVTAIUREHOPFP6SZOAOZKASMWR5X',
-  code: 0,
-  expire: 4085,
-  msg: 'ok',
-  tenant_access_token: 't-g104bube2DE5LVTAIUREHOPFP6SZOAOZKASMWR5X'
-}
+const Token = require('../proxy/token');
 const axios = require('axios');
-async function getToken() {
-
-    var data = {
-      "app_id": "cli_a30fa365ccb8900d",
-      "app_secret": "1TNnz4zetlpYLUuwBVh1IctkeUhPvjBe"
-    }
-  
+var moment = require('moment');
+const logger = require('../common/logger');
+const APP = {
+  app_id: 'cli_a30fa365ccb8900d',
+  app_secret: '1TNnz4zetlpYLUuwBVh1IctkeUhPvjBe'
+}
+async function getFeishuToken() {
+  return new Promise((resolve, reject) => {
     const options = {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
       },
       url: 'https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal',
-      data: data
+      data: APP
     };
 
     axios(options).then(
       function(res){
-        console.log(res.data);
+        resolve(res.data);
       }
     ).catch(
       function(error){
-        console.log(error)
+        reject(error)
       }
     );
-
-
+  })
 }
-// getToken()
-async function files() {
 
-  var data = {
-    "app_id": "cli_a30fa365ccb8900d",
-    "app_secret": "1TNnz4zetlpYLUuwBVh1IctkeUhPvjBe"
+async function checkTokenExpired(tokenObj) {
+  if (tokenObj.token) {
+    var token = JSON.parse(tokenObj.token);
+    if (token.expire > moment().diff(moment(tokenObj.create_at), "seconds")) {
+      return token;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
   }
-
-  const options = {
-    method: 'GET',
-    headers: { 
-      'Authorization': `Bearer ${token.app_access_token}`,
-    },
-    url: 'https://open.feishu.cn/open-apis/drive/v1/files',
-    data: {
-      folder_token: 'fldcnpG1qn4hJYwWJDRFBgtU8te'
-    }
-  };
-
-  axios(options).then(
-    function(res){
-      console.log(res.data.data.files);
-    }
-  ).catch(
-    function(error){
-      console.log(error)
-    }
-  );
-
-
 }
+
+async function refreshToken(tokenObj) {
+  var token = await getFeishuToken();
+  Token.update(tokenObj, token);
+  return token;
+}
+
+async function getToken() {
+  var tokenObj = await Token.get();
+  if (tokenObj) {
+    var token = await checkTokenExpired(tokenObj);
+    if (!token) {
+      token = await refreshToken(tokenObj);
+    }
+  } else {
+    var token = await getFeishuToken();
+    Token.create(token);
+  }
+  return token;
+}
+
+async function listFreights() {
+  var auth = await authorize();
+  const sheets = google.sheets({version: 'v4', auth});
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: '1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE',
+    range: 'freight!A1:P928',
+  });
+  const rows = res.data.values;
+  if (!rows || rows.length === 0) {
+    console.log('No data found.');
+    return;
+  }
+  return rows;
+}
+
+// async function files() {
+//   const token = await getToken();
+//   const options = {
+//     method: 'GET',
+//     headers: { 
+//       'Authorization': `Bearer ${token.app_access_token}`,
+//     },
+//     url: 'https://open.feishu.cn/open-apis/drive/v1/files',
+//     data: {
+//       folder_token: 'fldcnpG1qn4hJYwWJDRFBgtU8te'
+//     }
+//   };
+
+//   axios(options).then(
+//     function(res){
+//       console.log(res.data.data.files);
+//     }
+//   ).catch(
+//     function(error){
+//       console.log(error)
+//     }
+//   );
+// }
 // files();
 
-async function readfiles() {
-
+async function getSheetsInfo(token) {
   const options = {
     method: 'GET',
     headers: { 
       'Authorization': `Bearer ${token.app_access_token}`,
     },
-    // url: 'https://open.feishu.cn/open-apis/sheets/v3/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/sheets/Sheet1'
     url: 'https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/metainfo'
-
-
   };
 
-  axios(options).then(
-    function(res){
-      console.log(res.data.data);
-    }
-  ).catch(
-    function(error){
-      console.log(error)
-    }
-  );
-
-
+  return new Promise((resolve, reject) => {
+    axios(options).then(
+      function(res){
+        resolve(res.data.data);
+      }
+    ).catch(
+      function(error){
+        reject(error)
+      }
+    );
+  });
 }
-// readfiles();
+
+async function getSheetContent(sheet, token) {
+  const options = {
+    method: 'GET',
+    headers: { 
+      'Authorization': `Bearer ${token.app_access_token}`,
+    },
+    url: `https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/values/${sheet.sheetId}!A7:P${sheet.rowCount}`
+  }
+  return new Promise((resolve, reject) => {
+    axios(options).then(
+      function(res){
+        resolve(res.data);
+      }
+    ).catch(
+      function(error){
+        reject(error)
+      }
+    );
+  });
+}
 
 async function readfilesContent() {
-
-  const options = {
-    method: 'GET',
-    headers: { 
-      'Authorization': `Bearer ${token.app_access_token}`,
-    },
-    url: 'https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/values/58f474!A1:P9'
-    // url: 'https://open.feishu.cn/open-apis/sheets/v3/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/sheets/58f474'
-    // url: 'https://open.feishu.cn/open-apis/sheets/v2/spreadsheets/shtcnAZpRPK0wzV0TQQGsN86UGb/metainfo'
-
-
-  };
-
-  axios(options).then(
-    function(res){
-      console.log(res.data.data.valueRange.values);
-    }
-  ).catch(
-    function(error){
-      console.log(error)
-    }
-  );
-
-
-}
-readfilesContent();
-
-
-var fileToken =  {
-    id: '7171201256826912769',
-    token: 'nodcnDvr9BBNTxCHc1xsH7Q6mbc',
-    user_id: '7171172584065597442'
+  const token = await getToken();
+  const sheetsInfo = await getSheetsInfo(token);
+  var rows = [];
+  for(var sheet of sheetsInfo.sheets) {
+    var content = await getSheetContent(sheet, token);
+    console.log(content.data.valueRange.values);
+    rows = rows.concat(content.data.valueRange.values);
   }
+  logger.debug('row', rows[10]);
+  return rows;
+}
+
+exports.listFreights = readfilesContent;
+
 
   
