@@ -113,14 +113,14 @@ async function syncBoxInfo(freight, product) {
     product.box.width = freight.box.width || product.box.width;
     product.box.height = freight.box.height || product.box.height;
     product.box.weight = freight.box.weight || product.box.weight;
-    product.save(function (err) {
-      if (err) {
-        logger.error(err);
-        return false;
-      } else {
-        return true;
-      }
-    });
+    // product.save(function (err) {
+    //   if (err) {
+    //     logger.error(err);
+    //     return false;
+    //   } else {
+    //     return true;
+    //   }
+    // });
   }
 }
 async function checkFreightBox(freight){
@@ -167,11 +167,11 @@ var getFreightsAndProductingsByProduct = async function(product, days) {
   console.log('stock', stock.inventory);
   if (stock.inventory && stock.inventory !== 0) {
     product.stock = stock.inventory.SumNumber;
-    product.save(function(err) {
-      if (err) {
-        logger.error(err);
-      }
-    });
+    // product.save(function(err) {
+    //   if (err) {
+    //     logger.error(err);
+    //   }
+    // });
     await checkFreights(freights, stock.inventory.PendingStorageNumber);
   } else {
     await checkFreights(freights, 20000);

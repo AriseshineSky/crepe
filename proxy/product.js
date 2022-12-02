@@ -486,14 +486,6 @@ exports.getPlanWithProducings = async function(asin) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
-
-  await updateProduct(product, {orderDues: [], orderQuantity: 0});
-  await save(product);
-  logger.debug('pro', product);
-  console.log("dav");
-    
-
-
   var stock = await prepareStock(product);
   var sales = await getSales(fbaInventorySales, product);
   var inboundShippeds = product.inboundShippeds;
@@ -533,8 +525,8 @@ exports.getPlanWithProducings = async function(asin) {
       plan = producingsPlan;
     }
   }
-  // await save(product);
   console.log(plan.plans);
+  await save(product);
   var deliveryDue = await getDeliveryDue(totalInventory, inboundShippeds, sales);
   var volumeWeightCheck = true;
   for (var type in plan) {
@@ -801,6 +793,12 @@ async function getOrderDue(product, totalInventory, sales) {
       if (total > sales.minAvgSales * (delivery.diff(moment(), "days") + 1)) {
         quantity += Number(inbound.quantity);
       }
+    }
+  }
+
+  if (product.producings) {
+    for (var producing of product.producings) {
+      quantity += Number(producing.quantity);
     }
   }
   
