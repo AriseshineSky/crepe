@@ -580,9 +580,11 @@ exports.getProducingPlan = async function(asin, producingId) {
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
   var plan = null;
+  var currentProducing = null;
   for (var producing of product.producings) {
     if (producing._id.toString() === producingId) {
       logger.debug(producing);
+      currentProducing = producing;
       plan = await getProducingFreightPlan(producing, product, sales, inbounds);
     }
   }
@@ -612,16 +614,19 @@ exports.getProducingPlan = async function(asin, producingId) {
       }
     }
   }
-  
+  var freights = await Freight.freightTypes();
+  plan.deliveryPeriod = await getProducingPeriod(product, currentProducing);
   var purchase = {
     asin: asin,
     plan: plan,
     sales: sales,
+    producing: currentProducing,
     minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
     maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
     totalInventory: totalInventory,
     fbaInventory: fbaInventorySales.inventory,
     stock: stock,
+    freights: freights,
     inboundShippeds: inboundShippeds,
     volumeWeightCheck: volumeWeightCheck,
     orderDues: orderDues,

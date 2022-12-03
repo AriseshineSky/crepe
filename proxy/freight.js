@@ -259,7 +259,7 @@ var parseBox = async function(boxInfo) {
 
     var weightRe = /[\d\s\.]*(kg)/i;
     diStr = boxInfo.match(weightRe);
-    if (diStr) {
+    if (diStr && diStr[0].match(/[\d\.]+/)) {
       box.weight = Number(diStr[0].match(/[\d\.]+/)[0]);
     } else {
       weightRe = /[\d\s\.]+\/箱/gi;
