@@ -38,6 +38,19 @@ async function syncFreight(product, days) {
   product.purchase = await getProducingsQuantity(product.producings);
 }
 
+async function syncAllProductFreights(days) {
+  var products = await findAll();
+  for (var product of products) {
+    var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product, days);
+    await checkProducings(product, freightsAndProducings);
+    product.inboundShippeds = freightsAndProducings.inboundShippeds;
+    product.producings = freightsAndProducings.producings;
+    product.purchase = await getProducingsQuantity(product.producings);
+    await save(product);
+  }
+  
+}
+exports.syncAllProductFreights = syncAllProductFreights;
 exports.syncFreight = syncFreight;
 exports.getFreight = getFreight;
 

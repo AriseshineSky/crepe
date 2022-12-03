@@ -1,4 +1,4 @@
-// var sheetApi = require('./sheetApi');
+var sheetApi = require('./sheetApi');
 var larksuiteApi = require('../api/larksuite');
 var Purchase = require('./purchases');
 var models  = require('../models');
@@ -127,10 +127,16 @@ async function syncBoxInfo(freight, product) {
   }
 }
 async function checkFreightBox(freight){
-  return (freight.box.units !== 1 && freight.box.length !== 1 && freight.box.width !== 1 && freight.box.height !== 1 && freight.box.weight !== 1)
+  if (freight.box) {
+    return (freight.box.units !== 1 && freight.box.length !== 1 && freight.box.width !== 1 && freight.box.height !== 1 && freight.box.weight !== 1);
+  } else {
+    return false;
+  }
 }
 async function findFreightByType(freights, type) {
-  return freights.find((freight) => freight.type === type);
+  return freights.find(function(freight){
+    return freight.type === type}
+  );
 }
 var getFreightsAndProductingsByProduct = async function(product, days) {
   var freights = [];
@@ -150,12 +156,14 @@ var getFreightsAndProductingsByProduct = async function(product, days) {
         if (!syncBoxFlag && await checkFreightBox(allFreights[i])) {
           syncBoxFlag = await syncBoxInfo(allFreights[i], product);
         }
-        
         unShippedAmount -= allFreights[i].qty;
-        logger.debug('allFreights1', allFreights[i])
         if (!allFreights[i].delivery) {
-          var freightType = await findFreightByType(types, allFreights[i].type);
-          allFreights[i].delivery = moment(allFreights[i].shippedDate).add(freightType.period, 'days')
+          if(allFreights[i].type) {
+            var freightType = await findFreightByType(types, allFreights[i].type);
+          } else {
+            var freightType  = await findFreightByType(types, 'seaExpress');
+          }
+          allFreights[i].delivery = moment(allFreights[i].shippedDate).add(freightType.period, 'days');
         }
         if (moment(new Date()).diff(moment(allFreights[i].delivery), 'days') < days) {
           freights.push(allFreights[i]);
@@ -238,7 +246,8 @@ var parseBox = async function(boxInfo) {
     length: 1,
     width: 1,
     height: 1,
-    weight: 1
+    weight: 1,
+    units: 1
   };
   if (boxInfo) {
     
