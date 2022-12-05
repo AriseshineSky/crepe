@@ -173,7 +173,7 @@ async function calculateProducingMinInventory(freightType, status, sales, produc
   var type = freightType[0];
   var freight = await findFreightByType(type);
   for (var i = 0; i < status.length; i++) {
-    if (status[i].period > freight.period + days) {
+    if (status[i].period > freight.period + days + GAP) {
       period = Math.floor(status[i].before / sales.minAvgSales);
       if (period < minInventory) {
         minInventory = period;
@@ -791,18 +791,26 @@ async function formatPlan(plan, unitsPerBox) {
 
 async function calculatePlan(freightPlan, freightType, inbounds, product, sales, result) {
   var newPlan = await getNewFreightPlan(freightPlan, freightType, inbounds, product, sales);
-  if (newPlan.minInventory >= product.minInventory) {
-    if (newPlan.gap == 0) {
-      result.plan = JSON.parse(JSON.stringify(newPlan));
-      result.status = "done";
-    } else if (newPlan.gap === result.plan.gap && Number(result.plan.totalAmount) >= Number(newPlan.totalAmount) || result.plan.minInventory < product.minInventory) {
-      result.plan = JSON.parse(JSON.stringify(newPlan));
-    } else if (newPlan.gap < result.plan.gap) {
-      result.plan = JSON.parse(JSON.stringify(newPlan));
-    }
-  } else if (newPlan.gap < result.plan.gap) {
+
+  if (newPlan.minInventory >= product.minInventory && newPlan.gap == 0) {
     result.plan = JSON.parse(JSON.stringify(newPlan));
+    result.status = "done";
+    return;
+  } else {
+    if (result.plan.gap > 0) {
+      if (newPlan.gap < result.plan.gap) {
+        result.plan = JSON.parse(JSON.stringify(newPlan));
+      } else if (newPlan.gap === result.plan.gap) {
+        if (result.plan.minInventory < product.minInventory) {
+          if (newPlan.minInventory > result.plan.minInventory) {
+            result.plan = JSON.parse(JSON.stringify(newPlan));
+          }
+        }
+      }
+    }
   }
+
+  
   return result;
 }
 
@@ -817,19 +825,26 @@ async function checkMinInventory(minInventory, product) {
 
 async function calculateProducingPlan(freightPlan, freightType, inbounds, product, sales, result, producing) {
   var newPlan = await getNewProducingFreightPlan(freightPlan, freightType, product, sales, producing, inbounds);
-  if (newPlan.minInventory >= product.minInventory) {
-    if (newPlan.gap == 0) {
-      result.plan = JSON.parse(JSON.stringify(newPlan));
-      
-      result.status = "done";
-    } else if (newPlan.gap === result.plan.gap && (Number(result.plan.totalAmount) >= Number(newPlan.totalAmount) || result.plan.minInventory < product.minInventory)) {
-      result.plan = JSON.parse(JSON.stringify(newPlan));
-    } else if (newPlan.gap < result.plan.gap) {
-      result.plan = JSON.parse(JSON.stringify(newPlan));
-    }
-  } else if (newPlan.gap < result.plan.gap) {
+  
+  if (newPlan.minInventory >= product.minInventory && newPlan.gap == 0) {
     result.plan = JSON.parse(JSON.stringify(newPlan));
+    result.status = "done";
+    return;
+  } else {
+    if (result.plan.gap > 0) {
+      if (newPlan.gap < result.plan.gap) {
+        result.plan = JSON.parse(JSON.stringify(newPlan));
+      } else if (newPlan.gap === result.plan.gap) {
+        if (result.plan.minInventory < product.minInventory) {
+          if (newPlan.minInventory > result.plan.minInventory) {
+            result.plan = JSON.parse(JSON.stringify(newPlan));
+          }
+        }
+      }
+    }
   }
+  logger.debug('result',  result);
+  logger.debug('newPlan',  newPlan);
   return result;
 }
 
@@ -847,8 +862,6 @@ async function getFreightPlan(freightPlan, left, index, freightType, inbounds, p
   } else {
     var i = 0;
     while(i <= left) {
-      console.log('freightPlan', freightPlan);
-      console.log('i', i);
       freightPlan[freightType[index]] = { boxes: i }
       await getFreightPlan(freightPlan, left - i, index + 1, freightType, inbounds, product, sales, result);
       if ( i + 2 <= left ) {

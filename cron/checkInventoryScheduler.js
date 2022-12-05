@@ -8,13 +8,13 @@ const scheduleCronstyle = ()=>{
   schedule.scheduleJob('0 0 1 * * *', () => {
     checkProductsInventory.checkProductsInventory();
   });
-  schedule.scheduleJob('0 */6 * * * *', () => {
+  schedule.scheduleJob('0 0 */6 * * *', () => {
     Product.syncAllProductFreights(2);
   });
-  schedule.scheduleJob('0 */4 * * * *', () => {
+  schedule.scheduleJob('0 0 */4 * * *', () => {
     syncAllListings.syncListings();
   });
-  schedule.scheduleJob('0 */8 * * * *', () => {
+  schedule.scheduleJob('0 0 */8 * * *', () => {
     Product.updateAllStock();
   });
 }
