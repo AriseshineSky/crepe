@@ -7,9 +7,13 @@ var syncProducts = require('../lib/getInfoFromGoogleSheet');
 var logger = require('../common/logger');
 
 exports.updateAllStock = async function (req, res, next) {
-  await Product.updateAllStock();
+  Product.updateAllStock();
+  res.render('index', {title: "regist"});
 };
-
+exports.syncAllProductFreights = async function (req, res, next) {
+  Product.syncAllProductFreights(2);
+  res.render('index', {title: "regist"});
+};
 exports.show = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);

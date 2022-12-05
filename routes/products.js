@@ -24,6 +24,7 @@ router.post('/create', products.create);
 router.get('/sync', products.sync);
 router.get('/syncpm', products.syncpm);
 router.get('/updateAllStock', products.updateAllStock);
+router.get('/syncAllFreights', products.syncAllProductFreights);
 router.post('/delete', products.delete);
 router.get('/', products.index);
 router.get('/:asin', products.show);
