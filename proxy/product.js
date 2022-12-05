@@ -9,6 +9,7 @@ var getFbaInventoryByASIN = require('../lib/getFbaInventoryByASIN')
 var getStockByProduct = require('../lib/getStockByProduct');
 var getPlwhsByProduct = require('../lib/getPlwhsByProduct');
 var Freight = require('./freight');
+var Listing = require('./listing');
 var logger = require('../common/logger');
 async function getFreight(product) {
   Freight.getFreightsAndProductingsByProduct(product);
@@ -335,6 +336,22 @@ async function prepareFbaInventoryAndSales(asin, listings) {
   }
 }
 
+async function prepareFbaInventoryAndSalesV2(asin, listings) {
+  var inventory = 0;
+  var sales = 0;
+  if (!listings) {
+    listings = await getFbaInventoryByASIN(asin);
+  }
+  const savedlistings = await Listing.findLisingsByAsin(asin);
+  for (var listing of savedlistings) {
+    inventory = inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
+    sales = sales + listing.ps;
+  }
+  return {
+    inventory: inventory,
+    sales: sales
+  }
+}
 
 async function removeDeliveredInbounds(product) {
   product.inboundShippeds.forEach(async function(inbound) {
@@ -496,7 +513,8 @@ exports.getPlanV2 = async function(asin) {
 }
 
 exports.getPlanWithProducings = async function(asin) {
-  var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+  // var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+  var fbaInventorySales = await prepareFbaInventoryAndSalesV2(asin);
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
   var stock = await prepareStock(product);

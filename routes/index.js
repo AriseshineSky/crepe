@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var checkProductsInventory = require('../lib/checkProductsInventory');
+var syncAllListings = require('../lib/syncAllListings');
 
 yisucangApis = {
   inventory: '/OrderAPI/GetInventory',
@@ -28,6 +29,11 @@ router.get('/', function(req, res, next) {
 
 router.get('/check', async function(req, res, next) {
   await checkProductsInventory.checkProductsInventory();
+  res.render('index', {title: "regist"});
+})
+
+router.get('/syncListings', async function(req, res, next) {
+  await syncAllListings.syncListings();
   res.render('index', {title: "regist"});
 })
 
