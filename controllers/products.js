@@ -5,6 +5,11 @@ var mongoose = require('mongoose');
 var moment = require('moment');
 var syncProducts = require('../lib/getInfoFromGoogleSheet');
 var logger = require('../common/logger');
+
+exports.updateAllStock = async function (req, res, next) {
+  await Product.updateAllStock();
+};
+
 exports.show = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);
@@ -89,7 +94,6 @@ exports.syncpm = async function(req, res, next) {
 
 exports.plan = async function (req, res, next) {
   var asin = req.params.asin;
-  // var purchase = await Product.getPlanWithProducings(asin);
   var purchase = await Product.getPlanV3(asin);
   if (purchase.plan) {
     res.render('product/plan', {purchase: purchase});

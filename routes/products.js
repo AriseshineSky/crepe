@@ -23,6 +23,7 @@ router.get('/:asin/report', products.generateReport);
 router.post('/create', products.create);
 router.get('/sync', products.sync);
 router.get('/syncpm', products.syncpm);
+router.get('/updateAllStock', products.updateAllStock);
 router.post('/delete', products.delete);
 router.get('/', products.index);
 router.get('/:asin', products.show);

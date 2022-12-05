@@ -11,6 +11,21 @@ var getPlwhsByProduct = require('../lib/getPlwhsByProduct');
 var Freight = require('./freight');
 var Listing = require('./listing');
 var logger = require('../common/logger');
+
+async function updateStock(product) {
+  await prepareStock(product);
+  await save(product);
+}
+
+async function updateAllStock() {
+  const products = await findAll();
+  for (var product of products) {
+    await prepareStock(product);
+    await save(product);
+  }
+}
+
+exports.updateAllStock = updateAllStock;
 async function getFreight(product) {
   Freight.getFreightsAndProductingsByProduct(product);
 }
@@ -417,7 +432,7 @@ var getInventoryReport = async function(asin) {
   var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
   console.log(fbaInventorySales);
   var fbaSalesPeriod = await getFbaSalesPeriod(fbaInventorySales);
-  var stock = await prepareStock(product);
+  var stock = product.stock + product.plwhs;
   var stockSalesPeriod = await getStockSalesPeriod(fbaInventorySales, stock);
   await syncFreight(product);
 
@@ -475,21 +490,18 @@ exports.getPlanV3 = async function(asin, producingId) {
   var fbaInventorySales = await prepareFbaInventoryAndSalesV2(asin);
   console.log(fbaInventorySales);
   var product = await getProductByAsin(asin);
-  var stock = await prepareStock(product);
+  var stock = product.stock + product.plwhs
   var sales = await getSales(fbaInventorySales, product);
   var inboundShippeds = product.inboundShippeds;
   var totalInventory = fbaInventorySales.inventory + stock;
   var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
   await addCurrentInventoryToInbounds(totalInventory, inbounds);
-
   var minTotalSalesPeriod = totalInventory / sales.maxAvgSales;
   var maxTotalSalesPeriod = totalInventory / sales.minAvgSales;
   var orderDues = await getOrderDue(product, totalInventory, sales);
   logger.debug('orderDues', orderDues);
   var quantity = await getQuantity(sales, totalInventory, product);
-  
   var plan = {plans: []};
-
   if (producingId) {
     for (var producing of product.producings) {
       if (producing._id.toString() === producingId) {
