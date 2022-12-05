@@ -2,6 +2,7 @@ var Product = require('../proxy').Product;
 var Csv = require('../proxy').Csv;
 var Freight = require('../proxy').Freight;
 var mongoose = require('mongoose');
+var moment = require('moment');
 var syncProducts = require('../lib/getInfoFromGoogleSheet');
 var logger = require('../common/logger');
 exports.show = async function (req, res, next) {
@@ -88,7 +89,8 @@ exports.syncpm = async function(req, res, next) {
 
 exports.plan = async function (req, res, next) {
   var asin = req.params.asin;
-  var purchase = await Product.getPlanWithProducings(asin);
+  // var purchase = await Product.getPlanWithProducings(asin);
+  var purchase = await Product.getPlanV3(asin);
   if (purchase.plan) {
     res.render('product/plan', {purchase: purchase});
   } else {
@@ -99,7 +101,8 @@ exports.plan = async function (req, res, next) {
 exports.producingPlan = async function (req, res, next) {
   var asin = req.params.asin;
   var producingId = req.params.producingId;
-  var purchase = await Product.getProducingPlan(asin, producingId);
+  // var purchase = await Product.getProducingPlan(asin, producingId);
+  var purchase = await Product.getPlanV3(asin, producingId);
   if (purchase.plan) {
     res.render('product/plan', {purchase: purchase});
   } else {
@@ -347,7 +350,7 @@ exports.updateProducing = async function(req, res, next) {
   var quantity = req.body.quantity;
   var deliveryDue = req.body.deliveryDue;
   var producingId = req.body.producingId;
-  await Product.updateProducing(producingId, deliveryDue, quantity);
+  await Product.updateProducing(producingId, moment(deliveryDue).endOf('day'), quantity);
   res.redirect('/products/' + asin + '/inbounds');
 }
 exports.updateInbound = async function(req, res, next) {
