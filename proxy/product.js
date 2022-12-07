@@ -74,6 +74,8 @@ async function save(product) {
   product.save(function(error) {
     if (error) {
       logger.error(error);
+    } else {
+      logger.info(product.asin, "saved");
     }
   })
 }
