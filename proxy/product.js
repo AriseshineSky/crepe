@@ -351,17 +351,21 @@ async function prepareFbaInventoryAndSales(asin, listings) {
   }
 }
 
-async function prepareFbaInventoryAndSalesV2(asin) {
+async function prepareFbaInventoryAndSalesV2(asin, listings) {
   var inventory = 0;
   var sales = 0;
-  const savedlistings = await Listing.findLisingsByAsin(asin);
-  for (var listing of savedlistings) {
-    inventory = inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
-    sales = sales + listing.ps;
+  if (!listings) {
+    listings = await Listing.findLisingsByAsin(asin);
+  }
+  for (var listing of listings) {
+    if (listing.asin === asin) {
+      inventory = inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
+      sales = sales + listing.ps;
+    }
   }
   return {
     inventory: inventory,
-    sales: sales
+    sales: Math.ceil(sales)
   }
 }
 
