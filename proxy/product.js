@@ -373,16 +373,14 @@ async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
   if (!listings) {
     listings = await Listing.findLisingsByAsin(asin);
   }
-  
   for (var listing of listings) {
-    if (listing.country === country) {
+    if (listing.asin === asin && listing.country === country) {
       availableQuantity = availableQuantity + listing.availableQuantity;
       reservedFCTransfer = reservedFCTransfer + listing.reservedFCTransfer;
       inboundShipped = inboundShipped + listing.inboundShipped;
       sales = sales + listing.ps;
     }
   }
-
   return ({
     availableQuantity: availableQuantity,
     reservedFCTransfer: reservedFCTransfer,
