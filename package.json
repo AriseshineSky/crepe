@@ -32,7 +32,8 @@
     "morgan": "~1.9.1",
     "node-csv": "^0.1.2",
     "node-schedule": "^2.1.0",
-    "shimo-sdk-cabinet": "^4.5.0"
+    "shimo-sdk-cabinet": "^4.5.0",
+    "sinon": "^15.0.0"
   },
   "devDependencies": {
     "assert": "^2.0.0",

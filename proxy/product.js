@@ -41,8 +41,10 @@ async function checkProducings(product, freightsAndProducings) {
 
 async function getProducingsQuantity(producings) {
   var quantity = 0;
-  for(var i = 0; i < producings.length; i++) {
-    quantity += producings[i].quantity
+  if (producings) {
+    for(var i = 0; i < producings.length; i++) {
+      quantity += producings[i].quantity
+    }
   }
   return quantity;
 }
@@ -666,7 +668,7 @@ async function findFreightByType(type) {
   var freights = await Freight.freightTypes();
   return freights.find((freight) => freight.type === type);
 }
-
+exports.findFreightByType = findFreightByType;
 async function getOrderDue(product, totalInventory, sales) {
   
   var freightType = ['airExpress', 'seaExpress', 'sea'];

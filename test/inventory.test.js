@@ -3,6 +3,7 @@ var checkProductsInventory = require('../lib/checkProductsInventory');
 var Product = require('../proxy').Product;
 const { ObjectId } = require('mongodb');
 var moment = require('moment');
+var sinon = require('sinon');
 
 var listings = [
 { "_id" : ObjectId("638df9cc0909726a073978c2"), "asin" : "B0B4PW6ZKY", "country" : "US", "fnsku" : "X003CTVYVV", "account" : "V54", "__v" : 0, "availableQuantity" : 1073, "inboundShipped" : 0, "ps" : 54.1, "reservedFCProcessing" : 317, "reservedFCTransfer" : 2230 },
@@ -63,11 +64,12 @@ const multiInventorys = [{
   country: "CA",
 }];
 
-const fbaInventorySales = [
-  "B0B69WKWFG"
-]
+const fbaInventorySalesAsin = "B0B69WKWFG";
 
 describe('checkProductsInventory', function() {
+  var product = {
+    maxAvgSales: 35
+  }
   describe('checkProductInventoryShortage', function() {
     it('should return true when product inventory is less than 10 days sals', async function () { 
       for (var inventoryShortage of inventoryShortages) {
@@ -103,25 +105,19 @@ describe('checkProductsInventory', function() {
 
   describe('checkProductInventorySales', function() {
     it('should return product fba inventory and sales', async function () {
-      for (var asin of fbaInventorySales) {
-        var data = await Product.prepareFbaInventoryAndSalesV2(asin, listings);
-        assert.equal(data.inventory, 1000);
-        assert.equal(data.sales, 28);
-        var product = {
-          asin: asin,
-          maxAvgSales: 35
-        }
-        var sales = await Product.getSales(data, product);
-        assert.equal(sales.minAvgSales, 33);
-        product.avgSales = 40;
-        var sales = await Product.getSales(data, product);
-        assert.equal(sales.minAvgSales, 40);
-      }
-    });
-  });
+      
+  
+      var data = await Product.prepareFbaInventoryAndSalesV2(fbaInventorySalesAsin, listings);
+      assert.equal(data.inventory, 1000);
+      assert.equal(data.sales, 28);
 
-  describe('convertInboundShippedsDeliveryDueToPeroid', function() {
-    it('should return inbounds', async function () {
+      product.asin = fbaInventorySalesAsin;
+      var sales = await Product.getSales(data, product);
+      assert.equal(sales.minAvgSales, 33);
+      product.avgSales = 40;
+      var sales = await Product.getSales(data, product);
+      assert.equal(sales.minAvgSales, 40);
+      
       const inboundShippeds = [ 
         { "orderId" : "OR4509", "quantity" : 480, "deliveryDue" : new Date("2022-12-06T06:00:00Z"), "box" : { "length" : 44, "width" : 29, "height" : 24, "weight" : 12.38, "units" : 120 }, "_id" : ObjectId("638d99c87bc44657562b33e6") }, 
         { "orderId" : "OR4509", "quantity" : 660, "deliveryDue" : new Date("2022-12-06T06:00:00Z"), "box" : { "length" : 44, "width" : 29, "height" : 24, "weight" : 12.38, "units" : 120 }, "_id" : ObjectId("638d99c87bc44657562b33e7") }, 
@@ -139,6 +135,47 @@ describe('checkProductsInventory', function() {
         assert.equal(inbounds[i].period, check);
         assert.equal(inbounds[i].quantity, inboundShippeds[i].quantity);
       }
+
+      var totalInventory = 1360;
+      await Product.addCurrentInventoryToInbounds(totalInventory, inbounds);
+      assert.equal(inbounds[inbounds.length - 1].quantity, 1360);
+      assert.equal(inbounds[inbounds.length - 1].period, 0);
+
+      console.log(totalInventory)
+      console.log(sales)
+
+      product.minInventory = 7;
+      product.cycle = 17;
+
+      var findFreightByType = sinon.stub(Product, 'findFreightByType').callsFake(function(type) {
+        var freights = [{
+          type: 'airExpress',
+          period: 8
+        },{
+          type: 'airDelivery',
+          period: 15
+        },{
+          type: 'seaExpress',
+          period: 35
+        },{
+          type: 'sea',
+          period: 45
+        }]
+        return freights.find((freight) => freight.type === type);
+      });
+
+      findFreightByType.onCall('airExpress').returns({
+        type: 'airExpress',
+        period: 8
+      });
+      
+
+      var orderDues = await Product.getOrderDue(product, totalInventory, sales);
+      console.log(orderDues)
+ 
+
+      // var quantity = await Product.getQuantity(sales, totalInventory, product);
+      // console.log(quantity)
     });
   });
 })
