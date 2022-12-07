@@ -141,9 +141,6 @@ describe('checkProductsInventory', function() {
       assert.equal(inbounds[inbounds.length - 1].quantity, 1360);
       assert.equal(inbounds[inbounds.length - 1].period, 0);
 
-      console.log(totalInventory)
-      console.log(sales)
-
       product.minInventory = 7;
       product.cycle = 17;
       product.airDelivery = true;
