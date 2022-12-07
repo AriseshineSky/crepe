@@ -2,6 +2,7 @@ var assert = require('assert');
 var checkProductsInventory = require('../lib/checkProductsInventory');
 var Product = require('../proxy').Product;
 const { ObjectId } = require('mongodb');
+var moment = require('moment');
 
 var listings = [
 { "_id" : ObjectId("638df9cc0909726a073978c2"), "asin" : "B0B4PW6ZKY", "country" : "US", "fnsku" : "X003CTVYVV", "account" : "V54", "__v" : 0, "availableQuantity" : 1073, "inboundShipped" : 0, "ps" : 54.1, "reservedFCProcessing" : 317, "reservedFCTransfer" : 2230 },
@@ -106,6 +107,37 @@ describe('checkProductsInventory', function() {
         var data = await Product.prepareFbaInventoryAndSalesV2(asin, listings);
         assert.equal(data.inventory, 1000);
         assert.equal(data.sales, 28);
+        var product = {
+          asin: asin,
+          maxAvgSales: 35
+        }
+        var sales = await Product.getSales(data, product);
+        assert.equal(sales.minAvgSales, 33);
+        product.avgSales = 40;
+        var sales = await Product.getSales(data, product);
+        assert.equal(sales.minAvgSales, 40);
+      }
+    });
+  });
+
+  describe('convertInboundShippedsDeliveryDueToPeroid', function() {
+    it('should return inbounds', async function () {
+      const inboundShippeds = [ 
+        { "orderId" : "OR4509", "quantity" : 480, "deliveryDue" : new Date("2022-12-06T06:00:00Z"), "box" : { "length" : 44, "width" : 29, "height" : 24, "weight" : 12.38, "units" : 120 }, "_id" : ObjectId("638d99c87bc44657562b33e6") }, 
+        { "orderId" : "OR4509", "quantity" : 660, "deliveryDue" : new Date("2022-12-06T06:00:00Z"), "box" : { "length" : 44, "width" : 29, "height" : 24, "weight" : 12.38, "units" : 120 }, "_id" : ObjectId("638d99c87bc44657562b33e7") }, 
+        { "orderId" : "OR4449", "quantity" : 1800, "deliveryDue" : new Date("2022-12-11T06:00:00Z"), "box" : { "length" : 27.3, "width" : 23, "height" : 30.8, "weight" : 11, "units" : 120 }, "_id" : ObjectId("638d99c87bc44657562b33e8") }, 
+        { "orderId" : "OR4509", "quantity" : 2400, "deliveryDue" : new Date("2022-12-22T06:00:00Z"), "box" : { "length" : 44, "width" : 29, "height" : 24, "weight" : 12.38, "units" : 120 }, "_id" : ObjectId("638d99c87bc44657562b33e9") }, 
+        { "orderId" : "OR4449", "quantity" : 3228, "deliveryDue" : new Date("2023-01-04T06:00:00Z"), "box" : { "length" : 27.3, "width" : 23, "height" : 30.8, "weight" : 12.18, "units" : 120 }, "_id" : ObjectId("638d99c87bc44657562b33ea") } ];
+
+      var period = await Product.convertDeliveryDueToPeroid(inboundShippeds[0]);
+      var check = moment(new Date("2022-12-06T06:00:00Z")).diff(moment(), "days");
+      assert.equal(period, check);
+
+      var inbounds = await Product.convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
+      for(var i = 0; i < inbounds.length; i++) {
+        var check = moment(inboundShippeds[i].deliveryDue).diff(moment(), "days") + 6;
+        assert.equal(inbounds[i].period, check);
+        assert.equal(inbounds[i].quantity, inboundShippeds[i].quantity);
       }
     });
   });

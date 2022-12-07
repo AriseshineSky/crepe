@@ -222,6 +222,7 @@ async function convertDeliveryDueToPeroid(inbound) {
   return period;
 }
 
+exports.convertDeliveryDueToPeroid = convertDeliveryDueToPeroid;
 async function convertInboundShippedsDeliveryDueToPeroid(inboundShippeds) {
   var inbounds = [];
   if (inboundShippeds) {
