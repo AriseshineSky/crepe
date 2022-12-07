@@ -35,7 +35,7 @@ var listings = [
 { "_id" : ObjectId("638d6518877bc73648e1a710"), "asin" : "B0B69WKWFG", "country" : "US", "fnsku" : "B0B69WKWFG", "account" : "V41", "__v" : 0, "availableQuantity" : 0, "inboundShipped" : 0, "ps" : 0, "reservedFCProcessing" : 0, "reservedFCTransfer" : 0 },
 { "_id" : ObjectId("638d6518877bc73648e1a71a"), "asin" : "B0B69WKWFG", "country" : "CA", "fnsku" : "B0B69WKWFG", "account" : "V41", "__v" : 0, "availableQuantity" : 0, "inboundShipped" : 0, "ps" : 0, "reservedFCProcessing" : 0, "reservedFCTransfer" : 0 }
 ]
-
+const GAP = 6;
 const inventoryShortages = [{
   asin: "B0B98XCZFX",
   country: "US",
@@ -146,21 +146,22 @@ describe('checkProductsInventory', function() {
 
       product.minInventory = 7;
       product.cycle = 17;
+      product.airDelivery = true;
 
+      const freights = [{
+        type: 'airExpress',
+        period: 8
+      },{
+        type: 'airDelivery',
+        period: 15
+      },{
+        type: 'seaExpress',
+        period: 35
+      },{
+        type: 'sea',
+        period: 45
+      }]
       var findFreightByType = sinon.stub(Product, 'findFreightByType').callsFake(function(type) {
-        var freights = [{
-          type: 'airExpress',
-          period: 8
-        },{
-          type: 'airDelivery',
-          period: 15
-        },{
-          type: 'seaExpress',
-          period: 35
-        },{
-          type: 'sea',
-          period: 45
-        }]
         return freights.find((freight) => freight.type === type);
       });
 
@@ -168,14 +169,31 @@ describe('checkProductsInventory', function() {
         type: 'airExpress',
         period: 8
       });
-      
 
+      product.inboundShippeds = [ { "orderId" : "OR4141", "quantity" : 2016, "deliveryDue" : new Date("2022-12-07T06:00:00Z"), "box" : { "length" : 55, "width" : 34, "height" : 40, "weight" : 18.5, "units" : 36 }, "_id" : ObjectId("63902c03e1a8d1ae0d67f5c7") }, 
+                                  { "orderId" : "OR4141", "quantity" : 2016, "deliveryDue" : new Date("2022-12-07T06:00:00Z"), "box" : { "length" : 55, "width" : 34, "height" : 40, "weight" : 18.5, "units" : 36 }, "_id" : ObjectId("63902c03e1a8d1ae0d67f5c8") }, 
+                                  
+                                  { "orderId" : "OR4141", "quantity" : 2988, "deliveryDue" : new Date("2022-12-28T06:00:00Z"), "box" : { "length" : 55, "width" : 34, "height" : 40, "weight" : 18.5, "units" : 36 }, "_id" : ObjectId("63902c03e1a8d1ae0d67f5cb") } ];
+      product.producings = [ { "orderId" : "OR4766", "quantity" : 2016, "created" : new Date("2022-12-07T01:58:07Z"), "_id" : ObjectId("63902c03e1a8d1ae0d67f5cc") }, 
+                              { "orderId" : "OR4665", "quantity" : 5004, "created" : new Date("2022-11-29T17:34:45Z"), "_id" : ObjectId("63902c03e1a8d1ae0d67f5cd") }, 
+                              { "orderId" : "OR4138", "quantity" : 1004, "created" : new Date("2022-09-15T16:01:27Z"), "_id" : ObjectId("63902c03e1a8d1ae0d67f5d2") } ];
+      product.avgSales = 0;
+      product.ps = 260;
+      product.sea = true;
+      product.stock = 36;
+      product.plwhs = 0;
       var orderDues = await Product.getOrderDue(product, totalInventory, sales);
-      console.log(orderDues)
- 
-
-      // var quantity = await Product.getQuantity(sales, totalInventory, product);
-      // console.log(quantity)
+      var quantity = totalInventory;
+      for (var inbound of product.inboundShippeds) {
+        quantity += inbound.quantity;
+      }
+      for (var producing of product.producings) {
+        quantity += producing.quantity;
+      }
+      for(var freight of freights) {
+        var check = moment().add(quantity / sales.minAvgSales - product.cycle - freight.period - GAP - product.minInventory, 'days');
+        assert.equal(orderDues[freight.type].format('YYYY-MM-DD') , check.format('YYYY-MM-DD'));
+      }
     });
   });
 })
