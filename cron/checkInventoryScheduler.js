@@ -12,7 +12,7 @@ const scheduleCronstyle = ()=>{
   });
   schedule.scheduleJob('0 0 */6 * * *', () => {
     logger.info('start to update product freights');
-    Product.syncAllProductFreights(2);
+    Product.syncAllProductFreights(10);
   });
   schedule.scheduleJob('0 0 */4 * * *', () => {
     logger.info('start to update lisings');

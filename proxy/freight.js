@@ -1,6 +1,7 @@
 var sheetApi = require('./sheetApi');
 var larksuiteApi = require('../api/larksuite');
 var Purchase = require('./purchases');
+var Product = require('./product');
 var models  = require('../models');
 var FreightType = models.Freight;
 
@@ -40,7 +41,6 @@ class Freight {
 
 var syncFreights = async function() {
   var freights = [];
-  // var rows = await sheetApi.listFreights();
   var rows = await larksuiteApi.listFreights();
   var header = rows.shift();
   var shippedDateIndex = header.indexOf("出货日期");
@@ -52,7 +52,7 @@ var syncFreights = async function() {
   var typeIndex = header.indexOf("PM要求");
 
   for(var row of rows) {
-    if (row.length > 3) {
+    if (row[0] && row[1]) {
       var freight = await parseRow(row, orderIndex, deliveryIndex, deliveryDueIndex, qtyIndex, boxIndex, shippedDateIndex, typeIndex);
       freights.push(freight);
     }
@@ -68,7 +68,9 @@ async function formatFreightsAndProductings(freightsAndProducings) {
       quantity: freight.qty,
       orderId: freight.orderId,
       deliveryDue: freight.delivery,
-      box: freight.box
+      box: freight.box,
+      shippedDate: freight.shippedDate,
+      fba: freight.fba
     });
   }
   for (var producing of freightsAndProducings.producings) {
@@ -109,6 +111,75 @@ var checkFreights = async function(freights, pendingStorageNumber) {
   }
 }
 
+async function remvoeDuplicateYisucangInbounds(inbounds) {
+  return inbounds.filter((elem, index, self) => {
+    var count = 0;
+    for (var inbound of inbounds) {
+      if (inbound.number === elem.number) {
+        count++;
+      }
+    }
+    return count === 1;
+  })
+}
+
+exports.remvoeDuplicateYisucangInbounds = remvoeDuplicateYisucangInbounds;
+
+async function removeDeliveredFreights(freights, days, product) {
+  var freights = freights.filter((freight) => {
+    return moment(new Date()).diff(moment(freight.delivery), 'days') < days;
+  })
+
+  const inboundShipped = await Product.getInboundShippedCount(product.asin);
+  while ((await sumFreights(freights)) > inboundShipped && freights.length > 0) {
+    if (await removeFreight(freights, true)) {
+      break;
+    }
+  }
+  return freights;
+}
+
+async function findYisucangInbounds(inbounds, freight) {
+  return inbounds.filter((elem) => {
+    return elem.orderId === freight.orderId;
+  })
+}
+
+async function sortFreightsByDelivery(freights) {
+  return freights.sort(compare('delivery'))
+}
+var countBoxes = async function(objects) {
+  var sum = 0;
+  for (var obj of objects) {
+    sum += Number(obj.boxCount);
+  }
+  return sum;
+}
+
+async function removeFreight(freights, fba) {
+  var only = true;
+  for (var i = 0; i < freights.length; i++) {
+    if (freights[i].fba === fba && (moment(freights[i].delivery).diff(moment(new Date()), 'days') < 5)) {
+      only = false;
+      freights.splice(i, 1);
+      break;
+    }
+  }
+  return only;
+}
+async function checkFreightsV2(freights, inbounds) {
+  freights = await sortFreightsByDelivery(freights);
+  var originalBoxCount = await countBoxes(freights);
+  var leftBoxes = originalBoxCount - await countBoxes(inbounds);
+  while ((await countBoxes(freights)) > leftBoxes && freights.length > 0) {
+    console.log(freights);
+    if (await removeFreight(freights, false)) {
+      break;
+    }
+  }
+  return freights;
+}
+
 async function syncBoxInfo(freight, product) {
   if (!product.unitsPerBox || product.unitsPerBox === 1) {
     product.unitsPerBox = freight.box.units || product.unitsPerBox;
@@ -116,14 +187,6 @@ async function syncBoxInfo(freight, product) {
     product.box.width = freight.box.width || product.box.width;
     product.box.height = freight.box.height || product.box.height;
     product.box.weight = freight.box.weight || product.box.weight;
-    // product.save(function (err) {
-    //   if (err) {
-    //     logger.error(err);
-    //     return false;
-    //   } else {
-    //     return true;
-    //   }
-    // });
   }
 }
 async function checkFreightBox(freight){
@@ -138,6 +201,19 @@ async function findFreightByType(freights, type) {
     return freight.type === type}
   );
 }
+
+async function matchFreightAndProducing(freight, producing) {
+  return (freight.orderId === producing.orderId);
+}
+
+async function addDefaultDeliveryToFreight(freight, types) {
+  if(freight.type) {
+    var freightType = await findFreightByType(types, freight.type);
+  } else {
+    var freightType  = await findFreightByType(types, 'seaExpress');
+  }
+  return moment(freight.shippedDate).add(freightType.period, 'days');
+}
 var getFreightsAndProductingsByProduct = async function(product, days) {
   var freights = [];
   var producings = [];
@@ -145,34 +221,31 @@ var getFreightsAndProductingsByProduct = async function(product, days) {
   const freightApi = await Freight.getInstance();
   var allFreights = freightApi.freights;
   console.log(`allFreights: ${allFreights.length}`);
+  const yisucangInbounds = await getYisucangInbounds();
   var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
   console.log(`purchases: ${purchases.length}`);
   var syncBoxFlag = false;
   for (var j = 0; j < purchases.length; j++) {
     console.log(`checking: ${j + 1} purchase`);
     var unShippedAmount = purchases[j].qty;
+    var producingFreights = [];
     for (var i = 0; i < allFreights.length; i++) {
-      if (allFreights[i].orderId === purchases[j].orderId) {
+      if (await matchFreightAndProducing(allFreights[i], purchases[j])) {
+        producingFreights.push(allFreights[i]);
         if (!syncBoxFlag && await checkFreightBox(allFreights[i])) {
           syncBoxFlag = await syncBoxInfo(allFreights[i], product);
         }
         unShippedAmount -= allFreights[i].qty;
         if (!allFreights[i].delivery) {
-          if(allFreights[i].type) {
-            var freightType = await findFreightByType(types, allFreights[i].type);
-          } else {
-            var freightType  = await findFreightByType(types, 'seaExpress');
-          }
-          allFreights[i].delivery = moment(allFreights[i].shippedDate).add(freightType.period, 'days');
+          
         }
         if (moment(new Date()).diff(moment(allFreights[i].delivery), 'days') < days) {
           freights.push(allFreights[i]);
         }
-        logger.debug('allFreights2', allFreights[i], freights)
       }
     }
     
-    if ((unShippedAmount / purchases[j].qty) > 0.15 && moment(new Date()).diff(moment(purchases[j].created), 'days') < 90) {
+    if ((unShippedAmount / purchases[j].qty) > 0.15 && moment(new Date()).diff(moment(purchases[j].created), 'days') < 60) {
       producings.push({
         orderId: purchases[j].orderId,
         qty: unShippedAmount,
@@ -181,29 +254,78 @@ var getFreightsAndProductingsByProduct = async function(product, days) {
       });
     }
   }
-  logger.debug(JSON.stringify(freights)); 
-  logger.debug(JSON.stringify(purchases)); 
-  console.log('before stock');
-  var stock = await getStockByProduct(product);
-  console.log('stock', stock.inventory);
-  if (stock.inventory && stock.inventory !== 0) {
-    product.stock = stock.inventory.SumNumber;
-    // product.save(function(err) {
-    //   if (err) {
-    //     logger.error(err);
-    //   }
-    // });
-    await checkFreights(freights, stock.inventory.PendingStorageNumber);
-  } else {
-    await checkFreights(freights, 20000);
-  }
-  
+
+  freights = await checkFreightsV2(freights, yisucangInbounds);
+
   return await formatFreightsAndProductings({
     freights: freights,
     producings: producings
   })
 }
 
+async function getYisucangInboundsByOrderId(inbounds, orderId) {
+  return inbounds.filter((elem) => {
+    return (elem.orderId === orderId);
+  })
+}
+
+var getFreightsAndProductingsByProductV2 = async function(product, days, allFreights, yisucangInbounds, types) {
+  var freights = [];
+  var producings = [];
+  
+  if (!allFreights) {
+    const freightApi = await Freight.getInstance();
+    allFreights = freightApi.freights;
+  }
+
+  if (!yisucangInbounds) {
+    yisucangInbounds = await getYisucangInbounds();
+  }
+
+  if (!types) {
+    types = await freightTypes();
+  }
+
+  var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
+  console.log(`purchases: ${purchases.length}`);
+  for (var j = 0; j < purchases.length; j++) {
+    var unShippedAmount = purchases[j].qty;
+    var producingFreights = [];
+    for (var i = 0; i < allFreights.length; i++) {
+      if (await matchFreightAndProducing(allFreights[i], purchases[j])) {
+        producingFreights.push(allFreights[i]);
+        unShippedAmount -= allFreights[i].qty;
+        if (!allFreights[i].delivery) {
+          allFreights[i].delivery = await addDefaultDeliveryToFreight(allFreights[i], types)
+        }
+      }
+    }
+
+    producingFreights = await checkFreightsV2(producingFreights, await getYisucangInboundsByOrderId(yisucangInbounds, purchases[j].orderId));
+    freights = freights.concat(producingFreights);
+    
+    var shipped = false;
+    if ((unShippedAmount / purchases[j].qty) < 0.2 || moment(new Date()).diff(moment(purchases[j].created), 'days') > 60) {
+      shipped = true;
+    } else {
+      producings.push({
+        orderId: purchases[j].orderId,
+        qty: unShippedAmount,
+        delivery: purchases[j].us_arrival_date,
+        created: purchases[j].created,
+        inboundShippeds: producingFreights,
+        shipped: shipped
+      });
+    }
+  }
+
+  return await formatFreightsAndProductings({
+    freights: await removeDeliveredFreights(freights, days, product),
+    producings: producings
+  })
+}
+
+exports.getFreightsAndProductingsByProductV2 = getFreightsAndProductingsByProductV2;
 var parseDate = async function(dateInfo) {
   if (dateInfo) {
     var re = /\d+月.*\d+号?/;
@@ -317,6 +439,18 @@ var parseBox = async function(boxInfo) {
   }
 }
 
+var parseBoxCount = async function(boxInfo) {
+  var boxCount = 0
+  if (boxInfo) {
+    var boxCountRe = /\d+箱/;
+    var boxCountStr = boxInfo.match(boxCountRe);
+    if (boxCountStr) {
+      boxCount = Number(boxCountStr[0].match(/[\d]+/)[0]);
+    }
+  }
+  return boxCount;
+}
+
 async function parseShippedDate(dateInfo) {
   if (dateInfo) {    
     return moment('1900/01/01').add(dateInfo, 'days');
@@ -345,6 +479,16 @@ async function parseType(type) {
   }
 }
 
+async function parseFba(type) {
+  if (type) {
+    if (type.includes("FBA")) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
 var parseRow = async function(row, orderIndex, deliveryIndex, deliveryDueIndex, qtyIndex, boxIndex, shippedDateIndex, typeIndex) {
   var delivery = null;
   if (row[deliveryIndex]) {
@@ -352,18 +496,23 @@ var parseRow = async function(row, orderIndex, deliveryIndex, deliveryDueIndex, 
   } else if (row[deliveryDueIndex]) {
     delivery = await parseDate(row[deliveryDueIndex]);
   }
-  var orderId = await parseOrderId(row[orderIndex]);
   var box = await parseBox(row[boxIndex]);
+  var boxCount = await parseBoxCount(row[boxIndex]);
   var shippedDate = await parseShippedDate(row[shippedDateIndex]);
+  var orderId = await parseOrderId(row[orderIndex]);
   logger.debug('shippedDate', shippedDate, row[shippedDateIndex], shippedDateIndex, row);
   var type = await parseType(row[typeIndex]);
+  var fba = await parseFba(row[typeIndex]);
+
   return {
     orderId: orderId,
     delivery: delivery,
     qty: row[qtyIndex],
     shippedDate: shippedDate,
     type: type,
-    box: box
+    box: box,
+    boxCount: boxCount,
+    fba: fba
   }
 }
 
@@ -377,6 +526,34 @@ const TYPES = {
 async function freightTypes() {
   return await FreightType.find({});
 }
+
+async function parseYisucangInboundRow(row, HEADER) {
+  var number = row[HEADER.indexOf('入库单号')];
+  var orderId = await parseOrderId(row[HEADER.indexOf('物流追踪单号')]);
+  var quantity = row[HEADER.indexOf('入库数量')];
+  var date = row[HEADER.indexOf('入库时间')];
+  return {
+    number: number,
+    orderId: orderId,
+    boxCount: Number(quantity),
+    date: date
+  }
+}
+
+async function getYisucangInbounds() {
+  var rows = await sheetApi.listInbounds();
+  logger.debug(rows);
+  const HEADER = rows.shift();
+  inbounds = [];
+  for (var row of rows) {
+    if (row[0]) {
+      inbounds.push(await parseYisucangInboundRow(row, HEADER))
+    }
+  }
+  return inbounds;
+}
+
+exports.getYisucangInbounds = getYisucangInbounds;
 
 async function syncFreightTypes() {
   var rows = await sheetApi.listFreightTypes();

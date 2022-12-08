@@ -65,7 +65,7 @@ exports.syncFreight = async function (req, res, next) {
     res.render404('这个产品不存在。');
     return;
   } else {
-    await Product.syncFreight(product, 5);
+    await Product.syncFreight(product, 10);
     await Product.save(product);
     res.redirect('/products/' + product.asin + '/inbounds');
   }
@@ -109,7 +109,6 @@ exports.plan = async function (req, res, next) {
 exports.producingPlan = async function (req, res, next) {
   var asin = req.params.asin;
   var producingId = req.params.producingId;
-  // var purchase = await Product.getProducingPlan(asin, producingId);
   var purchase = await Product.getPlanV3(asin, producingId);
   if (purchase.plan) {
     res.render('product/plan', {purchase: purchase});

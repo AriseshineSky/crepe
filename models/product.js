@@ -34,6 +34,7 @@ var ProductSchema = new Schema({
       quantity: {type: Number },
       shippedDate: { type: Date },
       deliveryDue: { type: Date },
+      fba: { type: Boolean, default: false },
       box: { 
         length: {type: Number, default: 0 },
         width: {type: Number, default: 0 },
@@ -48,7 +49,23 @@ var ProductSchema = new Schema({
       orderId: {type: String },
       quantity: {type: Number, default: 0 },
       deliveryDue: { type: Date },
-      created: { type: Date }
+      created: { type: Date },
+      shipped: { type: Boolean },
+      inboundShippeds: [
+        {
+          orderId: {type: String },
+          quantity: {type: Number },
+          shippedDate: { type: Date },
+          deliveryDue: { type: Date },
+          box: { 
+            length: {type: Number, default: 0 },
+            width: {type: Number, default: 0 },
+            height: {type: Number, default: 0 },
+            weight: {type: Number, default: 0 },
+            units: { type: Number, default: 0 }
+          },
+        }
+      ]
     }
   ],
   peak: {
