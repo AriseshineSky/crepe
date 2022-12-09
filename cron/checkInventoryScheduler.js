@@ -10,7 +10,11 @@ const scheduleCronstyle = ()=>{
     logger.info('start to check product inventory');
     checkProductsInventory.checkProductsInventory();
   });
-  schedule.scheduleJob('0 0 */6 * * *', () => {
+  schedule.scheduleJob('0 0 */4 * * *', () => {
+    logger.info('start to update product sales and inventories');
+    Product.updateAllProuctSalesAndInventories();
+  });
+  schedule.scheduleJob('0 0 */4 * * *', () => {
     logger.info('start to update product freights');
     Product.syncAllProductFreights(10);
   });
@@ -18,7 +22,7 @@ const scheduleCronstyle = ()=>{
     logger.info('start to update lisings');
     syncAllListings.syncListings();
   });
-  schedule.scheduleJob('0 0 */8 * * *', () => {
+  schedule.scheduleJob('0 0 */4 * * *', () => {
     logger.info('start to update product stocks');
     Product.updateAllStock();
   });

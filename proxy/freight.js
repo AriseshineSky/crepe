@@ -16,29 +16,6 @@ const PRODUCT_ATTR = ['asin', 'plwhsId',
 'yisucangId', 'cycle', 
 'maxAvgSales', 'unitsPerBox']
 const INBOUND_ATTR = ['deliveryDue', 'quantity']
-class Freight {
-  constructor() {
-    this.freights = null;
-  }
-  static async getInstance() {
-    if(!this.instance) {
-      this.instance = new Freight();
-      logger.debug("new all freights instance");
-      this.createdAt = new Date();
-      this.instance.freights = await syncFreights();
-    } else if (await this.checkExpired()) {
-      this.instance.freights = await syncFreights();
-    }
-    return this.instance;
-  }
-  static async checkExpired() {
-    var stime = Date.parse(this.createdAt);
-    var etime = Date.parse(new Date());
-    var hours = Math.floor((etime - stime) / (3600 * 1000));
-    return hours > 1;
-  }
-}
-
 var syncFreights = async function() {
   var freights = [];
   var rows = await larksuiteApi.listFreights();
@@ -167,7 +144,10 @@ async function removeFreight(freights, fba) {
   }
   return only;
 }
-async function checkFreightsV2(freights, inbounds) {
+async function checkFreightsV2(freights, inbounds, recieved) {
+  if (recieved) {
+    return [];
+  }
   freights = await sortFreightsByDelivery(freights);
   var originalBoxCount = await countBoxes(freights);
   var leftBoxes = originalBoxCount - await countBoxes(inbounds);
@@ -269,17 +249,31 @@ async function getYisucangInboundsByOrderId(inbounds, orderId) {
   })
 }
 
-var getFreightsAndProductingsByProductV2 = async function(product, days, allFreights, yisucangInbounds, types) {
+async function checkFreightRecived(recieveds, orderId) {
+  for (var recived of recieveds) {
+    if (recived.orderId === orderId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+var getFreightsAndProductingsByProductV2 = async function(product, days, types, allFreights, yisucangInbounds, yisucangReciveds) {
   var freights = [];
   var producings = [];
   
   if (!allFreights) {
-    const freightApi = await Freight.getInstance();
-    allFreights = freightApi.freights;
+    allFreights = await syncFreights();
   }
 
   if (!yisucangInbounds) {
     yisucangInbounds = await getYisucangInbounds();
+    yisucangInbounds = await remvoeDuplicateYisucangInbounds(yisucangInbounds);
+  }
+
+  if (!yisucangReciveds) {
+    yisucangReciveds = await getYisucangReciveds();
+    yisucangReciveds = await remvoeDuplicateYisucangInbounds(yisucangReciveds);
   }
 
   if (!types) {
@@ -301,7 +295,7 @@ var getFreightsAndProductingsByProductV2 = async function(product, days, allFrei
       }
     }
 
-    producingFreights = await checkFreightsV2(producingFreights, await getYisucangInboundsByOrderId(yisucangInbounds, purchases[j].orderId));
+    producingFreights = await checkFreightsV2(producingFreights, await getYisucangInboundsByOrderId(yisucangInbounds, purchases[j].orderId), await checkFreightRecived(yisucangReciveds, purchases[j].orderId));
     freights = freights.concat(producingFreights);
     
     var shipped = false;
@@ -527,7 +521,7 @@ async function freightTypes() {
   return await FreightType.find({});
 }
 
-async function parseYisucangInboundRow(row, HEADER) {
+async function parseYisucangRow(row, HEADER) {
   var number = row[HEADER.indexOf('入库单号')];
   var orderId = await parseOrderId(row[HEADER.indexOf('物流追踪单号')]);
   var quantity = row[HEADER.indexOf('入库数量')];
@@ -542,18 +536,31 @@ async function parseYisucangInboundRow(row, HEADER) {
 
 async function getYisucangInbounds() {
   var rows = await sheetApi.listInbounds();
-  logger.debug(rows);
   const HEADER = rows.shift();
   inbounds = [];
   for (var row of rows) {
     if (row[0]) {
-      inbounds.push(await parseYisucangInboundRow(row, HEADER))
+      inbounds.push(await parseYisucangRow(row, HEADER))
     }
   }
   return inbounds;
 }
 
 exports.getYisucangInbounds = getYisucangInbounds;
+
+async function getYisucangReciveds() {
+  var rows = await sheetApi.listRecieveds();
+  const HEADER = rows.shift();
+  recieveds = [];
+  for (var row of rows) {
+    if (row[0]) {
+      recieveds.push(await parseYisucangRow(row, HEADER))
+    }
+  }
+  return recieveds;
+}
+
+exports.getYisucangReciveds = getYisucangReciveds;
 
 async function syncFreightTypes() {
   var rows = await sheetApi.listFreightTypes();

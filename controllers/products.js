@@ -58,6 +58,11 @@ exports.freights = async function (req, res, next) {
   }
 };
 
+exports.updateAllProuctSalesAndInventories = async function (req, res, next) {
+  Product.updateAllProuctSalesAndInventories();
+  res.render('index', {title: "regist"});
+};
+
 exports.syncFreight = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);

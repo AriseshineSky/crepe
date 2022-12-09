@@ -70,21 +70,20 @@ async function syncFreight(product, days) {
 
 async function syncAllProductFreights(days) {
   var products = await findAll();
-
   const types = await Freight.freightTypes();
-  const freightApi = await Freight.getInstance();
-  var allFreights = freightApi.freights;
+  const allFreights = await Freight.syncFreights();
   const yisucangInbounds = await Freight.getYisucangInbounds();
   var inbounds = await Freight.remvoeDuplicateYisucangInbounds(yisucangInbounds);
+  const yisucangReciveds = await Freight.getYisucangReciveds();
+  var recieveds = await Freight.remvoeDuplicateYisucangInbounds(yisucangReciveds);
   for (var product of products) {
-    var freightsAndProducings = await Freight.getFreightsAndProductingsByProductV2(product, days, types, allFreights, inbounds);
+    var freightsAndProducings = await Freight.getFreightsAndProductingsByProductV2(product, days, types, allFreights, inbounds, recieveds);
     await checkProducings(product, freightsAndProducings);
     product.inboundShippeds = freightsAndProducings.inboundShippeds;
     product.producings = freightsAndProducings.producings;
     product.purchase = await getProducingsQuantity(product.producings);
     await save(product);
   }
-  
 }
 exports.syncAllProductFreights = syncAllProductFreights;
 exports.syncFreight = syncFreight;
@@ -499,6 +498,18 @@ async function getSales(fbaInventorySales, product) {
   return sales;
 }
 exports.getSales = getSales;
+
+async function updateAllProuctSalesAndInventories() {
+  var products = await findAll();
+  for (var product of products) {
+    const listings = await Listing.findLisingsByAsin(product.asin);
+    var fbaInventorySales = await prepareFbaInventoryAndSalesV2(product.asin, listings);
+    await getSales(fbaInventorySales, product);
+    save(product);
+  }
+}
+
+exports.updateAllProuctSalesAndInventories = updateAllProuctSalesAndInventories;
 
 async function prepareOrderDues(orderDues) {
   var dues = [];
