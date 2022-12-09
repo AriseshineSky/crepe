@@ -26,6 +26,11 @@ const scheduleCronstyle = ()=>{
     logger.info('start to update product stocks');
     Product.updateAllStock();
   });
+
+  schedule.scheduleJob('0 0 */4 * * *', () => {
+    logger.info('start to update product pm');
+    Product.syncPm();
+  });
 }
 
 exports.initScheduledJobs = () => {
