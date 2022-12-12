@@ -27,7 +27,6 @@ router.get('/updateAllStock', products.updateAllStock);
 router.get('/syncAllFreights', products.syncAllProductFreights);
 router.post('/delete', products.delete);
 router.get('/updateAllProuctSalesAndInventories', products.updateAllProuctSalesAndInventories);
-router.get('/updateProductProducingStatus', products.updateProductProducingStatus);
 router.get('/', products.index);
 router.get('/:asin', products.show);
 

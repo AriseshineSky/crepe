@@ -654,7 +654,7 @@ async function bestProducingsFreightPlanForAllDelivery(producing, product, sales
     status: "pending"
   }
 
-  var step = Math.ceil(quantity.boxes ** (freightType.length) / 80000000);
+  var step = Math.ceil(quantity.boxes ** (freightType.length) / 60000000);
   await getFreightPlanByProducing(freightPlan, quantity.boxes, 0, freightType, inbounds, product, sales, result, producing, step);
   return await formatPlan(result.plan, product.unitsPerBox);
 }
@@ -976,7 +976,7 @@ async function bestPlanForAllDelivery(quantity, product, sales, inbounds, freigh
     plan: plan,
     status: "pending"
   }
-  var step = Math.ceil(quantity.boxes ** (freightType.length) / 80000000);
+  var step = Math.ceil(quantity.boxes ** (freightType.length) / 60000000);
   await getFreightPlan(freightPlan, quantity.boxes, 0, freightType, inbounds, product, sales, result, step)
   
   return await formatPlan(result.plan, product.unitsPerBox);
