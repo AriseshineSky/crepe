@@ -24,6 +24,8 @@
             data-toggle="table"
             data-pagination="true"
             data-editable-emptytext="Default empty text."
+            data-sort-name="delivery"
+            data-sort-order="asc"
             >
               <thead>
                 <tr>
@@ -31,10 +33,11 @@
                   <th data-editable="true" data-sortable="true">发货方式:</th>
                   <th data-editable="true" data-sortable="true">箱数:</th>
                   <th data-editable="true" data-sortable="true">数量:</th>
+                  <th data-editable="true" data-sortable="true">重量(kg):</th>
                   <th data-editable="true" data-sortable="true">运费:</th>
                   <th data-editable="true" data-sortable="true">采购日期:</th>
                   <th data-editable="true" data-sortable="true">出货日期:</th>
-                  <th data-editable="true" data-sortable="true">到货日期:</th>
+                  <th data-field="delivery" data-editable="true" data-sortable="true">到货日期:</th>
                   <th data-editable="true" data-sortable="true">运输周期(天):</th>
                   <th data-editable="true" data-sortable="true">亚马逊开卖日期:</th>
                   <th data-editable="true" data-sortable="true">开卖前库存:</th>
@@ -50,6 +53,7 @@
                         <td><%= TYPES[type] %></td>
                         <td><%= plan[type]['boxes'] %></td>
                         <td><%= plan[type]['units'] %></td>
+                        <td><%= plan[type]['weight'] %></td>
                         <td><%= plan[type]['amount'] %></td>
                         <td><%= moment(plan['created']).format('YYYY-MM-DD') %></td>
                         <td>
@@ -89,16 +93,19 @@
             data-toggle="table"
             data-pagination="true"
             data-editable-emptytext="Default empty text."
+            data-sort-name="delivery"
+            data-sort-order="asc"
             >
               <thead>
                 <tr>
                   <th data-editable="true" data-sortable="true">发货方式:</th>
                   <th data-editable="true" data-sortable="true">箱数:</th>
                   <th data-editable="true" data-sortable="true">数量:</th>
+                  <th data-editable="true" data-sortable="true">重量(kg):</th>
                   <th data-editable="true" data-sortable="true">运费:</th>
                   <th data-editable="true" data-sortable="true">采购日期:</th>
                   <th data-editable="true" data-sortable="true">出货日期:</th>
-                  <th data-editable="true" data-sortable="true">到货日期:</th>
+                  <th data-field="delivery" data-editable="true" data-sortable="true">到货日期:</th>
                   <th data-editable="true" data-sortable="true">运输周期(天):</th>
                   <th data-editable="true" data-sortable="true">亚马逊开卖日期:</th>
                   <th data-editable="true" data-sortable="true">开卖前库存:</th>
@@ -111,6 +118,7 @@
                       <td><%= TYPES[type] %></td>
                       <td><%= purchase.plan[type]['boxes'] %></td>
                       <td><%= purchase.plan[type]['units']  %></td>
+                      <td><%= purchase.plan[type]['weight'] %></td>
                       <td><%= purchase.plan[type]['amount'] %></td>
                       <td><%= moment().format('YYYY-MM-DD') %></td>
                       <td><%= moment().add(purchase.product.cycle, 'days').format('YYYY-MM-DD') %></td>
@@ -146,12 +154,14 @@
             data-toggle="table"
             data-pagination="true"
             data-editable-emptytext="Default empty text."
+            data-sort-name="delivery"
+            data-sort-order="asc"
             >
               <thead>
                 <tr>
                   <th data-editable="true" data-sortable="true">orderId:</th>
                   <th data-editable="true" data-sortable="true">数量:</th>
-                  <th data-editable="true" data-sortable="true">预估收货日期:</th>
+                  <th data-field="delivery" data-editable="true" data-sortable="true">预估收货日期:</th>
                   <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
                   <th data-editable="true" data-sortable="true">开卖前库存:</th>
                 </tr>

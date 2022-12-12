@@ -65,7 +65,8 @@ var ProductSchema = new Schema({
             units: { type: Number, default: 0 }
           },
         }
-      ]
+      ],
+      deletedAt: { type: Date }
     }
   ],
   peak: {
@@ -79,6 +80,7 @@ var ProductSchema = new Schema({
   yisucangId: {type: Number, default: 0 },
   createAt: { type: Date, default: Date.now },
   updateAt: { type: Date, default: Date.now },
+  deletedAt: { type: Date }
 });
 
 ProductSchema.plugin(BaseModel);

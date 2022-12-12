@@ -26,21 +26,23 @@
       </thead>
       <tbody>
         <% product.producings.forEach(function(producing){ %>
-          <tr>
-            <td><%= producing.orderId %></td>
-            <td><%= producing.quantity %></td>
-            <td><%= `${producing.created.getMonth() + 1}/${producing.created.getDate()}/${producing.created.getFullYear()}` %></td>
-            <td>
-              <% if (producing.deliveryDue) {%>
-                <%= `${producing.deliveryDue.getMonth() + 1}/${producing.deliveryDue.getDate()}/${producing.deliveryDue.getFullYear()}` %>
-              <% } %>
-            </td>
-            <td style="text-align:center;">
-              <button class="btn btn-primary producing" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
-              <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
-              <button class="btn btn-danger producing" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
-            </td>
-          </tr>
+          <% if(!producing.deletedAt) { %>
+            <tr>
+              <td><%= producing.orderId %></td>
+              <td><%= producing.quantity %></td>
+              <td><%= `${producing.created.getMonth() + 1}/${producing.created.getDate()}/${producing.created.getFullYear()}` %></td>
+              <td>
+                <% if (producing.deliveryDue) {%>
+                  <%= `${producing.deliveryDue.getMonth() + 1}/${producing.deliveryDue.getDate()}/${producing.deliveryDue.getFullYear()}` %>
+                <% } %>
+              </td>
+              <td style="text-align:center;">
+                <button class="btn btn-primary producing" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
+                <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
+                <button class="btn btn-danger producing" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
+              </td>
+            </tr>
+          <% } %>
         <% }) %>
       </tbody>
     </table>
