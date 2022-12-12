@@ -114,6 +114,8 @@ async function syncPm() {
   }
 }
 exports.syncPm = syncPm;
+
+
 function compare(type) {
   return function(m, n) {
     return m[type] - n[type];
@@ -523,6 +525,11 @@ async function prepareOrderDues(orderDues) {
   return dues;
 }
 exports.prepareOrderDues = prepareOrderDues;
+
+async function getValidProducings(product) {
+  var products = await findValidProducings(product.asin);
+  return products[0]?.producings;
+}
 exports.getPlanV3 = async function(asin, producingId) {
   var fbaInventorySales = await prepareFbaInventoryAndSalesV2(asin);
   console.log(fbaInventorySales);
@@ -558,15 +565,16 @@ exports.getPlanV3 = async function(asin, producingId) {
     }
   } else {
     var producingsPlan = null;
-    if (product.producings && product.producings.length > 0) {
-      producingsPlan = await getProducingsFreightPlan(product, sales, inbounds);
+    var validProducings = await getValidProducings(product)
+    if (validProducings?.length > 0) {
+      producingsPlan = await getProducingsFreightPlan(product, sales, inbounds, validProducings);
     }
     logger.debug('producingsPlan', producingsPlan);
     if (quantity.boxes > 0) {
       await updateProduct(product, {orderQuantity: quantity.quantity});
       if (producingsPlan) {
         console.log(3)
-        plan = await bestPlanV4(quantity, product, sales, producingsPlan.inbounds);
+        plan = await bestPlanV4(quantity, product, sales, producingsPlan.inbounds || []);
         plan.plans = producingsPlan.plans;
       } else {
         plan = await bestPlanV4(quantity, product, sales, inbounds);
@@ -647,7 +655,6 @@ async function bestProducingsFreightPlanForAllDelivery(producing, product, sales
   }
 
   var step = Math.ceil(quantity.boxes ** (freightType.length) / 80000000);
-  console.log(step)
   await getFreightPlanByProducing(freightPlan, quantity.boxes, 0, freightType, inbounds, product, sales, result, producing, step);
   return await formatPlan(result.plan, product.unitsPerBox);
 }
@@ -663,17 +670,17 @@ async function getProducingFreightPlan(producing, product, sales, inbounds) {
   return await bestProducingsFreightPlanForAllDelivery(producing, product, sales, freightType, inbounds);
 }
 
-async function prepareProducings(product) {
-  var producings = JSON.parse(JSON.stringify(product.producings));
+async function prepareProducings(product, validProducings) {
+  var producings = JSON.parse(JSON.stringify(validProducings));
   for (var producing of producings) {
     producing.period = await getProducingPeriod(product, producing);
   }
   return await sortQueue(producings);
 }
 
-async function getProducingsFreightPlan(product, sales, inbounds) {
+async function getProducingsFreightPlan(product, sales, inbounds, validProducings) {
   var plan = {plans: []};
-  var producings = await prepareProducings(product)
+  var producings = await prepareProducings(product, validProducings)
   for (var i = 0; i < producings.length; i++) {
     if (!producings[i].deletedAt) {
       if (plan.inbounds) {
@@ -970,7 +977,6 @@ async function bestPlanForAllDelivery(quantity, product, sales, inbounds, freigh
     status: "pending"
   }
   var step = Math.ceil(quantity.boxes ** (freightType.length) / 80000000);
-  console.log('step', step)
   await getFreightPlan(freightPlan, quantity.boxes, 0, freightType, inbounds, product, sales, result, step)
   
   return await formatPlan(result.plan, product.unitsPerBox);
@@ -1014,6 +1020,25 @@ async function bestPlanV4(quantity, product, sales, inbounds) {
   return await bestPlanForAllDelivery(quantity, product, sales, inbounds, freightType);
 }
 
+async function findValidProducings(asin) {
+  return Product.aggregate([
+    { $match : { 'asin': asin } },
+    {
+      $project: {
+        "producings": {
+          $filter: {
+            input: "$producings",
+            as: "producing",
+            cond: { 
+              $eq: [ '$$producing.deleted', false ]
+            }
+          }
+        }
+      }
+  }
+  ]
+  )
+}
 var getProductByAsin = async function (asin) {
   return Product.findOne({'asin': asin}).clone().catch(function(err){ console.log(err)});
 };
@@ -1040,13 +1065,26 @@ var deleteInbound = async function(inboundId) {
 }
 var deleteProducing = async function(producingId) {
   var objId = mongoose.Types.ObjectId(producingId);
-  await Product.updateOne({"producings._id":objId},{$set: {'producings.$.deletedAt': Date.now()}});
+  await Product.updateOne({"producings._id":objId},{$set: {'producings.$.deletedAt': Date.now(), 'producings.$.deleted': true}});
 }
 var updateInbound = async function(inboundId, deliveryDue, quantity) {
   var objId = mongoose.Types.ObjectId(inboundId);
   await Product.updateOne({"inboundShippeds._id": objId}, { $set:{'inboundShippeds.$.deliveryDue': deliveryDue, 'inboundShippeds.$.quantity': quantity}});
 }
 
+async function updateProductProducingStatus() {
+  var products = await findAll();
+  for (var product of products) {
+    console.log(product.asin);
+    if (product.producings) {
+      for (var producing of product.producings) {
+        producing.deleted = false;
+      }
+    }
+    await save(product);
+  }
+}
+exports.updateProductProducingStatus = updateProductProducingStatus;
 async function updateProducing(producingId, deliveryDue, quantity) {
   var objId = mongoose.Types.ObjectId(producingId);
   await Product.updateOne({"producings._id":objId},{$set: {'producings.$.deliveryDue': deliveryDue, 'producings.$.quantity': quantity}});

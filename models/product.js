@@ -66,6 +66,7 @@ var ProductSchema = new Schema({
           },
         }
       ],
+      deleted: { type: Boolean, default: false },
       deletedAt: { type: Date }
     }
   ],

@@ -51,10 +51,6 @@ exports.freights = async function (req, res, next) {
     return;
   } else {
     Product.getFreight(product);
-    // res.render('product/show', {
-    //   product: product,
-    //   title: ""
-    // });
   }
 };
 
@@ -96,6 +92,10 @@ exports.sync = async function(req, res, next) {
   res.render('index');
 }
 
+exports.updateProductProducingStatus = async function (req, res, next) {
+  Product.updateProductProducingStatus()
+  res.render('index');
+}
 exports.syncpm = async function(req, res, next) {
   Product.syncPm();
   res.render('index');
@@ -376,6 +376,7 @@ exports.updateInbound = async function(req, res, next) {
 exports.showInbounds = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);
+  console.log(product)
   if (!product) {
     return;
   } else {
