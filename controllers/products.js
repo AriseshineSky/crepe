@@ -269,6 +269,7 @@ exports.save = async function (req, res, next) {
     product.asin = asin;
     product.cycle = cycle;
     product.avgSales = avgSales;
+    product.maxAvgSales = maxAvgSales;
     product.unitsPerBox = unitsPerBox;
     product.box = box;
     product.plwhsId = plwhsId;
