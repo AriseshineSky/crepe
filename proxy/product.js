@@ -1057,6 +1057,13 @@ exports.newAndSave = function (data, callback) {
   console.log(product);
   product.save(callback);
 };
+
+exports.createNewProduct = function (data, callback) {
+  var product = new Product();
+  product.asin = data.asin;
+  console.log(product);
+  product.save(callback);
+};
 exports.findAll = findAll;
 
 var deleteInbound = async function(inboundId) {

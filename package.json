@@ -29,9 +29,12 @@
     "moment": "^2.29.4",
     "mongodb": "^4.10.0",
     "mongoose": "^6.7.0",
+    "mongosh": "^1.6.1",
     "morgan": "~1.9.1",
     "node-csv": "^0.1.2",
     "node-schedule": "^2.1.0",
+    "node-telegram-bot-api": "^0.60.0",
+    "nodemon": "^2.0.20",
     "shimo-sdk-cabinet": "^4.5.0",
     "sinon": "^15.0.0"
   },
