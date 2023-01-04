@@ -1,7 +1,7 @@
 var base = require('./base')
 var FormData = require('form-data');
 
-YISUCANG_ID_KEYS = [
+const YISUCANG_ID_KEYS = [
   {
     PartnerID: '96648968',
     PartnerKey: '7fd301de-7d58-388f-044a-74ef521b18c5'
