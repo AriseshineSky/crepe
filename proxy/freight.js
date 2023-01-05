@@ -18,7 +18,8 @@ const PRODUCT_ATTR = ['asin', 'plwhsId',
 const INBOUND_ATTR = ['deliveryDue', 'quantity']
 var syncFreights = async function() {
   var freights = [];
-  var rows = await larksuiteApi.listFreights();
+  // var rows = await larksuiteApi.listFreights();
+  var rows = await sheetApi.listFreights();
   var header = rows.shift();
   var shippedDateIndex = header.indexOf("出货日期");
   var deliveryDueIndex = header.indexOf("预计到港时间");
@@ -325,7 +326,11 @@ var parseDate = async function(dateInfo) {
     var re = /\d+月.*\d+号?/;
     var date = dateInfo.match(re);
     if (date) {
-      return moment(date[0], 'MM月DD号');
+      if (moment(date[0], 'MM月DD号').isAfter(moment('2023-10-01'))) {
+        return moment(`2022-${date[0]}`, 'YYYY-MM月DD号');
+      } else {
+        return moment(date[0], 'MM月DD号');
+      }
     } else {
       console.log('err', dateInfo);
     }

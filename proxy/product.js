@@ -1,6 +1,6 @@
 var models  = require('../models');
 var Product = models.Product;
-var user = require('./user');
+var User = require('./user');
 var mongoose = require('mongoose');
 const getPm = require('../api/getPM');
 var moment = require('moment');
@@ -32,6 +32,7 @@ async function updateAllStock() {
   const products = await findAll();
   for (var product of products) {
     await prepareStock(product);
+    console.log(`asin: ${product.asin}, yisucang: ${product.stock}`)
     await save(product);
   }
 }
@@ -107,8 +108,9 @@ async function checkStatus(inbound, units, sales) {
 async function syncPm() {
   var products = await findAll();
   for (var product of products) {
-    var name = await getPm(product.asin, 'US');
-    var pm = await user.findOrCreate(name);
+    var user = await getPm(product.asin, 'US');
+    var pm = await User.findOrCreate(user);
+    User.updateUser(user);
     product.pm = pm;
     await save(product);
   }

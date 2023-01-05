@@ -5,7 +5,7 @@ module.exports = async function(asin, country) {
   var response = await axios.get(pmLink);
   
   if (response.data.data && response.data.data.product && response.data.data.product.users[0]) {
-    var pm = response.data.data.product.users[0].name;
+    var pm = response.data.data.product.users[0];
   } else {
     var pm = 'unknown';
   }
