@@ -3,6 +3,7 @@ var checkProductsInventory = require('../lib/checkProductsInventory');
 var Product = require('../proxy').Product;
 var freights = require('../proxy/freight');
 var syncAllListings = require('../lib/syncAllListings');
+var generateProduct = require('../lib/generateProductByListing');
 const logger = require('../common/logger');
 
 const scheduleCronstyle = ()=>{
@@ -36,3 +37,5 @@ const scheduleCronstyle = ()=>{
 exports.initScheduledJobs = () => {
   scheduleCronstyle();
 }
+
+// checkProductsInventory.checkProductsInventory();

@@ -21,7 +21,6 @@ open_apis = {
   marketAnalyze: '/api/v2/finance/salesoperations/marketAnalyze'
 }
 
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.redirect('/products');
@@ -36,6 +35,5 @@ router.get('/syncListings', async function(req, res, next) {
   await syncAllListings.syncListings();
   res.render('index', {title: "regist"});
 })
-
 
 module.exports = router;

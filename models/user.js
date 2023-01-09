@@ -2,7 +2,8 @@ var mongoose = require('mongoose');
 var BaseModel= require('./base_model');
 var Schema = mongoose.Schema;
 var UserSchema = new Schema({
-  name: { type: String }
+  name: { type: String },
+  chatId: { type: String }
 })
 
 UserSchema.plugin(BaseModel);

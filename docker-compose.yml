@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  app:
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+    ports:
+      - 5001:5001
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/app
+  mongodb:
+    image: 'mongo:latest'
+    restart: always
+    environment: 
+      MONGO_INITDB_DATABASE: crepe_test
+    ports:
+      - "27016:27017"
+    volumes:
+      - 'mongodbdata:/data/db'
+volumes:
+  mongodbdata:

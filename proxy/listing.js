@@ -2,7 +2,7 @@ var models  = require('../models');
 var Listing = models.Listing;
 var logger = require('../common/logger');
 
-var findAll = async function() {
+exports.findAll = async function() {
   return await Listing.find({});
 }
 

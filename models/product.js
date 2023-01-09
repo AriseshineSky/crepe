@@ -5,8 +5,8 @@ var Schema    = mongoose.Schema;
 var ProductSchema = new Schema({
   pm: { type: Schema.Types.ObjectId, ref: 'User'},
   asin: { type: String},
-  cycle: { type: Number, default: 0 },
-  unitsPerBox: { type: Number, default: 0 },
+  cycle: { type: Number, default: 20 },
+  unitsPerBox: { type: Number, default: 1 },
   maxAvgSales: { type: Number, default: 0 },
   avgSales: { type: Number },
   ps: { type: Number, default: 0 },

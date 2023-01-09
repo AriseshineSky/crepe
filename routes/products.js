@@ -29,5 +29,4 @@ router.post('/delete', products.delete);
 router.get('/updateAllProuctSalesAndInventories', products.updateAllProuctSalesAndInventories);
 router.get('/', products.index);
 router.get('/:asin', products.show);
-
 module.exports = router;

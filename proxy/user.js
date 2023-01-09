@@ -7,11 +7,25 @@ var moment = require('moment');
 
 var logger = require('../common/logger');
 
-exports.findOrCreate = async function(name) {
-  var user = await User.findOne({"name": name});
-  if (user) {
-    return user;
+exports.findOrCreate = async function(user) {
+  if (!user) {
+    return null;
+  }
+  var savedUser = await User.findOne({"name": user.name});
+  if (savedUser) {
+    return savedUser;
   } else {
-    return await User.create({"name": name});
+    return await User.create({"name": user.name, "chatId": user.chat_id});
+  }
+}
+
+exports.updateUser = async function(user) {
+  var savedUser = await User.findOne({"name": user.name});
+  if (savedUser) {
+    savedUser.chatId = user.chat_id;
+    await savedUser.save();
+    return savedUser;
+  } else {
+    return await User.create({"name": user.name, "chatId": user.chat_id});
   }
 }
