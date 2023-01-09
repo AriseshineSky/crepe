@@ -11,20 +11,20 @@ exports.findOrCreate = async function(user) {
   if (!user) {
     return null;
   }
-  var user = await User.findOne({"name": user.name});
-  if (user) {
-    return user;
+  var savedUser = await User.findOne({"name": user.name});
+  if (savedUser) {
+    return savedUser;
   } else {
     return await User.create({"name": user.name, "chatId": user.chat_id});
   }
 }
 
 exports.updateUser = async function(user) {
-  var user = await User.findOne({"name": user.name});
-  if (user) {
-    user.chatId = user.chat_id;
-    await user.save();
-    return user;
+  var savedUser = await User.findOne({"name": user.name});
+  if (savedUser) {
+    savedUser.chatId = user.chat_id;
+    await savedUser.save();
+    return savedUser;
   } else {
     return await User.create({"name": user.name, "chatId": user.chat_id});
   }
