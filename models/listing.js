@@ -10,7 +10,10 @@ var ListingSchema = new Schema({
   reservedFCTransfer: { type: Number },
   reservedFCProcessing: { type: Number },
   inboundShipped: { type: Number },
-  ps: { type: Number }
+  ps: { type: Number },
+  createAt: { type: Date, default: Date.now },
+  updateAt: { type: Date, default: Date.now },
+  deletedAt: { type: Date }
 })
 
 ListingSchema.plugin(BaseModel);
