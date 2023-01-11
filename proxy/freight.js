@@ -453,8 +453,8 @@ var parseBoxCount = async function(boxInfo) {
 
 async function parseShippedDate(dateInfo) {
   if (dateInfo) {    
-    return moment('1900/01/01').add(dateInfo, 'days');
-    // return moment(dateInfo, 'MM/DD/YY');
+    // return moment('1900/01/01').add(dateInfo, 'days');
+    return moment(dateInfo, 'YYYY/MM/DD');
   }
 }
 
