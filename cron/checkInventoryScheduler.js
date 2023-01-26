@@ -37,5 +37,5 @@ const scheduleCronstyle = ()=>{
 exports.initScheduledJobs = () => {
   scheduleCronstyle();
 }
-generateProduct.generateProduct();
+// generateProduct.generateProduct();
 // checkProductsInventory.checkProductsInventory();
