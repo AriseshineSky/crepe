@@ -176,13 +176,24 @@ async function calculateProducingFirstOutOfStockPeriod(status) {
   return period;
 }
 
-async function calculateMinInventory(freightType, status, sales, product) {
+async function calculateMinInventory(freightType, status, sales, product, gap) {
   var period = 0;
   var minInventory = 100000;
   var type = freightType[0];
   var freight = await findFreightByType(type);
-  for (var i = 0; i < status.length; i++) {
-    if (status[i].period > freight.period + product.cycle) {
+  // 如果存在断货，检查空运到货之后的最小库存
+  // 如果不存在断货，检查所有时刻最小库存
+  if (gap > 0) {
+    for (var i = 0; i < status.length; i++) {
+      if (status[i].period > freight.period + product.cycle + GAP) {
+        period = Math.floor(status[i].before / sales.minAvgSales);
+        if (period < minInventory) {
+          minInventory = period;
+        }
+      }
+    }
+  } else{
+    for (var i = 0; i < status.length; i++) {
       period = Math.floor(status[i].before / sales.minAvgSales);
       if (period < minInventory) {
         minInventory = period;
@@ -575,7 +586,6 @@ exports.getPlanV3 = async function(asin, producingId) {
     if (quantity.boxes > 0) {
       await updateProduct(product, {orderQuantity: quantity.quantity});
       if (producingsPlan) {
-        console.log(3)
         plan = await bestPlanV4(quantity, product, sales, producingsPlan.inbounds || []);
         plan.plans = producingsPlan.plans;
       } else {
@@ -842,16 +852,36 @@ async function formatPlan(plan, unitsPerBox) {
 
 async function calculatePlan(freightPlan, freightType, inbounds, product, sales, result) {
   var newPlan = await getNewFreightPlan(freightPlan, freightType, inbounds, product, sales);
-
+  // 更新策略
+  // 1. 存在断货: 
+  //   1.1 最小库存不满足要求
+  //     1.1.1新计划断货时间更短
+  //     1.1.2新计划断货时间相同，但是最小库存更多
+  //   1.2 最小库存满足要求
+  //     1.2.1新计划断货时间更短
+  // 2. 不存在断货
+  //   2.1 最小库存不满足要求
+  //     2.1.1 新计划不断货，而且最小库存更多
+  //   2.2 最小库存满足要求 (找到发货方案)
   if (newPlan.minInventory >= product.minInventory && newPlan.gap == 0) {
+    // 最低库存已满足要求，并且没有断货，当前运输计划费用最低
     result.plan = JSON.parse(JSON.stringify(newPlan));
     result.status = "done";
     return;
   } else {
     if (result.plan.gap > 0) {
+      // 已有的发货计划存在断货
       if (newPlan.gap < result.plan.gap) {
         result.plan = JSON.parse(JSON.stringify(newPlan));
       } else if (newPlan.gap === result.plan.gap) {
+        if (result.plan.minInventory < product.minInventory) {
+          if (newPlan.minInventory > result.plan.minInventory) {
+            result.plan = JSON.parse(JSON.stringify(newPlan));
+          }
+        }
+      }
+    } else {
+      if (newPlan.gap === 0) {
         if (result.plan.minInventory < product.minInventory) {
           if (newPlan.minInventory > result.plan.minInventory) {
             result.plan = JSON.parse(JSON.stringify(newPlan));
@@ -991,7 +1021,7 @@ async function getNewFreightPlan(freightPlan, freightType, inbounds, product, sa
   var status = await recalculateInboundQueue(inboundQueue, sales);
   var newPlan = await calculatePlanAmounts(freightPlan, product);
   newPlan.gap = await calculateOutOfStockPeriod(status);
-  newPlan.minInventory = await calculateMinInventory(freightType, status, sales, product);
+  newPlan.minInventory = await calculateMinInventory(freightType, status, sales, product, newPlan.gap);
   newPlan.inventoryStatus = status;
   return newPlan;
 }
