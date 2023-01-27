@@ -59,4 +59,4 @@ typings/
 
 /data
 *.csv
-./config.js
+config.js
