@@ -364,6 +364,11 @@ var findAll = async function() {
   return await Product.find({ps : {$gt : 2}}).populate('pm');
 }
 
+var showAll = async function() {
+  return await Product.find({ps : {$gt : 0}}).populate('pm');
+}
+
+exports.showAll = showAll;
 var findAllAsins = async function() {
   return Product.find().select('asin');
 }

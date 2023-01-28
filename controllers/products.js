@@ -72,7 +72,6 @@ exports.syncFreight = async function (req, res, next) {
   }
 };
 
-
 exports.delete = async function (req, res, next) {
   var asin = req.body.asin;
   var productId = req.body.productId;
@@ -81,7 +80,7 @@ exports.delete = async function (req, res, next) {
 };
 
 exports.index = async function (req, res, next) {
-  var products = await Product.findAll();
+  var products = await Product.showAll();
   res.render('product/index', {
     products: products
   });
