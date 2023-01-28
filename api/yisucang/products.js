@@ -20,7 +20,7 @@ const YISUCANG_ID_KEYS = [
   },
   {
     PartnerID: '21169534',
-    PartnerKey: '6d368a38-6fff-63c2-4ed7-5ed10206791a'
+    PartnerKey: 'accf4efe-bd5f-0333-cdc8-9ceca8e8cc84'
   },
   {
     PartnerID: '84163649',
