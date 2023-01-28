@@ -76,7 +76,7 @@ async function listFreights() {
   const sheets = google.sheets({version: 'v4', auth});
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: '1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE',
-    range: 'freight!A1:P932',
+    range: 'freight!A1:P550',
   });
   const rows = res.data.values;
   if (!rows || rows.length === 0) {
@@ -105,7 +105,7 @@ async function listInbounds() {
   const sheets = google.sheets({version: 'v4', auth});
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: '1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE',
-    range: 'inbounds!A1:M1000',
+    range: 'inbounds!A1:M500',
   });
   const rows = res.data.values;
   if (!rows || rows.length === 0) {
@@ -121,7 +121,7 @@ async function listRecieveds() {
   const sheets = google.sheets({version: 'v4', auth});
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: '1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE',
-    range: 'recieved!A1:M1000',
+    range: 'recieved!A1:M500',
   });
   const rows = res.data.values;
   if (!rows || rows.length === 0) {
@@ -137,7 +137,7 @@ async function listProducts() {
   const sheets = google.sheets({version: 'v4', auth});
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: '1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE',
-    range: 'crepe!A1:X220',
+    range: 'crepe!A1:X520',
   });
   const rows = res.data.values;
   if (!rows || rows.length === 0) {
