@@ -30,6 +30,7 @@
         <th>设置平均销量</th>
         <th>Actions</th>
         <th>箱规</th>
+        <th>放弃</th>
       </tr>
     </thead>
     <tbody>
@@ -93,6 +94,9 @@
             <%= product.box.length %>*<%= product.box.width %>*<%= product.box.height %>cm<br/>
             <%= product.box.weight %>kg<br/>
             <%= product.unitsPerBox %>个/箱
+          </td>
+          <td>
+            <%= product.discontinue %>
           </td>
         </tr>
       <% }) %>
