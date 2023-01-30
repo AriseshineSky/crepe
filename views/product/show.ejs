@@ -96,6 +96,16 @@
               <label>每箱数量(个)：</label>
               <span class="form-control" ><%- product.unitsPerBox %></span>
             </div>
+            <div class="form-check">
+              <% if (product.discontinue) { %>
+                <input class="form-check-input" type="checkbox" name="discontinue" value="true" checked id="defaultDiscontinue">
+              <% } else { %>
+                <input class="form-check-input" type="checkbox" name="discontinue" value="true" id="defaultDiscontinue">
+              <% } %>
+              <label class="form-check-label" for="defaultDiscontinue">
+                放弃
+              </label>
+            </div>
 
           <div class="card-footer text-muted">
             <a href="/products/<%= product.asin %>/edit" target="_blank" type="button" class="btn btn-primary">Edit</a>

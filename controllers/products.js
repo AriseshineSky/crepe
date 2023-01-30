@@ -228,6 +228,7 @@ exports.save = async function (req, res, next) {
   var maxAvgSales = req.body.maxAvgSales;
   var unitsPerBox = req.body.unitsPerBox;
   var minInventory = req.body.minInventory;
+  var discontinue = req.body.discontinue;
   var box = {
     length: req.body["box.length"],
     width: req.body["box.width"],
@@ -275,6 +276,7 @@ exports.save = async function (req, res, next) {
     product.yisucangId = yisucangId;
     product.airDelivery = airDelivery;
     product.sea = sea;
+    product.discontinue = discontinue;
     product.minInventory = minInventory;
     product.save(function (err) {
       if (err) {
