@@ -7,7 +7,7 @@ var generateProduct = require('../lib/generateProductByListing');
 const logger = require('../common/logger');
 
 const scheduleCronstyle = ()=>{
-  schedule.scheduleJob('0 0 1 * * *', () => {
+  schedule.scheduleJob('0 0 1 * * 2,4,0', () => {
     logger.info('start to check product inventory');
     checkProductsInventory.checkProductsInventory();
   });
