@@ -20,6 +20,8 @@ router.get('/:asin/producings/:producingId/plan', products.producingPlan);
 router.get('/:asin/freights', products.freights);
 router.get('/:asin/syncFreight', products.syncFreight);
 router.get('/:asin/report', products.generateReport);
+router.get('/:asin/showPlan', products.showPlan);
+router.post('/:asin/plan', products.updatePlan);
 router.post('/create', products.create);
 router.get('/sync', products.sync);
 router.get('/syncpm', products.syncpm);
