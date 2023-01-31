@@ -92,7 +92,7 @@
           
             <form role="form" name="saveProduct" id="save_product" action=<%- `/products/${purchase.product.asin}/plan` %> method="post">
               <div class="modal-footer justify-content-end">
-                <input class="form-control" name="purchase" value="<%= JSON.stringify(purchase) %>" type="hidden" >
+                <input class="form-control" name="plan" value="<%= JSON.stringify(purchase) %>" type="hidden" >
                 <button type="submit" class="btn btn-primary btn-lg">Save</button>
               </div> 
             </form>
