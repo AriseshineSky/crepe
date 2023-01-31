@@ -59,6 +59,20 @@ exports.updateAllProuctSalesAndInventories = async function (req, res, next) {
   res.render('index', {title: "regist"});
 };
 
+exports.updatePlan = async function (req, res, next) {
+  var asin = req.params.asin;
+  let purchase = req.body.purchase;
+  var product = await Product.getProductByAsin(asin);
+  if (!product) {
+    res.render404('这个产品不存在。');
+    return;
+  } else {
+    product.purchase = purchase;
+    await Product.save(product);
+    res.redirect('/products/' + product.asin + '/showPlan');
+  }
+}
+
 exports.syncFreight = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);
@@ -107,6 +121,15 @@ exports.plan = async function (req, res, next) {
     res.render('product/plan', {purchase: purchase});
   } else {
     res.render('product/inventory');
+  }
+};
+
+exports.showPlan = async function (req, res, next) {
+  var asin = req.params.asin;
+  var product = await Product.getProductByAsin(asin);
+  console.log(product)
+  if (product.purchase) {
+    res.render('product/plan', {purchase: JSON.parse(product.purchase)});
   }
 };
 
