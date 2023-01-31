@@ -61,13 +61,13 @@ exports.updateAllProuctSalesAndInventories = async function (req, res, next) {
 
 exports.updatePlan = async function (req, res, next) {
   var asin = req.params.asin;
-  let purchase = req.body.purchase;
+  let plan = req.body.plan;
   var product = await Product.getProductByAsin(asin);
   if (!product) {
     res.render404('这个产品不存在。');
     return;
   } else {
-    product.purchase = purchase;
+    product.plan = plan;
     await Product.save(product);
     res.redirect('/products/' + product.asin + '/showPlan');
   }
@@ -127,9 +127,8 @@ exports.plan = async function (req, res, next) {
 exports.showPlan = async function (req, res, next) {
   var asin = req.params.asin;
   var product = await Product.getProductByAsin(asin);
-  console.log(product)
-  if (product.purchase) {
-    res.render('product/plan', {purchase: JSON.parse(product.purchase)});
+  if (product.plan) {
+    res.render('product/plan', {purchase: JSON.parse(product.plan)});
   }
 };
 
