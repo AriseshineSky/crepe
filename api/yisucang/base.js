@@ -11,7 +11,6 @@ module.exports = function(url, data) {
       data: data,
       url: baseUrl + url
     };
-  
     const axios = require('axios');
     axios(options).then(
       function(res){
