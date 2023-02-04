@@ -361,7 +361,7 @@ async function prepareStock(product) {
 }
 exports.prepareStock = prepareStock;
 var findAll = async function() {
-  return await Product.find({ps : {$gt : 2}}).populate('pm');
+  return await Product.find({ps : {$gt : 2}, discontinue: false}).populate('pm');
 }
 
 var showAll = async function() {
