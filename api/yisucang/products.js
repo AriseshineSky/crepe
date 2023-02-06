@@ -58,6 +58,11 @@ const YISUCANG_ID_KEYS = [
   {
     PartnerID: '36495486',
     PartnerKey: '615e4ad7-f1dc-20a6-95b8-dd20676ac81e'
+  },
+  // Shawn
+  {
+    PartnerID: '64379481',
+    PartnerKey: '21c28a12-29fb-e88c-ff7d-3e8467027553'
   }
 ]
 yisucangApis = {
