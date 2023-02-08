@@ -60,6 +60,15 @@ const YISUCANG_ID_KEYS = [
   {
     PartnerID: '64379481',
     PartnerKey: '21c28a12-29fb-e88c-ff7d-3e8467027553'
+  },
+  {
+    PartnerID: '77284373',
+    PartnerKey: 'fb9c267c-ec14-3a4c-44bf-7b0f1267fdd8'
+  },
+  // Janet
+  {
+    PartnerID: '83265699',
+    PartnerKey: '30a3a6e8-3c5c-1116-fecc-3a14fc5cb371'
   }
 ]
 function inventories() {
