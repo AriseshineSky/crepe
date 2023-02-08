@@ -69,6 +69,11 @@ const YISUCANG_ID_KEYS = [
   {
     PartnerID: '83265699',
     PartnerKey: '30a3a6e8-3c5c-1116-fecc-3a14fc5cb371'
+  },
+  // Michael
+  {
+    PartnerID: '67527241',
+    PartnerKey: '48c5de4f-860b-a2d1-bbd9-fa82a76ec542'
   }
 ]
 function inventories() {
