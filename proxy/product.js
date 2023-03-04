@@ -28,12 +28,19 @@ async function getInboundShippedCount(asin) {
 
 exports.getInboundShippedCount = getInboundShippedCount;
 
-async function updateAllStock() {
-  const products = await findAll();
-  for (var product of products) {
+async function updateAllStock(asin) {
+  if (asin) {
+    let product = await getProductByAsin(asin);
     await prepareStock(product);
     console.log(`asin: ${product.asin}, yisucang: ${product.stock}`)
     await save(product);
+  } else {
+    const products = await findAll();
+    for (var product of products) {
+      await prepareStock(product);
+      console.log(`asin: ${product.asin}, yisucang: ${product.stock}`)
+      await save(product);
+    }
   }
 }
 

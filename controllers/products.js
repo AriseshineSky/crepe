@@ -10,6 +10,12 @@ exports.updateAllStock = async function (req, res, next) {
   Product.updateAllStock();
   res.render('index', {title: "regist"});
 };
+exports.updateAllStockByAsin = async function (req, res, next) {
+  var asin = req.params.asin;
+  Product.updateAllStock(asin);
+  res.render('index', {title: "regist"});
+};
+
 exports.syncAllProductFreights = async function (req, res, next) {
   Product.syncAllProductFreights(2);
   res.render('index', {title: "regist"});
