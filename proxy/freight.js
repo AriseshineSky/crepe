@@ -153,7 +153,6 @@ async function checkFreightsV2(freights, inbounds, recieved) {
   var originalBoxCount = await countBoxes(freights);
   var leftBoxes = originalBoxCount - await countBoxes(inbounds);
   while ((await countBoxes(freights)) > leftBoxes && freights.length > 0) {
-    console.log(freights);
     if (await removeFreight(freights, false)) {
       break;
     }
@@ -385,7 +384,6 @@ var parseBox = async function(boxInfo) {
     } else {
       logger.info(diRe);
       logger.info(boxInfo);
-      console.log(boxInfo);
     }
 
     var weightRe = /[\d\s\.]*(kg)/i;
@@ -400,7 +398,6 @@ var parseBox = async function(boxInfo) {
           box.weight = Number(diStr[0].match(/[\d\.]+/)[0]);
         }
       }
-      console.log(boxInfo);
     }
 
     if (!box.weight) {
@@ -421,7 +418,6 @@ var parseBox = async function(boxInfo) {
           box.units = Number(unitsStr[0].match(/[\d]+/)[0]);
         }
       }
-      console.log(boxInfo);
     }
     if (!box.units) {
       logger.error(unitsRe);
@@ -460,7 +456,6 @@ async function parseShippedDate(dateInfo) {
 
 async function parseType(type) {
   if (type) {
-    console.log(type);
     if (type.includes("海运")) {
       if (type.includes("限时达")) {
         return 'seaExpress';
