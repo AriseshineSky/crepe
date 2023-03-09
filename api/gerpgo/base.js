@@ -1,7 +1,7 @@
-module.exports = function(url, data, token) {
+module.exports = function(url, data, token, salt) {
   return new Promise((resolve, reject) => {
     var md5 = require('md5');
-    var sign = md5(JSON.stringify(data) + '62daace5e4b073604b7e0b27')
+    var sign = md5(JSON.stringify(data) + salt)
     const options = {
       method: 'POST',
       headers: { 
