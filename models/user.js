@@ -1,16 +1,26 @@
-var mongoose = require('mongoose');
-var BaseModel= require('./base_model');
+var mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+var BaseModel = require("./base_model");
 var Schema = mongoose.Schema;
 var UserSchema = new Schema({
-  name: { type: String },
-  chatId: { type: String }
-})
+	name: { type: String, unique: true },
+	email: { type: String, unique: true, required: true },
+	password: {
+		type: String,
+		set(val) {
+			let salt = bcrypt.genSaltSync(10);
+			let hash = bcrypt.hashSync(val, salt);
+			return hash;
+		},
+	},
+	chatId: { type: String },
+});
 
 UserSchema.plugin(BaseModel);
-UserSchema.pre('save', function(next) {
-  var now = new Date();
-  this.updateAt = now;
-  next();
-})
+UserSchema.pre("save", function (next) {
+	var now = new Date();
+	this.updateAt = now;
+	next();
+});
 
-mongoose.model('User', UserSchema);
+mongoose.model("User", UserSchema);
