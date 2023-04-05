@@ -20,6 +20,28 @@ var getToken = function(url) {
     );
   })
 }
+var getToken2 = function(url) {
+  return new Promise((resolve, reject) => {
+    axios.post(url, {
+      "appId":"3e0f7d42936a4343b3ad05d1239524ca",
+      "appKey":"6399d977e4b086e9ac8877e0"
+    }).then(
+      function(res){
+        var token = {
+          accessToken: res.data.data.accessToken,
+          expiresIn: Date.now() / 1000 + res.data.data.expiresIn
+        }
+        resolve(token);
+      }
+    ).catch(
+      function(error){
+        console.log(error)
+        reject(error)
+      }
+    );
+  })
+}
 module.exports = {
-  getToken
+  getToken,
+  getToken2
 }
