@@ -12,12 +12,13 @@ exports.login = async function (req, res, next) {
 			name: req.body.name,
 			password: req.body.password,
 		});
+		console.log(token);
+		res.cookie("token", token);
 		res.send({
 			user,
 			token,
 		});
 	} catch (error) {
-		console.log(error);
 		return res.status(422).send({
 			message: error,
 		});
@@ -40,7 +41,7 @@ exports.create = async function (req, res, next) {
 	}
 };
 exports.showRegister = async function (req, res, next) {
-	res.render("user/register", { title: "regist" });
+	res.render("user/register", { title: "regist", message: "" });
 };
 exports.showLogin = async function (req, res, next) {
 	// res.render("user/login");

@@ -40,6 +40,7 @@
     "node-schedule": "^2.1.0",
     "node-telegram-bot-api": "^0.60.0",
     "nodemon": "^2.0.20",
+    "rbac": "^5.0.3",
     "shimo-sdk-cabinet": "^4.5.0",
     "sinon": "^15.0.0"
   },

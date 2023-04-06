@@ -13,6 +13,7 @@ var productsRouter = require("./routes/products");
 var freightsRouter = require("./routes/freights");
 var usersRouter = require("./routes/users");
 var expressLayouts = require("express-ejs-layouts");
+const auth = require("./middlewares/auth");
 var app = express();
 require("dotenv").config();
 scheduledFunctions.initScheduledJobs();
@@ -26,12 +27,21 @@ app.use(
 		saveUninitialized: false,
 	}),
 );
+const filteredPath = ["/users/login", "/users/api/login", "/users/register", "/users/api/register"];
+
+app.use(cookieParser());
+app.use("/", async (req, res, next) => {
+	console.log(req.path);
+	if (filteredPath.indexOf(req.path) > -1) {
+		return next();
+	}
+	await auth()(req, res, next);
+});
 app.use(flash());
 app.use(errorPageMiddleware.errorPage);
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(expressLayouts);
 app.use("/", indexRouter);

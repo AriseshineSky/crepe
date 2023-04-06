@@ -21,7 +21,11 @@ exports.getToken = async function (user) {
 		},
 		process.env.SECRET,
 	);
-	return token;
+	console.log(process.env.SECRET);
+	console.log(token);
+	console.log(jwt.verify(token, process.env.SECRET));
+	console.log("end");
+	return { token, user: savedUser };
 };
 
 exports.create = async function (user) {
@@ -47,6 +51,12 @@ exports.findOrCreate = async function (user) {
 	}
 };
 
+exports.findById = async function (id) {
+	if (!id) {
+		return null;
+	}
+	return await User.findById(id);
+};
 exports.updateUser = async function (user) {
 	var savedUser = await User.findOne({ name: user.name });
 	if (savedUser) {

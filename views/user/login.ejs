@@ -1,10 +1,29 @@
 <%- contentFor('pageSection') %>
-	<h1>User Login</h1>
-	<form action="/users/login" method="post">
-		<label for="name">Username:</label>
-		<input type="text" id="username" name="name"><br><br>
-		<label for="password">Password:</label>
-		<input type="password" id="password" name="password"><br><br>
-		<input type="submit" value="Login">
-	</form>
+	<div class="main">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6 col-md-offset-3">
+					<div class="card">
+						<div class="card-header">
+							<h3 class="title">Login</h3>
+						</div>
+						<div class="card-body">
+							<form action="/users/login" method="post">
+								<div class="form-group">
+									<label for="name">User Name</label>
+									<input name="name" type="name" class="form-control" id="name" placeholder="User Name">
+								</div>
+								<div class="form-group">
+									<label for="password">Password</label>
+									<input name="password" type="password" class="form-control" id="password" placeholder="Password">
+								</div>
+								<button type="submit" class="btn btn-primary">Submit</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
