@@ -1,11 +1,28 @@
-var models = require("../models");
-var Product = models.Product;
-var User = models.User;
-var mongoose = require("mongoose");
-const getPm = require("../api/getPM");
-var moment = require("moment");
-
+const models = require("../models");
+const User = models.User;
+const jwt = require("jsonwebtoken");
 var logger = require("../common/logger");
+
+exports.getToken = async function (user) {
+	const savedUser = await User.findOne({
+		name: user.name,
+	});
+	console.log(user, savedUser);
+	if (!savedUser) {
+		throw new Error("user does not exist");
+	}
+	const isPasswordValid = require("bcryptjs").compareSync(user.password, savedUser.password);
+	if (!isPasswordValid) {
+		throw new Error("invalid password");
+	}
+	const token = jwt.sign(
+		{
+			id: String(savedUser._id),
+		},
+		process.env.SECRET,
+	);
+	return token;
+};
 
 exports.create = async function (user) {
 	if (!user) {

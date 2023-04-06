@@ -6,5 +6,6 @@ router.post("/api/register", users.create);
 router.get("/register", users.showRegister);
 router.get("/api/users", users.list);
 router.get("/login", users.showLogin);
+router.post("/login", users.login);
 
 module.exports = router;

@@ -7,37 +7,27 @@ exports.create = async function (req, res, next) {
 };
 
 exports.login = async function (req, res, next) {
-	const user = await User.findOne({
-		name: req.body.username,
-	});
-	if (!user) {
+	try {
+		const { token, user } = await User.getToken({
+			name: req.body.name,
+			password: req.body.password,
+		});
+		res.send({
+			user,
+			token,
+		});
+	} catch (error) {
+		console.log(error);
 		return res.status(422).send({
-			message: "user does not exist",
+			message: error,
 		});
 	}
-	const isPasswordValid = require("bcryptjs").compareSync(req.body.password, user.password);
-	if (!isPasswordValid) {
-		return res.status(422).send({
-			message: "invalid password",
-		});
-	}
-	const token = jwt.sign(
-		{
-			id: String(user._id),
-		},
-		SECRET,
-	);
-
-	res.send({
-		user,
-		token,
-	});
 };
 exports.list = async function (req, res, next) {};
 exports.create = async function (req, res, next) {
 	try {
 		await User.create({
-			name: req.body.username,
+			name: req.body.name,
 			email: req.body.email,
 			password: req.body.password,
 		});
@@ -50,9 +40,9 @@ exports.create = async function (req, res, next) {
 	}
 };
 exports.showRegister = async function (req, res, next) {
-	res.render("user/register", { title: "regist", messages: {} });
+	res.render("user/register", { title: "regist" });
 };
 exports.showLogin = async function (req, res, next) {
 	// res.render("user/login");
-	res.render("login", { title: "login" });
+	res.render("user/login", { title: "login" });
 };
