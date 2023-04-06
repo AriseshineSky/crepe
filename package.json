@@ -36,6 +36,8 @@
     "mongoose": "^6.7.0",
     "mongosh": "^1.6.1",
     "morgan": "~1.9.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.2.0",
     "node-csv": "^0.1.2",
     "node-schedule": "^2.1.0",
     "node-telegram-bot-api": "^0.60.0",

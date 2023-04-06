@@ -7,10 +7,11 @@ exports.getToken = async function (user) {
 	const savedUser = await User.findOne({
 		name: user.name,
 	});
-	console.log(user, savedUser);
 	if (!savedUser) {
 		throw new Error("user does not exist");
 	}
+	console.log(user);
+	console.log(savedUser);
 	const isPasswordValid = require("bcryptjs").compareSync(user.password, savedUser.password);
 	if (!isPasswordValid) {
 		throw new Error("invalid password");
@@ -21,10 +22,6 @@ exports.getToken = async function (user) {
 		},
 		process.env.SECRET,
 	);
-	console.log(process.env.SECRET);
-	console.log(token);
-	console.log(jwt.verify(token, process.env.SECRET));
-	console.log("end");
 	return { token, user: savedUser };
 };
 
@@ -43,11 +40,22 @@ exports.findOrCreate = async function (user) {
 	if (!user) {
 		return null;
 	}
-	var savedUser = await User.findOne({ name: user.name });
+	var savedUser = await User.findOne({ name: user.username });
 	if (savedUser) {
+		return await savedUser.update({
+			name: user.username,
+			chatId: user.chat_id,
+			realm: user.realm,
+			password: "vine153!!",
+		});
 		return savedUser;
 	} else {
-		return await User.create({ name: user.name, chatId: user.chat_id });
+		return await User.create({
+			name: user.username,
+			chatId: user.chat_id,
+			realm: user.realm,
+			password: "vine153!!",
+		});
 	}
 };
 
