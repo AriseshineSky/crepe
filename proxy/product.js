@@ -120,6 +120,36 @@ async function checkStatus(inbound, units, sales) {
 	return units - inbound.period * sales.minAvgSales;
 }
 
+async function getDatabaseConnection() {
+	const connection = mysql.createConnection({
+		host: "mysql",
+		port: 3306,
+		user: "root",
+		password: "root",
+		database: "pl_warehouse",
+	});
+	connection.connect((error) => {
+		console.log(error);
+	});
+	return connection;
+}
+
+async function syncFromPlwhs() {
+	const connection = await getDatabaseConnection();
+	connection.query("SELECT * FROM Product;", async (error, results, fields) => {
+		if (error) {
+			console.log(error);
+			// throw error;
+		}
+		console.log(results);
+		for (let product of results) {
+			let savedProduct = await Product.find({ where: { plwhsId: product.id } });
+			if (!savedProduct) {
+			}
+		}
+	});
+}
+exports.syncFromPlwhs = syncFromPlwhs;
 async function syncPm() {
 	const connection = mysql.createConnection({
 		host: "mysql",

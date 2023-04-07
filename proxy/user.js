@@ -47,6 +47,7 @@ exports.findOrCreate = async function (user) {
 			chatId: user.chat_id,
 			realm: user.realm,
 			password: "vine153!!",
+			plwhsId: user.id,
 		});
 		return savedUser;
 	} else {
@@ -55,6 +56,7 @@ exports.findOrCreate = async function (user) {
 			chatId: user.chat_id,
 			realm: user.realm,
 			password: "vine153!!",
+			plwhsId: user.id,
 		});
 	}
 };
