@@ -31,9 +31,8 @@ const scheduleCronstyle = () => {
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product pm");
 		Product.syncPm();
+		Product.syncFromPlwhs();
 	});
-
-	Product.syncFromPlwhs();
 };
 
 exports.initScheduledJobs = () => {

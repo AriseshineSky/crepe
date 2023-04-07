@@ -133,7 +133,11 @@ async function getDatabaseConnection() {
 	});
 	return connection;
 }
-
+async function getProductById(id) {
+	if (!id) return null;
+	return await Product.findById(id);
+}
+exports.getProductById = getProductById;
 async function syncFromPlwhs() {
 	const connection = await getDatabaseConnection();
 	connection.query("SELECT * FROM Product;", async (error, results, fields) => {

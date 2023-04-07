@@ -1,18 +1,18 @@
-var Product = require("../proxy").Product;
-var Csv = require("../proxy").Csv;
-var Freight = require("../proxy").Freight;
-var mongoose = require("mongoose");
-var moment = require("moment");
-var syncProducts = require("../lib/getInfoFromGoogleSheet");
-var logger = require("../common/logger");
+let Product = require("../proxy").Product;
+let Csv = require("../proxy").Csv;
+let Freight = require("../proxy").Freight;
+let mongoose = require("mongoose");
+let moment = require("moment");
+let syncProducts = require("../lib/getInfoFromGoogleSheet");
+let logger = require("../common/logger");
 
 exports.updateAllStock = async function (req, res, next) {
 	Product.updateAllStock();
 	res.render("index", { title: "regist" });
 };
 exports.updateAllStockByAsin = async function (req, res, next) {
-	var asin = req.params.asin;
-	Product.updateAllStock(asin);
+	let productId = req.params.productId;
+	Product.updateAllStock(productId);
 	res.render("index", { title: "regist" });
 };
 
@@ -21,8 +21,8 @@ exports.syncAllProductFreights = async function (req, res, next) {
 	res.render("index", { title: "regist" });
 };
 exports.show = async function (req, res, next) {
-	var asin = req.params.asin;
-	var product = await Product.getProductByAsin(asin);
+	let productId = req.params.productId;
+	let product = await Product.getProductById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -35,8 +35,8 @@ exports.show = async function (req, res, next) {
 };
 
 exports.generateReport = async function (req, res, next) {
-	var asin = req.params.asin;
-	var product = await Product.getProductByAsin(asin);
+	let asin = req.params.productId;
+	let product = await Product.getProductByAsin(asin);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -50,8 +50,8 @@ exports.generateReport = async function (req, res, next) {
 };
 
 exports.freights = async function (req, res, next) {
-	var asin = req.params.asin;
-	var product = await Product.getProductByAsin(asin);
+	let asin = req.params.productId;
+	let product = await Product.getProductByAsin(asin);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -66,9 +66,9 @@ exports.updateAllProuctSalesAndInventories = async function (req, res, next) {
 };
 
 exports.updatePlan = async function (req, res, next) {
-	var asin = req.params.asin;
+	let asin = req.params.productId;
 	let plan = req.body.plan;
-	var product = await Product.getProductByAsin(asin);
+	let product = await Product.getProductByAsin(asin);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -80,8 +80,8 @@ exports.updatePlan = async function (req, res, next) {
 };
 
 exports.syncFreight = async function (req, res, next) {
-	var asin = req.params.asin;
-	var product = await Product.getProductByAsin(asin);
+	let asin = req.params.productId;
+	let product = await Product.getProductByAsin(asin);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -93,14 +93,14 @@ exports.syncFreight = async function (req, res, next) {
 };
 
 exports.delete = async function (req, res, next) {
-	var asin = req.body.asin;
-	var productId = req.body.productId;
+	let asin = req.body.asin;
+	let productId = req.body.productId;
 	await Product.remove(asin, productId);
 	res.redirect("/products");
 };
 
 exports.index = async function (req, res, next) {
-	// var products = await Product.showAll();
+	// let products = await Product.showAll();
 	const products = await Product.findByUser(req.user);
 	res.render("product/index", {
 		products: products,
@@ -122,8 +122,8 @@ exports.syncpm = async function (req, res, next) {
 };
 
 exports.plan = async function (req, res, next) {
-	var asin = req.params.asin;
-	var purchase = await Product.getPlanV3(asin);
+	let asin = req.params.productId;
+	let purchase = await Product.getPlanV3(asin);
 	if (purchase.plan) {
 		res.render("product/plan", { purchase: purchase });
 	} else {
@@ -132,17 +132,17 @@ exports.plan = async function (req, res, next) {
 };
 
 exports.showPlan = async function (req, res, next) {
-	var asin = req.params.asin;
-	var product = await Product.getProductByAsin(asin);
+	let asin = req.params.productId;
+	let product = await Product.getProductByAsin(asin);
 	if (product.plan) {
 		res.render("product/plan", { purchase: JSON.parse(product.plan) });
 	}
 };
 
 exports.producingPlan = async function (req, res, next) {
-	var asin = req.params.asin;
-	var producingId = req.params.producingId;
-	var purchase = await Product.getPlanV3(asin, producingId);
+	let asin = req.params.productId;
+	let producingId = req.params.producingId;
+	let purchase = await Product.getPlanV3(asin, producingId);
 	if (purchase.plan) {
 		res.render("product/plan", { purchase: purchase });
 	} else {
@@ -151,8 +151,8 @@ exports.producingPlan = async function (req, res, next) {
 };
 
 exports.producingsPlan = async function (req, res, next) {
-	var asin = req.params.asin;
-	var purchase = await Product.getProducingsPlan(asin);
+	let asin = req.params.productId;
+	let purchase = await Product.getProducingsPlan(asin);
 	if (purchase.plan) {
 		res.render("product/plan", { purchase: purchase });
 	} else {
@@ -161,8 +161,8 @@ exports.producingsPlan = async function (req, res, next) {
 };
 
 exports.report = async function (req, res, next) {
-	var asin = req.params.asin;
-	var product = await Product.getProductByAsin(asin);
+	let asin = req.params.productId;
+	let product = await Product.getProductByAsin(asin);
 	await generateReport(asin);
 	if (!product) {
 		res.render404("这个产品不存在。");
@@ -176,8 +176,8 @@ exports.report = async function (req, res, next) {
 };
 
 exports.edit = async function (req, res, next) {
-	var asin = req.params.asin;
-	var product = await Product.getProductByAsin(asin);
+	let productId = req.params.productId;
+	let product = await Product.getProductById(productId);
 
 	if (!product) {
 		res.render404("这个产品不存在。");
@@ -197,24 +197,24 @@ exports.new = function (req, res, next) {
 };
 
 exports.create = async function (req, res, next) {
-	var asin = req.body.asin;
-	var cycle = req.body.cycle;
-	var maxAvgSales = req.body.maxAvgSales;
-	var unitsPerBox = req.body.unitsPerBox;
-	var box = {
+	let asin = req.body.asin;
+	let cycle = req.body.cycle;
+	let maxAvgSales = req.body.maxAvgSales;
+	let unitsPerBox = req.body.unitsPerBox;
+	let box = {
 		length: req.body["box.length"],
 		width: req.body["box.width"],
 		height: req.body["box.height"],
 		weight: req.body["box.weight"],
 	};
-	var plwhsId = req.body.plwhsId;
-	var yisucangId = req.body.yisucangId;
-	var airDelivery = req.body.airDelivery;
-	var sea = req.body.sea;
-	var product = await Product.getProductByAsin(asin);
+	let plwhsId = req.body.plwhsId;
+	let yisucangId = req.body.yisucangId;
+	let airDelivery = req.body.airDelivery;
+	let sea = req.body.sea;
+	let product = await Product.getProductByAsin(asin);
 	console.log(product);
 	if (!product) {
-		var newProduct = {
+		let newProduct = {
 			asin: asin,
 			cycle: cycle,
 			unitsPerBox: unitsPerBox,
@@ -251,28 +251,28 @@ exports.create = async function (req, res, next) {
 };
 
 exports.save = async function (req, res, next) {
-	var asin = req.body.asin;
-	var cycle = req.body.cycle;
-	var maxAvgSales = req.body.maxAvgSales;
-	var unitsPerBox = req.body.unitsPerBox;
-	var minInventory = req.body.minInventory;
-	var discontinue = req.body.discontinue;
-	var box = {
+	let asin = req.body.asin;
+	let cycle = req.body.cycle;
+	let maxAvgSales = req.body.maxAvgSales;
+	let unitsPerBox = req.body.unitsPerBox;
+	let minInventory = req.body.minInventory;
+	let discontinue = req.body.discontinue;
+	let box = {
 		length: req.body["box.length"],
 		width: req.body["box.width"],
 		height: req.body["box.height"],
 		weight: req.body["box.weight"],
 	};
-	var plwhsId = req.body.plwhsId;
-	var yisucangId = req.body.yisucangId;
-	var airDelivery = req.body.airDelivery;
-	var sea = req.body.sea;
-	var avgSales = req.body.avgSales;
-	var product = await Product.getProductByAsin(asin);
+	let plwhsId = req.body.plwhsId;
+	let yisucangId = req.body.yisucangId;
+	let airDelivery = req.body.airDelivery;
+	let sea = req.body.sea;
+	let avgSales = req.body.avgSales;
+	let product = await Product.getProductByAsin(asin);
 	const countries = req.body.countries;
 	console.log(product);
 	if (!product) {
-		var newProduct = {
+		let newProduct = {
 			asin: asin,
 			cycle: cycle,
 			unitsPerBox: unitsPerBox,
@@ -319,17 +319,17 @@ exports.save = async function (req, res, next) {
 };
 
 exports.put = async function (req, res, next) {
-	var asin = req.body.asin;
-	var cycle = req.body.cycle;
-	var maxAvgSales = req.body.maxAvgSales;
-	var unitsPerBox = req.body.unitsPerBox;
-	var box = {
+	let asin = req.body.asin;
+	let cycle = req.body.cycle;
+	let maxAvgSales = req.body.maxAvgSales;
+	let unitsPerBox = req.body.unitsPerBox;
+	let box = {
 		length: req.body["box.length"],
 		width: req.body["box.width"],
 		height: req.body["box.height"],
 		weight: req.body["box.weight"],
 	};
-	var product = await Product.getProductByAsin(asin);
+	let product = await Product.getProductByAsin(asin);
 	if (!product) {
 		Product.newAndSave(asin, cycle, unitsPerBox, box, maxAvgSales, function (err, product) {
 			if (err) {
@@ -353,11 +353,11 @@ exports.put = async function (req, res, next) {
 };
 
 exports.addInbound = async function (req, res, next) {
-	var asin = req.params.asin;
-	var quantity = req.body.quantity;
-	var deliveryDue = req.body.deliveryDue;
+	let asin = req.params.productId;
+	let quantity = req.body.quantity;
+	let deliveryDue = req.body.deliveryDue;
 	console.log(quantity);
-	var product = await Product.getProductByAsin(asin);
+	let product = await Product.getProductByAsin(asin);
 	if (!product) {
 		return;
 	} else {
@@ -374,40 +374,40 @@ exports.addInbound = async function (req, res, next) {
 	}
 };
 exports.deleteInbound = async function (req, res, next) {
-	var asin = req.params.asin;
-	var inboundId = req.params.inboundId;
+	let asin = req.params.productId;
+	let inboundId = req.params.inboundId;
 	console.log(inboundId);
 	await Product.deleteInbound(inboundId);
-	var product = await Product.getProductByAsin(asin);
+	let product = await Product.getProductByAsin(asin);
 	res.redirect("/products/" + product.asin + "/inbounds");
 };
 exports.deleteProducing = async function (req, res, next) {
-	var asin = req.params.asin;
-	var producingId = req.params.producingId;
+	let asin = req.params.productId;
+	let producingId = req.params.producingId;
 	await Product.deleteProducing(producingId);
-	var product = await Product.getProductByAsin(asin);
+	let product = await Product.getProductByAsin(asin);
 	res.redirect("/products/" + product.asin + "/inbounds");
 };
 
 exports.updateProducing = async function (req, res, next) {
-	var asin = req.body.asin;
-	var quantity = req.body.quantity;
-	var deliveryDue = req.body.deliveryDue;
-	var producingId = req.body.producingId;
+	let asin = req.body.asin;
+	let quantity = req.body.quantity;
+	let deliveryDue = req.body.deliveryDue;
+	let producingId = req.body.producingId;
 	await Product.updateProducing(producingId, moment(deliveryDue).endOf("day"), quantity);
 	res.redirect("/products/" + asin + "/inbounds");
 };
 exports.updateInbound = async function (req, res, next) {
-	var asin = req.body.asin;
-	var quantity = req.body.quantity;
-	var deliveryDue = req.body.deliveryDue;
-	var inboundId = req.body.inboundId;
+	let asin = req.body.asin;
+	let quantity = req.body.quantity;
+	let deliveryDue = req.body.deliveryDue;
+	let inboundId = req.body.inboundId;
 	await Product.updateInbound(inboundId, deliveryDue, quantity);
 	res.redirect("/products/" + asin + "/inbounds");
 };
 exports.showInbounds = async function (req, res, next) {
-	var asin = req.params.asin;
-	var product = await Product.getProductByAsin(asin);
+	let productId = req.params.productId;
+	let product = await Product.getProductById(productId);
 	console.log(product);
 	if (!product) {
 		return;
@@ -420,18 +420,18 @@ exports.showInbounds = async function (req, res, next) {
 };
 
 exports.update = function (req, res, next) {
-	var asin = req.body.asin;
-	var cycle = req.body.cycle;
-	var maxAvgSales = req.body.maxAvgSales;
-	var unitsPerBox = req.body.unitsPerBox;
-	var box = {
+	let asin = req.body.asin;
+	let cycle = req.body.cycle;
+	let maxAvgSales = req.body.maxAvgSales;
+	let unitsPerBox = req.body.unitsPerBox;
+	let box = {
 		length: req.body["box.length"],
 		width: req.body["box.width"],
 		height: req.body["box.height"],
 		weight: req.body["box.weight"],
 	};
 	const countries = req.body.countries;
-	var product = Product.getProductByAsin(asin);
+	let product = Product.getProductByAsin(asin);
 	if (!product) {
 		res.render404("此产品不存在或已被删除。");
 		return;
@@ -452,7 +452,7 @@ exports.update = function (req, res, next) {
 };
 
 exports.csv = async function (req, res, next) {
-	var products = await Csv.parseCsv("ProductDailyProfit-10212022-11042022.csv");
+	let products = await Csv.parseCsv("ProductDailyProfit-10212022-11042022.csv");
 	res.render("/product/csv", {
 		products: products,
 	});
