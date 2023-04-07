@@ -13,6 +13,7 @@ var UserSchema = new Schema({
 		},
 	},
 	chatId: { type: String },
+	plwhsId: { type: Number },
 });
 UserSchema.plugin(BaseModel);
 UserSchema.pre("save", function (next) {
@@ -22,4 +23,3 @@ UserSchema.pre("save", function (next) {
 });
 
 mongoose.model("User", UserSchema);
-

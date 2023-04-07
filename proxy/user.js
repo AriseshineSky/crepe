@@ -61,6 +61,12 @@ exports.findOrCreate = async function (user) {
 	}
 };
 
+exports.findByPlwhsId = async function (id) {
+	if (!id) {
+		return null;
+	}
+	return await User.findOne({ plwhsId: id });
+};
 exports.findById = async function (id) {
 	if (!id) {
 		return null;

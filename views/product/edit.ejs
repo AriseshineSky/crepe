@@ -31,9 +31,22 @@
                   <input class="form-control" name="cycle" value="<%= product.cycle %>">
                 </div>
                 <div class="input-group input-group-static mb-4">
-                  <label>最小库存保有量(天):</label>
+                  <label>最小库存保有量(天):</label>    
                   <input class="form-control" name="minInventory" value="<%= product.minInventory %>">
-                </div>
+                </div>  
+								<div class="form-group"> 
+                  <label>卖场:</label>   
+										<label><input type="checkbox" name="countries"  value="US" <% if (product.countries.includes('US')) { %>checked<% }%> >US</label>
+										<label><input type="checkbox" name="countries"  value="CA" <% if (product.countries.includes('CA')) { %>checked<% }%> >CA</label>
+										<label><input type="checkbox" name="countries"  value="MX" <% if (product.countries.includes('MX')) { %>checked<% }%> >MX</label>
+										<label><input type="checkbox" name="countries"  value="UK" <% if (product.countries.includes('UK')) { %>checked<% }%> >UK</label>
+										<label><input type="checkbox" name="countries"  value="DE" <% if (product.countries.includes('DE')) { %>checked<% }%> >DE</label>
+										<label><input type="checkbox" name="countries"  value="FR" <% if (product.countries.includes('FR')) { %>checked<% }%> >FR</label>
+										<label><input type="checkbox" name="countries"  value="IT" <% if (product.countries.includes('IT')) { %>checked<% }%> >IT</label>
+										<label><input type="checkbox" name="countries"  value="SP" <% if (product.countries.includes('SP')) { %>checked<% }%> >SP</label>
+										<label><input type="checkbox" name="countries"  value="AU" <% if (product.countries.includes('AU')) { %>checked<% }%> >AU</label>
+										<label><input type="checkbox" name="countries"  value="JP" <% if (product.countries.includes('JP')) { %>checked<% }%> >JP</label>
+								</div>
                 <div class="input-group input-group-static mb-4">
                   <label>运输类型(默认有空运和海运快船):</label>
                   <div class="form-check">

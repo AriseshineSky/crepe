@@ -141,10 +141,24 @@ async function syncFromPlwhs() {
 			console.log(error);
 			// throw error;
 		}
-		console.log(results);
 		for (let product of results) {
-			let savedProduct = await Product.find({ where: { plwhsId: product.id } });
+			let savedProduct = await Product.findOne({ plwhsId: product.id });
+			const user = await User.findByPlwhsId(product.appUserId);
+			if (!user) {
+				continue;
+			}
 			if (!savedProduct) {
+				let newProduct = await Product.create({
+					plwhsId: product.id,
+					asin: product.asin,
+					pm: user.id,
+				});
+				console.log(newProduct);
+			} else {
+				if (!savedProduct.pm) {
+					savedProduct.pm = user.id;
+					savedProduct.save();
+				}
 			}
 		}
 	});

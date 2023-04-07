@@ -269,6 +269,7 @@ exports.save = async function (req, res, next) {
 	var sea = req.body.sea;
 	var avgSales = req.body.avgSales;
 	var product = await Product.getProductByAsin(asin);
+	const countries = req.body.countries;
 	console.log(product);
 	if (!product) {
 		var newProduct = {
@@ -306,6 +307,7 @@ exports.save = async function (req, res, next) {
 		product.sea = sea;
 		product.discontinue = discontinue;
 		product.minInventory = minInventory;
+		product.countries = countries;
 		product.save(function (err) {
 			if (err) {
 				return next(err);
@@ -428,7 +430,7 @@ exports.update = function (req, res, next) {
 		height: req.body["box.height"],
 		weight: req.body["box.weight"],
 	};
-
+	const countries = req.body.countries;
 	var product = Product.getProductByAsin(asin);
 	if (!product) {
 		res.render404("此产品不存在或已被删除。");
@@ -439,6 +441,8 @@ exports.update = function (req, res, next) {
 	product.unitsPerBox = unitsPerBox;
 	product.box = box;
 
+	product.countries = countries;
+	console.log(countries);
 	product.save(function (err) {
 		if (err) {
 			return next(err);
@@ -453,4 +457,3 @@ exports.csv = async function (req, res, next) {
 		products: products,
 	});
 };
-
