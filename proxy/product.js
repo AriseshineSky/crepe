@@ -390,7 +390,7 @@ async function prepareFbaInventoryAndSales(asin, listings) {
   for(var country in listings[asin]) {
     for(var account in listings[asin][country]) {
       for(var listing of listings[asin][country][account]) {
-        inventory = inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
+        inventory = inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped + listing.reservedFCProcessing;
         sales = sales + listing.ps;
       }
     }
