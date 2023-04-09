@@ -138,6 +138,21 @@ async function getProductById(id) {
 	return await Product.findById(id);
 }
 exports.getProductById = getProductById;
+
+async function updateProductDefaultCountries() {
+	const products = await showAll();
+
+	console.log(products.length);
+	for (let product of products) {
+		console.log(product.countries);
+		if (len(product.countries) < 1) {
+			product.countries = ["US", "CA", "MX", "UK", "IT", "DE", "FR", "SP", "JP", "AU"];
+			product.save();
+		}
+	}
+}
+exports.updateProductDefaultCountries = updateProductDefaultCountries;
+
 async function syncFromPlwhs() {
 	const connection = await getDatabaseConnection();
 	connection.query("SELECT * FROM Product;", async (error, results, fields) => {
@@ -448,7 +463,7 @@ async function findByUser(user) {
 
 exports.findByUser = findByUser;
 var showAll = async function () {
-	return await Product.find({ ps: { $gt: 0 } }).populate("pm");
+	return await Product.find({ ps: { $gte: 0 } }).populate("pm");
 };
 
 exports.showAll = showAll;

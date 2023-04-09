@@ -32,7 +32,9 @@ const scheduleCronstyle = () => {
 		logger.info("start to update product pm");
 		Product.syncPm();
 		Product.syncFromPlwhs();
+		Product.updateProductDefaultCountries();
 	});
+	Product.updateProductDefaultCountries();
 };
 
 exports.initScheduledJobs = () => {
