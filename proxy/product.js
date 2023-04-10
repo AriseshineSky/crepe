@@ -1,16 +1,16 @@
-var models = require("../models");
-var Product = models.Product;
-var User = require("./user");
-var mongoose = require("mongoose");
+let models = require("../models");
+let Product = models.Product;
+let User = require("./user");
+let mongoose = require("mongoose");
 const getPm = require("../api/getPM");
-var moment = require("moment");
+let moment = require("moment");
 const GAP = 6;
-var getFbaInventoryByASIN = require("../lib/getFbaInventoryByASIN");
-var getStockByProduct = require("../lib/getStockByProduct");
-var getPlwhsByProduct = require("../lib/getPlwhsByProduct");
-var Freight = require("./freight");
-var Listing = require("./listing");
-var logger = require("../common/logger");
+let getFbaInventoryByASIN = require("../lib/getFbaInventoryByASIN");
+let getStockByProduct = require("../lib/getStockByProduct");
+let getPlwhsByProduct = require("../lib/getPlwhsByProduct");
+let Freight = require("./freight");
+let Listing = require("./listing");
+let logger = require("../common/logger");
 const mysql = require("mysql2");
 
 async function updateStock(product) {
@@ -19,9 +19,9 @@ async function updateStock(product) {
 }
 
 async function getInboundShippedCount(asin) {
-	var shipped = 0;
-	var listings = await Listing.findLisingsByAsin(asin);
-	for (var listing of listings) {
+	let shipped = 0;
+	let listings = await Listing.findLisingsByAsin(asin);
+	for (let listing of listings) {
 		shipped += listing.inboundShipped;
 	}
 	return shipped;
@@ -29,15 +29,15 @@ async function getInboundShippedCount(asin) {
 
 exports.getInboundShippedCount = getInboundShippedCount;
 
-async function updateAllStock(asin) {
-	if (asin) {
-		let product = await getProductByAsin(asin);
+async function updateAllStock(productId) {
+	if (productId) {
+		let product = await getProductById(productId);
 		await prepareStock(product);
 		console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
 		await save(product);
 	} else {
 		const products = await findAll();
-		for (var product of products) {
+		for (let product of products) {
 			await prepareStock(product);
 			console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
 			await save(product);
@@ -50,8 +50,8 @@ async function getFreight(product) {
 	Freight.getFreightsAndProductingsByProduct(product);
 }
 async function checkProducings(product, freightsAndProducings) {
-	for (var j = 0; j < freightsAndProducings.producings.length; j++) {
-		for (var i = 0; i < product.producings.length; i++) {
+	for (let j = 0; j < freightsAndProducings.producings.length; j++) {
+		for (let i = 0; i < product.producings.length; i++) {
 			if (product.producings[i].orderId === freightsAndProducings.producings[j].orderId) {
 				freightsAndProducings.producings[j].deliveryDue = product.producings[i].deliveryDue;
 				freightsAndProducings.producings[j].deletedAt = product.producings[i].deletedAt;
@@ -61,17 +61,17 @@ async function checkProducings(product, freightsAndProducings) {
 }
 
 async function getProducingsQuantity(producings) {
-	var quantity = 0;
+	let quantity = 0;
 	if (producings) {
-		for (var i = 0; i < producings.length; i++) {
+		for (let i = 0; i < producings.length; i++) {
 			quantity += producings[i].quantity;
 		}
 	}
 	return quantity;
 }
 async function syncFreight(product, days) {
-	// var freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product, days);
-	var freightsAndProducings = await Freight.getFreightsAndProductingsByProductV2(product, days);
+	// let freightsAndProducings = await Freight.getFreightsAndProductingsByProduct(product, days);
+	let freightsAndProducings = await Freight.getFreightsAndProductingsByProductV2(product, days);
 	await checkProducings(product, freightsAndProducings);
 	product.inboundShippeds = freightsAndProducings.inboundShippeds;
 	product.producings = freightsAndProducings.producings;
@@ -79,15 +79,15 @@ async function syncFreight(product, days) {
 }
 
 async function syncAllProductFreights(days) {
-	var products = await findAll();
+	let products = await findAll();
 	const types = await Freight.freightTypes();
 	const allFreights = await Freight.syncFreights();
 	const yisucangInbounds = await Freight.getYisucangInbounds();
-	var inbounds = await Freight.remvoeDuplicateYisucangInbounds(yisucangInbounds);
+	let inbounds = await Freight.remvoeDuplicateYisucangInbounds(yisucangInbounds);
 	const yisucangReciveds = await Freight.getYisucangReciveds();
-	var recieveds = await Freight.remvoeDuplicateYisucangInbounds(yisucangReciveds);
-	for (var product of products) {
-		var freightsAndProducings = await Freight.getFreightsAndProductingsByProductV2(
+	let recieveds = await Freight.remvoeDuplicateYisucangInbounds(yisucangReciveds);
+	for (let product of products) {
+		let freightsAndProducings = await Freight.getFreightsAndProductingsByProductV2(
 			product,
 			days,
 			types,
@@ -205,10 +205,10 @@ async function syncPm() {
 		}
 	});
 
-	// var products = await findAll();
-	// for (var product of products) {
-	// 	var user = await getPm(product.asin, "US");
-	// 	var pm = await User.findOrCreate(user);
+	// let products = await findAll();
+	// for (let product of products) {
+	// 	let user = await getPm(product.asin, "US");
+	// 	let pm = await User.findOrCreate(user);
 	// 	User.updateUser(user);
 	// 	product.pm = pm;
 	// 	await save(product);
@@ -227,7 +227,7 @@ async function sortQueue(inboundQueue) {
 }
 
 async function calculateInboundQueue(inbounds, sales) {
-	var inboundQueue = [];
+	let inboundQueue = [];
 	inboundQueue[0] = {
 		period: inbounds[0].period,
 		inventory: {
@@ -235,12 +235,12 @@ async function calculateInboundQueue(inbounds, sales) {
 			after: inbounds[0].quantity,
 		},
 	};
-	for (var i = 1; i < inbounds.length; i++) {
-		var units = 0;
-		for (var j = 0; j < i; j++) {
+	for (let i = 1; i < inbounds.length; i++) {
+		let units = 0;
+		for (let j = 0; j < i; j++) {
 			units += inbounds[j].quantity;
 		}
-		var items = await checkStatus(inbounds[i], units, sales);
+		let items = await checkStatus(inbounds[i], units, sales);
 		inboundQueue[i] = {
 			period: inbounds[i].period,
 			inventory: {
@@ -253,9 +253,9 @@ async function calculateInboundQueue(inbounds, sales) {
 }
 
 async function calculateOutOfStockPeriod(status) {
-	var period = 0;
+	let period = 0;
 
-	for (var i = 0; i < status.length - 1; i++) {
+	for (let i = 0; i < status.length - 1; i++) {
 		if (status[i].before === 0 && status[i].after === 0) {
 			period += status[i + 1].period - status[i].period + 1;
 		}
@@ -264,9 +264,9 @@ async function calculateOutOfStockPeriod(status) {
 }
 
 async function calculateProducingFirstOutOfStockPeriod(status) {
-	var period = 0;
+	let period = 0;
 
-	for (var i = 0; i < status.length; i++) {
+	for (let i = 0; i < status.length; i++) {
 		if (status[i].before === 0 && status[i].after === 0) {
 			period += status[i + 1].period - status[i].period + 1;
 		}
@@ -275,14 +275,14 @@ async function calculateProducingFirstOutOfStockPeriod(status) {
 }
 
 async function calculateMinInventory(freightType, status, sales, product, gap) {
-	var period = 0;
-	var minInventory = 100000;
-	var type = freightType[0];
-	var freight = await findFreightByType(type);
+	let period = 0;
+	let minInventory = 100000;
+	let type = freightType[0];
+	let freight = await findFreightByType(type);
 	// 如果存在断货，检查空运到货之后的最小库存
 	// 如果不存在断货，检查所有时刻最小库存
 	if (gap > 0) {
-		for (var i = 0; i < status.length; i++) {
+		for (let i = 0; i < status.length; i++) {
 			if (status[i].period > freight.period + product.cycle + GAP) {
 				period = Math.floor(status[i].before / sales.minAvgSales);
 				if (period < minInventory) {
@@ -291,7 +291,7 @@ async function calculateMinInventory(freightType, status, sales, product, gap) {
 			}
 		}
 	} else {
-		for (var i = 0; i < status.length; i++) {
+		for (let i = 0; i < status.length; i++) {
 			period = Math.floor(status[i].before / sales.minAvgSales);
 			if (period < minInventory) {
 				minInventory = period;
@@ -302,12 +302,12 @@ async function calculateMinInventory(freightType, status, sales, product, gap) {
 }
 
 async function calculateProducingMinInventory(freightType, status, sales, product, producing) {
-	var period;
-	var minInventory = 100000;
-	var days = await getProducingPeriod(product, producing);
-	var type = freightType[0];
-	var freight = await findFreightByType(type);
-	for (var i = 0; i < status.length; i++) {
+	let period;
+	let minInventory = 100000;
+	let days = await getProducingPeriod(product, producing);
+	let type = freightType[0];
+	let freight = await findFreightByType(type);
+	for (let i = 0; i < status.length; i++) {
 		if (status[i].period > freight.period + days + GAP) {
 			period = Math.floor(status[i].before / sales.minAvgSales);
 			if (period < minInventory) {
@@ -319,18 +319,18 @@ async function calculateProducingMinInventory(freightType, status, sales, produc
 }
 
 async function recalculateInboundQueue(inboundQueue, sales) {
-	var states = [];
-	var newInboundQueue = JSON.parse(JSON.stringify(inboundQueue));
-	for (var i = 0; i < newInboundQueue.length; i++) {
+	let states = [];
+	let newInboundQueue = JSON.parse(JSON.stringify(inboundQueue));
+	for (let i = 0; i < newInboundQueue.length; i++) {
 		if (newInboundQueue[i].inventory.before < 0) {
-			var period = Math.ceil(-newInboundQueue[i].inventory.before / sales.minAvgSales);
+			let period = Math.ceil(-newInboundQueue[i].inventory.before / sales.minAvgSales);
 			states.push({
 				period: newInboundQueue[i].period - period,
 				before: 0,
 				after: 0,
 			});
-			var gap = -newInboundQueue[i].inventory.before;
-			for (var j = i; j < newInboundQueue.length; j++) {
+			let gap = -newInboundQueue[i].inventory.before;
+			for (let j = i; j < newInboundQueue.length; j++) {
 				newInboundQueue[j].inventory.before += gap;
 				newInboundQueue[j].inventory.after += gap;
 			}
@@ -345,16 +345,16 @@ async function recalculateInboundQueue(inboundQueue, sales) {
 }
 
 async function convertDeliveryDueToPeroid(inbound) {
-	var delivery = moment(inbound.deliveryDue);
-	var period = delivery.diff(moment(), "days");
+	let delivery = moment(inbound.deliveryDue);
+	let period = delivery.diff(moment(), "days");
 	return period;
 }
 
 exports.convertDeliveryDueToPeroid = convertDeliveryDueToPeroid;
 async function convertInboundShippedsDeliveryDueToPeroid(inboundShippeds) {
-	var inbounds = [];
+	let inbounds = [];
 	if (inboundShippeds) {
-		for (var inbound of inboundShippeds) {
+		for (let inbound of inboundShippeds) {
 			inbound.period = await convertDeliveryDueToPeroid(inbound);
 			inbounds.push({
 				period: inbound.period + GAP,
@@ -367,7 +367,7 @@ async function convertInboundShippedsDeliveryDueToPeroid(inboundShippeds) {
 exports.convertInboundShippedsDeliveryDueToPeroid = convertInboundShippedsDeliveryDueToPeroid;
 exports.addCurrentInventoryToInbounds = addCurrentInventoryToInbounds;
 async function convertInboundsToSortedQueue(inbounds) {
-	var sortedInbounds = await sortQueue(inbounds);
+	let sortedInbounds = await sortQueue(inbounds);
 	return sortedInbounds;
 }
 
@@ -380,9 +380,9 @@ async function addCurrentInventoryToInbounds(totalInventory, inboundShippeds) {
 
 async function addShipmentToInbounds(shipment, inbounds) {
 	if (inbounds) {
-		var newInbounds = JSON.parse(JSON.stringify(inbounds));
+		let newInbounds = JSON.parse(JSON.stringify(inbounds));
 	} else {
-		var newInbounds = [];
+		let newInbounds = [];
 	}
 	newInbounds.push({
 		quantity: shipment.quantity,
@@ -392,10 +392,10 @@ async function addShipmentToInbounds(shipment, inbounds) {
 }
 
 async function addFreightPlanToInbounds(freightPlan, inbounds, product) {
-	var newInbounds = JSON.parse(JSON.stringify(inbounds));
-	for (var type in freightPlan) {
-		var freight = await findFreightByType(type);
-		var shipment = {
+	let newInbounds = JSON.parse(JSON.stringify(inbounds));
+	for (let type in freightPlan) {
+		let freight = await findFreightByType(type);
+		let shipment = {
 			quantity: await totalUnits(freightPlan[type].boxes, product.unitsPerBox),
 			period: product.cycle + freight.period + GAP,
 		};
@@ -404,7 +404,7 @@ async function addFreightPlanToInbounds(freightPlan, inbounds, product) {
 	return newInbounds;
 }
 async function getProducingPeriod(product, producing) {
-	var days = 0;
+	let days = 0;
 	if (producing.deliveryDue) {
 		days = moment(producing.deliveryDue).diff(moment(), "days");
 	} else {
@@ -416,11 +416,11 @@ async function getProducingPeriod(product, producing) {
 	return days;
 }
 async function addProducingFreightPlanToInbounds(freightPlan, inbounds, product, producing) {
-	var newInbounds = JSON.parse(JSON.stringify(inbounds));
-	var days = await getProducingPeriod(product, producing);
-	for (var type in freightPlan) {
-		var freight = await findFreightByType(type);
-		var shipment = {
+	let newInbounds = JSON.parse(JSON.stringify(inbounds));
+	let days = await getProducingPeriod(product, producing);
+	for (let type in freightPlan) {
+		let freight = await findFreightByType(type);
+		let shipment = {
 			quantity: await totalUnits(freightPlan[type].boxes, product.unitsPerBox),
 			period: days + freight.period + GAP,
 		};
@@ -430,17 +430,17 @@ async function addProducingFreightPlanToInbounds(freightPlan, inbounds, product,
 }
 
 async function updateProduct(product, attrs) {
-	for (var key in attrs) {
+	for (let key in attrs) {
 		product[key] = attrs[key];
 	}
 }
 exports.updateProduct = updateProduct;
 async function prepareStock(product) {
-	var quantity = 0;
-	var yStock = 0;
-	var pStock = 0;
-	var stock = await getStockByProduct(product);
-	var plwhs = await getPlwhsByProduct(product);
+	let quantity = 0;
+	let yStock = 0;
+	let pStock = 0;
+	let stock = await getStockByProduct(product);
+	let plwhs = await getPlwhsByProduct(product);
 	if (stock.inventory) {
 		quantity += stock.inventory.SumNumber;
 		yStock = stock.inventory.SumNumber;
@@ -453,7 +453,7 @@ async function prepareStock(product) {
 	return quantity;
 }
 exports.prepareStock = prepareStock;
-var findAll = async function () {
+let findAll = async function () {
 	return await Product.find({ ps: { $gt: 2 }, discontinue: false }).populate("pm");
 };
 
@@ -462,25 +462,25 @@ async function findByUser(user) {
 }
 
 exports.findByUser = findByUser;
-var showAll = async function () {
+let showAll = async function () {
 	return await Product.find({ ps: { $gte: 0 } }).populate("pm");
 };
 
 exports.showAll = showAll;
-var findAllAsins = async function () {
+let findAllAsins = async function () {
 	return Product.find().select("asin");
 };
 exports.findAllAsins = findAllAsins;
 async function prepareFbaInventoryAndSales(asin, listings) {
-	var inventory = 0;
-	var sales = 0;
+	let inventory = 0;
+	let sales = 0;
 	if (!listings) {
 		listings = await getFbaInventoryByASIN(asin);
 	}
 	logger.debug(JSON.stringify(listings));
-	for (var country in listings[asin]) {
-		for (var account in listings[asin][country]) {
-			for (var listing of listings[asin][country][account]) {
+	for (let country in listings[asin]) {
+		for (let account in listings[asin][country]) {
+			for (let listing of listings[asin][country][account]) {
 				inventory =
 					inventory +
 					listing.availableQuantity +
@@ -497,12 +497,12 @@ async function prepareFbaInventoryAndSales(asin, listings) {
 }
 
 async function prepareFbaInventoryAndSalesV2(asin, listings) {
-	var inventory = 0;
-	var sales = 0;
+	let inventory = 0;
+	let sales = 0;
 	if (!listings) {
 		listings = await Listing.findLisingsByAsin(asin);
 	}
-	for (var listing of listings) {
+	for (let listing of listings) {
 		if (listing.asin === asin) {
 			inventory =
 				inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
@@ -515,15 +515,33 @@ async function prepareFbaInventoryAndSalesV2(asin, listings) {
 	};
 }
 
+
+async function prepareFbaInventoryAndSalesV3(product, listings) {
+	let inventory = 0;
+	let sales = 0;
+
+  if (!listings) {
+		listings = await Listing.findLisingsByProduct(product);
+	}
+
+	for (let listing of listings) {
+    inventory = inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
+    sales = sales + listing.ps;
+	}
+	return {
+		inventory: inventory,
+		sales: Math.ceil(sales),
+	};
+}
 async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
-	var availableQuantity = 0;
-	var reservedFCTransfer = 0;
-	var inboundShipped = 0;
-	var sales = 0;
+	let availableQuantity = 0;
+	let reservedFCTransfer = 0;
+	let inboundShipped = 0;
+	let sales = 0;
 	if (!listings) {
 		listings = await Listing.findLisingsByAsin(asin);
 	}
-	for (var listing of listings) {
+	for (let listing of listings) {
 		if (listing.asin === asin && listing.country === country) {
 			availableQuantity = availableQuantity + listing.availableQuantity;
 			reservedFCTransfer = reservedFCTransfer + listing.reservedFCTransfer;
@@ -560,9 +578,9 @@ async function getStockSalesPeriod(fbaInventorySales, stock) {
 	return Math.floor(stock / fbaInventorySales.sales);
 }
 
-var generateReport = async function (asin) {
-	var messages = [];
-	var report = await getInventoryReport(asin);
+let generateReport = async function (asin) {
+	let messages = [];
+	let report = await getInventoryReport(asin);
 	if (report.fbaSalesPeriod < 10) {
 		messages.push(`${asin} 亚马逊库存不足10天`);
 		if (report.stock > 0) {
@@ -577,24 +595,24 @@ var generateReport = async function (asin) {
 
 exports.generateReport = generateReport;
 
-var getInventoryReport = async function (asin) {
-	var report = {};
-	var product = await getProductByAsin(asin);
-	var fbaInventorySales = await prepareFbaInventoryAndSales(asin);
+let getInventoryReport = async function (asin) {
+	let report = {};
+	let product = await getProductByAsin(asin);
+	let fbaInventorySales = await prepareFbaInventoryAndSales(asin);
 	console.log(fbaInventorySales);
-	var fbaSalesPeriod = await getFbaSalesPeriod(fbaInventorySales);
-	var stock = product.stock + product.plwhs;
-	var stockSalesPeriod = await getStockSalesPeriod(fbaInventorySales, stock);
+	let fbaSalesPeriod = await getFbaSalesPeriod(fbaInventorySales);
+	let stock = product.stock + product.plwhs;
+	let stockSalesPeriod = await getStockSalesPeriod(fbaInventorySales, stock);
 	await syncFreight(product);
 
-	var inbounds = await convertInboundShippedsDeliveryDueToPeroid(product.inboundShippeds);
+	let inbounds = await convertInboundShippedsDeliveryDueToPeroid(product.inboundShippeds);
 
 	await addCurrentInventoryToInbounds(fbaInventorySales.inventory + stock, inbounds);
-	var newInbounds = await convertInboundsToSortedQueue(inbounds);
-	var sales = await getSales(fbaInventorySales, product);
-	var inboundQueue = await calculateInboundQueue(newInbounds, sales);
-	var status = await recalculateInboundQueue(inboundQueue, sales);
-	var gap = await calculateOutOfStockPeriod(status);
+	let newInbounds = await convertInboundsToSortedQueue(inbounds);
+	let sales = await getSales(fbaInventorySales, product);
+	let inboundQueue = await calculateInboundQueue(newInbounds, sales);
+	let status = await recalculateInboundQueue(inboundQueue, sales);
+	let gap = await calculateOutOfStockPeriod(status);
 	report.fbaSalesPeriod = fbaSalesPeriod;
 	report.inventory = fbaInventorySales.inventory;
 	report.stock = fbaInventorySales.stock;
@@ -609,7 +627,7 @@ async function getSales(fbaInventorySales, product) {
 		ps: Math.ceil(fbaInventorySales.sales),
 		fbaInventory: fbaInventorySales.inventory,
 	});
-	var avgSales;
+	let avgSales;
 	if (product.avgSales && product.avgSales > 0) {
 		avgSales = product.avgSales;
 	} else if (product.maxAvgSales > 0) {
@@ -617,7 +635,7 @@ async function getSales(fbaInventorySales, product) {
 	} else {
 		avgSales = Math.ceil(fbaInventorySales.sales);
 	}
-	var sales = {
+	let sales = {
 		airExpress: fbaInventorySales.sales * 0.9 + product.maxAvgSales * 0.1,
 		airDelivery: fbaInventorySales.sales * 0.8 + product.maxAvgSales * 0.2,
 		seaExpress: avgSales,
@@ -630,10 +648,10 @@ async function getSales(fbaInventorySales, product) {
 exports.getSales = getSales;
 
 async function updateAllProuctSalesAndInventories() {
-	var products = await findAll();
-	for (var product of products) {
-		const listings = await Listing.findLisingsByAsin(product.asin);
-		var fbaInventorySales = await prepareFbaInventoryAndSalesV2(product.asin, listings);
+	let products = await findAll();
+	for (let product of products) {
+		const listings = await Listing.findLisingsByProduct(product);
+		let fbaInventorySales = await prepareFbaInventoryAndSalesV3(product, listings);
 		await getSales(fbaInventorySales, product);
 		save(product);
 	}
@@ -642,8 +660,8 @@ async function updateAllProuctSalesAndInventories() {
 exports.updateAllProuctSalesAndInventories = updateAllProuctSalesAndInventories;
 
 async function prepareOrderDues(orderDues) {
-	var dues = [];
-	for (var type in orderDues) {
+	let dues = [];
+	for (let type in orderDues) {
 		dues.push({
 			type: type,
 			due: orderDues[type],
@@ -654,30 +672,30 @@ async function prepareOrderDues(orderDues) {
 exports.prepareOrderDues = prepareOrderDues;
 
 async function getValidProducings(product) {
-	var products = await findValidProducings(product.asin);
+	let products = await findValidProducings(product.asin);
 	return products[0]?.producings;
 }
-exports.getPlanV3 = async function (asin, producingId) {
-	var fbaInventorySales = await prepareFbaInventoryAndSalesV2(asin);
+exports.getPlanV3 = async function (productId, producingId) {
+  let product = await getProductById(productId);
+	let fbaInventorySales = await prepareFbaInventoryAndSalesV3(product);
 	console.log(fbaInventorySales);
-	var product = await getProductByAsin(asin);
-	var stock = product.stock + product.plwhs;
-	var sales = await getSales(fbaInventorySales, product);
-	var inboundShippeds = product.inboundShippeds;
-	var totalInventory = fbaInventorySales.inventory + stock;
-	var inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
+	let stock = product.stock + product.plwhs;
+	let sales = await getSales(fbaInventorySales, product);
+	let inboundShippeds = product.inboundShippeds;
+	let totalInventory = fbaInventorySales.inventory + stock;
+	let inbounds = await convertInboundShippedsDeliveryDueToPeroid(inboundShippeds);
 	await addCurrentInventoryToInbounds(totalInventory, inbounds);
-	var minTotalSalesPeriod = totalInventory / sales.maxAvgSales;
-	var maxTotalSalesPeriod = totalInventory / sales.minAvgSales;
-	var orderDues = await getOrderDue(product, totalInventory, sales);
+	let minTotalSalesPeriod = totalInventory / sales.maxAvgSales;
+	let maxTotalSalesPeriod = totalInventory / sales.minAvgSales;
+	let orderDues = await getOrderDue(product, totalInventory, sales);
 	logger.debug("orderDues", orderDues);
-	var quantity = await getQuantity(sales, totalInventory, product);
-	var plan = { plans: [] };
+	let quantity = await getQuantity(sales, totalInventory, product);
+	let plan = { plans: [] };
 	if (producingId) {
-		for (var producing of product.producings) {
+		for (let producing of product.producings) {
 			if (producing._id.toString() === producingId) {
 				logger.debug(producing);
-				var producingPlan = await getProducingFreightPlan(producing, product, sales, inbounds);
+				let producingPlan = await getProducingFreightPlan(producing, product, sales, inbounds);
 				producingPlan.deliveryDue = producing.deliveryDue;
 				producingPlan.created = producing.created;
 				producingPlan.deliveryPeriod = await getProducingPeriod(product, producing);
@@ -691,8 +709,8 @@ exports.getPlanV3 = async function (asin, producingId) {
 			}
 		}
 	} else {
-		var producingsPlan = null;
-		var validProducings = await getValidProducings(product);
+		let producingsPlan = null;
+		let validProducings = await getValidProducings(product);
 		if (validProducings?.length > 0) {
 			producingsPlan = await getProducingsFreightPlan(product, sales, inbounds, validProducings);
 		}
@@ -722,17 +740,16 @@ exports.getPlanV3 = async function (asin, producingId) {
 	await save(product);
 	logger.debug(plan);
 
-	var volumeWeightCheck = true;
-	for (var type in plan) {
+	let volumeWeightCheck = true;
+	for (let type in plan) {
 		if (plan[type].units && plan[type].units > 0) {
 			if (!checkVolumeWeight(product.box, type)) {
 				volumeWeightCheck = false;
 			}
 		}
 	}
-	var freights = await Freight.freightTypes();
-	var purchase = {
-		asin: asin,
+	let freights = await Freight.freightTypes();
+	let purchase = {
 		plan: plan,
 		sales: sales,
 		quantity: quantity,
@@ -755,7 +772,7 @@ async function convertProducingQtyIntoBox(producing, product) {
 	if (product.unitsPerBox === 0) {
 		product.unitsPerBox = 30;
 	}
-	var quantity = {
+	let quantity = {
 		boxes: Math.ceil(producing.quantity / product.unitsPerBox),
 	};
 	return quantity;
@@ -768,10 +785,10 @@ async function bestProducingsFreightPlanForAllDelivery(
 	freightType,
 	inbounds,
 ) {
-	var quantity = await convertProducingQtyIntoBox(producing, product);
-	var freight = await findFreightByType("airExpress");
+	let quantity = await convertProducingQtyIntoBox(producing, product);
+	let freight = await findFreightByType("airExpress");
 
-	var plan = {
+	let plan = {
 		airExpress: {
 			boxes: quantity.boxes,
 		},
@@ -779,17 +796,17 @@ async function bestProducingsFreightPlanForAllDelivery(
 		minInventory: -100,
 		totalAmount: quantity.boxes * freight.price * product.box.weight,
 	};
-	for (var i = 1; i < freightType.length; i++) {
+	for (let i = 1; i < freightType.length; i++) {
 		plan[freightType[i]] = { boxes: 0 };
 	}
 
-	var freightPlan = {};
-	var result = {
+	let freightPlan = {};
+	let result = {
 		plan: plan,
 		status: "pending",
 	};
 
-	var step = Math.ceil(quantity.boxes ** freightType.length / 60000000);
+	let step = Math.ceil(quantity.boxes ** freightType.length / 60000000);
 	await getFreightPlanByProducing(
 		freightPlan,
 		quantity.boxes,
@@ -806,7 +823,7 @@ async function bestProducingsFreightPlanForAllDelivery(
 }
 
 async function getProducingFreightPlan(producing, product, sales, inbounds) {
-	var freightType = ["airExpress", "seaExpress"];
+	let freightType = ["airExpress", "seaExpress"];
 	if (product.airDelivery) {
 		freightType = ["airExpress", "airDelivery", "seaExpress"];
 	}
@@ -823,27 +840,27 @@ async function getProducingFreightPlan(producing, product, sales, inbounds) {
 }
 
 async function prepareProducings(product, validProducings) {
-	var producings = JSON.parse(JSON.stringify(validProducings));
-	for (var producing of producings) {
+	let producings = JSON.parse(JSON.stringify(validProducings));
+	for (let producing of producings) {
 		producing.period = await getProducingPeriod(product, producing);
 	}
 	return await sortQueue(producings);
 }
 
 async function getProducingsFreightPlan(product, sales, inbounds, validProducings) {
-	var plan = { plans: [] };
-	var producings = await prepareProducings(product, validProducings);
-	for (var i = 0; i < producings.length; i++) {
+	let plan = { plans: [] };
+	let producings = await prepareProducings(product, validProducings);
+	for (let i = 0; i < producings.length; i++) {
 		if (!producings[i].deletedAt) {
 			if (plan.inbounds) {
-				var producingPlan = await getProducingFreightPlan(
+				let producingPlan = await getProducingFreightPlan(
 					producings[i],
 					product,
 					sales,
 					plan.inbounds,
 				);
 			} else {
-				var producingPlan = await getProducingFreightPlan(producings[i], product, sales, inbounds);
+				let producingPlan = await getProducingFreightPlan(producings[i], product, sales, inbounds);
 			}
 			producingPlan.deliveryDue = producings[i].deliveryDue;
 			producingPlan.created = producings[i].created;
@@ -863,40 +880,40 @@ async function getProducingsFreightPlan(product, sales, inbounds, validProducing
 exports.getProducingFreightPlan = getProducingFreightPlan;
 
 async function findFreightByType(type) {
-	var freights = await Freight.freightTypes();
+	let freights = await Freight.freightTypes();
 	return freights.find((freight) => freight.type === type);
 }
 exports.findFreightByType = findFreightByType;
 async function getOrderDue(product, totalInventory, sales) {
-	var freightType = ["airExpress", "seaExpress", "sea"];
+	let freightType = ["airExpress", "seaExpress", "sea"];
 	if (product.airDelivery) {
 		freightType = ["airExpress", "airDelivery", "seaExpress", "sea"];
 	}
-	var quantity = totalInventory;
+	let quantity = totalInventory;
 
 	if (product.inboundShippeds) {
-		for (var inbound of product.inboundShippeds) {
-			var total = totalInventory;
-			for (var fasterInbound of product.inboundShippeds) {
+		for (let inbound of product.inboundShippeds) {
+			let total = totalInventory;
+			for (let fasterInbound of product.inboundShippeds) {
 				if (moment(fasterInbound.deliveryDue).isBefore(inbound.deliveryDue)) {
 					total += inbound.quantity;
 				}
 			}
-			var delivery = moment(inbound.deliveryDue);
+			let delivery = moment(inbound.deliveryDue);
 			if (total > sales.minAvgSales * (delivery.diff(moment(), "days") + 1)) {
 				quantity += Number(inbound.quantity);
 			}
 		}
 	}
 
-	var purchase = await getProducingsQuantity(product.producings);
+	let purchase = await getProducingsQuantity(product.producings);
 	quantity += purchase;
 
 	await updateProduct(product, { purchase: purchase });
 
-	var orderDues = {};
-	for (var type of freightType) {
-		var freight = await findFreightByType(type);
+	let orderDues = {};
+	for (let type of freightType) {
+		let freight = await findFreightByType(type);
 		orderDues[type] = moment().add(
 			quantity / sales.minAvgSales - product.cycle - freight.period - GAP - product.minInventory,
 			"days",
@@ -908,17 +925,17 @@ async function getOrderDue(product, totalInventory, sales) {
 exports.getOrderDue = getOrderDue;
 exports.getQuantity = getQuantity;
 async function getQuantity(sales, totalInventory, product) {
-	var total = totalInventory;
+	let total = totalInventory;
 	if (product.inboundShippeds) {
-		for (var inboundShipped of product.inboundShippeds) {
-			var delivery = moment(inboundShipped.deliveryDue);
+		for (let inboundShipped of product.inboundShippeds) {
+			let delivery = moment(inboundShipped.deliveryDue);
 			if (delivery.diff(moment(), "days") + 1 <= 90) {
 				total += Number(inboundShipped.quantity);
 			}
 		}
 	}
 	if (product.producings) {
-		for (var producing of product.producings) {
+		for (let producing of product.producings) {
 			total += Number(producing.quantity);
 		}
 	}
@@ -926,31 +943,31 @@ async function getQuantity(sales, totalInventory, product) {
 	if (product.unitsPerBox === 0) {
 		product.unitsPerBox = 30;
 	}
-	var boxes = Math.ceil((sales.minAvgSales * 90 - total) / product.unitsPerBox);
+	let boxes = Math.ceil((sales.minAvgSales * 90 - total) / product.unitsPerBox);
 
 	if (boxes > 0) {
-		var quantity = boxes * product.unitsPerBox;
+		let quantity = boxes * product.unitsPerBox;
 		return { boxes: boxes, quantity: quantity };
 	} else {
-		var days = total / sales.maxAvgSales;
+		let days = total / sales.maxAvgSales;
 		return { boxes: boxes, days: days };
 	}
 }
 async function getDeliveryDue(totalInventory, inboundShippeds, sales) {
-	var due = totalInventory / sales.maxAvgSales;
+	let due = totalInventory / sales.maxAvgSales;
 
 	inboundShippeds = inboundShippeds.sort(function (m, n) {
 		return moment(m.deliveryDue).isBefore(n.deliveryDue);
 	});
 
-	for (var inbound of inboundShippeds) {
-		var total = totalInventory;
-		for (var fasterInbound of inboundShippeds) {
+	for (let inbound of inboundShippeds) {
+		let total = totalInventory;
+		for (let fasterInbound of inboundShippeds) {
 			if (moment(fasterInbound.deliveryDue).isBefore(inbound.deliveryDue)) {
 				total += inbound.quantity;
 			}
 		}
-		var delivery = moment(inbound.deliveryDue);
+		let delivery = moment(inbound.deliveryDue);
 		if (total > sales.maxAvgSales * (delivery.diff(moment(), "days") + 1)) {
 			total += inbound.quantity;
 		}
@@ -967,10 +984,10 @@ async function totalUnits(boxCount, unitsPerBox) {
 	return boxCount * unitsPerBox;
 }
 async function calculatePlanAmounts(freightPlan, product) {
-	var amount = 0;
+	let amount = 0;
 
-	for (var type in freightPlan) {
-		var freight = await findFreightByType(type);
+	for (let type in freightPlan) {
+		let freight = await findFreightByType(type);
 		freightPlan[type].amount = Math.ceil(
 			freightPlan[type].boxes * freight.price * product.box.weight,
 		);
@@ -983,15 +1000,15 @@ async function calculatePlanAmounts(freightPlan, product) {
 
 async function checkVolumeWeight(box, freightType) {
 	if (freightType.indexOf("sea") > 0) {
-		var volumeWeight = (box.length + box.width + box.height) / 5000;
+		let volumeWeight = (box.length + box.width + box.height) / 5000;
 	} else {
-		var volumeWeight = (box.length + box.width + box.height) / 6000;
+		let volumeWeight = (box.length + box.width + box.height) / 6000;
 	}
 	return volumeWeight < 1.2 * box.wt;
 }
 
 async function formatPlan(plan, unitsPerBox) {
-	for (var type in plan) {
+	for (let type in plan) {
 		if (plan[type].boxes) {
 			plan[type].units = plan[type].boxes * unitsPerBox;
 		}
@@ -1000,7 +1017,7 @@ async function formatPlan(plan, unitsPerBox) {
 }
 
 async function calculatePlan(freightPlan, freightType, inbounds, product, sales, result) {
-	var newPlan = await getNewFreightPlan(freightPlan, freightType, inbounds, product, sales);
+	let newPlan = await getNewFreightPlan(freightPlan, freightType, inbounds, product, sales);
 	// 更新策略
 	// 1. 存在断货:
 	//   1.1 最小库存不满足要求
@@ -1044,7 +1061,7 @@ async function calculatePlan(freightPlan, freightType, inbounds, product, sales,
 }
 
 async function checkMinInventory(minInventory, product) {
-	for (var key in minInventory) {
+	for (let key in minInventory) {
 		if (minInventory[key] < product.minInventory) {
 			return false;
 		}
@@ -1061,7 +1078,7 @@ async function calculateProducingPlan(
 	result,
 	producing,
 ) {
-	var newPlan = await getNewProducingFreightPlan(
+	let newPlan = await getNewProducingFreightPlan(
 		freightPlan,
 		freightType,
 		product,
@@ -1111,13 +1128,13 @@ async function getFreightPlan(
 	}
 	if (index === freightType.length - 1) {
 		freightPlan[freightType[index]] = { boxes: left };
-		var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
+		let freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
 		await calculatePlan(freightPlanDup, freightType, inbounds, product, sales, result);
 		if (result.status === "done") {
 			return null;
 		}
 	} else {
-		var i = 0;
+		let i = 0;
 		while (i <= left) {
 			freightPlan[freightType[index]] = { boxes: i };
 			await getFreightPlan(
@@ -1134,7 +1151,7 @@ async function getFreightPlan(
 			if (i + step <= left) {
 				i += step;
 			} else {
-				var stepDup = step;
+				let stepDup = step;
 				while (i + stepDup > left && stepDup >= 2) {
 					stepDup = Math.round(stepDup / 2);
 				}
@@ -1161,7 +1178,7 @@ async function getFreightPlanByProducing(
 	}
 	if (index === freightType.length - 1) {
 		freightPlan[freightType[index]] = { boxes: left };
-		var freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
+		let freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
 		await calculateProducingPlan(
 			freightPlanDup,
 			freightType,
@@ -1175,7 +1192,7 @@ async function getFreightPlanByProducing(
 			return null;
 		}
 	} else {
-		var i = 0;
+		let i = 0;
 		while (i <= left) {
 			freightPlan[freightType[index]] = { boxes: i };
 			await getFreightPlanByProducing(
@@ -1193,7 +1210,7 @@ async function getFreightPlanByProducing(
 			if (i + step <= left) {
 				i += step;
 			} else {
-				var stepDup = step;
+				let stepDup = step;
 				while (i + stepDup > left && stepDup >= 2) {
 					stepDup = Math.round(stepDup / 2);
 				}
@@ -1203,8 +1220,8 @@ async function getFreightPlanByProducing(
 	}
 }
 async function bestPlanForAllDelivery(quantity, product, sales, inbounds, freightType) {
-	var freight = await findFreightByType("airExpress");
-	var plan = {
+	let freight = await findFreightByType("airExpress");
+	let plan = {
 		airExpress: {
 			boxes: quantity.boxes,
 		},
@@ -1212,16 +1229,16 @@ async function bestPlanForAllDelivery(quantity, product, sales, inbounds, freigh
 		minInventory: -100,
 		totalAmount: quantity.boxes * freight.price * product.box.weight,
 	};
-	for (var i = 1; i < freightType.length; i++) {
+	for (let i = 1; i < freightType.length; i++) {
 		plan[freightType[i]] = { boxes: 0 };
 	}
 
-	var freightPlan = {};
-	var result = {
+	let freightPlan = {};
+	let result = {
 		plan: plan,
 		status: "pending",
 	};
-	var step = Math.ceil(quantity.boxes ** freightType.length / 60000000);
+	let step = Math.ceil(quantity.boxes ** freightType.length / 60000000);
 	await getFreightPlan(
 		freightPlan,
 		quantity.boxes,
@@ -1238,11 +1255,11 @@ async function bestPlanForAllDelivery(quantity, product, sales, inbounds, freigh
 }
 
 async function getNewFreightPlan(freightPlan, freightType, inbounds, product, sales) {
-	var newInbounds = await addFreightPlanToInbounds(freightPlan, inbounds, product);
+	let newInbounds = await addFreightPlanToInbounds(freightPlan, inbounds, product);
 	newInbounds = await convertInboundsToSortedQueue(newInbounds);
-	var inboundQueue = await calculateInboundQueue(newInbounds, sales);
-	var status = await recalculateInboundQueue(inboundQueue, sales);
-	var newPlan = await calculatePlanAmounts(freightPlan, product);
+	let inboundQueue = await calculateInboundQueue(newInbounds, sales);
+	let status = await recalculateInboundQueue(inboundQueue, sales);
+	let newPlan = await calculatePlanAmounts(freightPlan, product);
 	newPlan.gap = await calculateOutOfStockPeriod(status);
 	newPlan.minInventory = await calculateMinInventory(
 		freightType,
@@ -1263,16 +1280,16 @@ async function getNewProducingFreightPlan(
 	producing,
 	inbounds,
 ) {
-	var newInbounds = await addProducingFreightPlanToInbounds(
+	let newInbounds = await addProducingFreightPlanToInbounds(
 		freightPlan,
 		inbounds,
 		product,
 		producing,
 	);
 	newInbounds = await convertInboundsToSortedQueue(newInbounds);
-	var inboundQueue = await calculateInboundQueue(newInbounds, sales);
-	var status = await recalculateInboundQueue(inboundQueue, sales);
-	var newPlan = await calculatePlanAmounts(freightPlan, product);
+	let inboundQueue = await calculateInboundQueue(newInbounds, sales);
+	let status = await recalculateInboundQueue(inboundQueue, sales);
+	let newPlan = await calculatePlanAmounts(freightPlan, product);
 	newPlan.gap = await calculateOutOfStockPeriod(status);
 	newPlan.minInventory = await calculateProducingMinInventory(
 		freightType,
@@ -1287,7 +1304,7 @@ async function getNewProducingFreightPlan(
 }
 
 async function bestPlanV4(quantity, product, sales, inbounds) {
-	var freightType = ["airExpress", "seaExpress"];
+	let freightType = ["airExpress", "seaExpress"];
 	if (product.airDelivery) {
 		freightType = ["airExpress", "airDelivery", "seaExpress"];
 	}
@@ -1317,7 +1334,7 @@ async function findValidProducings(asin) {
 		},
 	]);
 }
-var getProductByAsin = async function (asin) {
+let getProductByAsin = async function (asin) {
 	return Product.findOne({ asin: asin })
 		.clone()
 		.catch(function (err) {
@@ -1327,7 +1344,7 @@ var getProductByAsin = async function (asin) {
 exports.getProductByAsin = getProductByAsin;
 
 exports.newAndSave = function (data, callback) {
-	var product = new Product();
+	let product = new Product();
 	product.asin = data.asin;
 	product.cycle = data.cycle;
 	product.unitsPerBox = data.unitsPerBox;
@@ -1341,29 +1358,29 @@ exports.newAndSave = function (data, callback) {
 };
 
 exports.createNewProduct = function (data, callback) {
-	var product = new Product();
+	let product = new Product();
 	product.asin = data.asin;
 	console.log(product);
 	product.save(callback);
 };
 exports.findAll = findAll;
 
-var deleteInbound = async function (inboundId) {
-	var objId = mongoose.Types.ObjectId(inboundId);
+let deleteInbound = async function (inboundId) {
+	let objId = mongoose.Types.ObjectId(inboundId);
 	await Product.update(
 		{ "inboundShippeds._id": objId },
 		{ $pull: { inboundShippeds: { _id: objId } } },
 	);
 };
-var deleteProducing = async function (producingId) {
-	var objId = mongoose.Types.ObjectId(producingId);
+let deleteProducing = async function (producingId) {
+	let objId = mongoose.Types.ObjectId(producingId);
 	await Product.updateOne(
 		{ "producings._id": objId },
 		{ $set: { "producings.$.deletedAt": Date.now(), "producings.$.deleted": true } },
 	);
 };
-var updateInbound = async function (inboundId, deliveryDue, quantity) {
-	var objId = mongoose.Types.ObjectId(inboundId);
+let updateInbound = async function (inboundId, deliveryDue, quantity) {
+	let objId = mongoose.Types.ObjectId(inboundId);
 	await Product.updateOne(
 		{ "inboundShippeds._id": objId },
 		{
@@ -1376,11 +1393,11 @@ var updateInbound = async function (inboundId, deliveryDue, quantity) {
 };
 
 async function updateProductProducingStatus() {
-	var products = await findAll();
-	for (var product of products) {
+	let products = await findAll();
+	for (let product of products) {
 		console.log(product.asin);
 		if (product.producings) {
-			for (var producing of product.producings) {
+			for (let producing of product.producings) {
 				producing.deleted = false;
 			}
 		}
@@ -1389,14 +1406,14 @@ async function updateProductProducingStatus() {
 }
 exports.updateProductProducingStatus = updateProductProducingStatus;
 async function updateProducing(producingId, deliveryDue, quantity) {
-	var objId = mongoose.Types.ObjectId(producingId);
+	let objId = mongoose.Types.ObjectId(producingId);
 	await Product.updateOne(
 		{ "producings._id": objId },
 		{ $set: { "producings.$.deliveryDue": deliveryDue, "producings.$.quantity": quantity } },
 	);
 }
 
-var remove = async function (asin, productId) {
+let remove = async function (asin, productId) {
 	if (asin) {
 		await Product.deleteOne({ asin: asin });
 	} else if (productId) {

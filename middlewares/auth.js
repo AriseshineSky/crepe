@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../proxy").User;
-
+let Product = require("../proxy").Product;
 function checkPermission() {
 	return async (req, res, next) => {
 		try {
@@ -10,11 +10,15 @@ function checkPermission() {
 			const user = await User.findById(id);
 			if (user) {
 				req.user = user;
-				next();
+				const productId = req.params.productId;
+				const product = await Product.getProductById(productId);
+				if (product.pm === id) {
+					next();
+				} else {
+					throw Error('forbidden');
+				}
 			} else {
-				res.status(403).json({
-					message: "Forbidden",
-				});
+				throw Error('forbidden');
 			}
 		} catch (error) {
 			res.status(403).json({
