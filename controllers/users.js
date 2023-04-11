@@ -6,6 +6,10 @@ exports.create = async function (req, res, next) {
 	res.render("index", { title: "regist" });
 };
 
+exports.showChangePassword = async (req, res, next) {
+	res.render("user/reset-password", { title: "Change Password", message: "" });
+}
+
 exports.login = async function (req, res, next) {
 	try {
 		const { token, user } = await User.getToken({
@@ -47,3 +51,8 @@ exports.showLogin = async function (req, res, next) {
 	// res.render("user/login");
 	res.render("user/login", { title: "login" });
 };
+
+exports.changePassword = async (req, res, next) => {
+	const oldPassword = req.body.oldPassword;
+	
+}

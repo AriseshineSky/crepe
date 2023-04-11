@@ -1,6 +1,7 @@
 const models = require("../models");
 const User = models.User;
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 var logger = require("../common/logger");
 
 exports.getToken = async function (user) {
@@ -24,7 +25,23 @@ exports.getToken = async function (user) {
 	);
 	return { token, user: savedUser };
 };
-
+exports.changePassword = async (user) =>{
+    const savedUser = await User.findOne({
+		name: user.name
+	})	
+	if (!savedUser) {
+		throw new Error('user does not exist')
+	}
+	const isOldPasswordValid = bcrypt.compareSync(user.oldPassword, savedUser.password);
+	if (!isOldPasswordValid) {
+		throw new Error("invalid old password");
+	}
+	const newUser = await User.update({password: user.newPassword})
+	const token = jwt.sign({
+		id: String(newUser._id)
+	}, process.env.SECRET);
+	return { token, user: newUser};
+}
 exports.create = async function (user) {
 	if (!user) {
 		return null;

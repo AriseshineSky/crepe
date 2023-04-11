@@ -1,9 +1,9 @@
 const schedule = require("node-schedule");
-var checkProductsInventory = require("../lib/checkProductsInventory");
-var Product = require("../proxy").Product;
-var freights = require("../proxy/freight");
-var syncAllListings = require("../lib/syncAllListings");
-var generateProduct = require("../lib/generateProductByListing");
+let checkProductsInventory = require("../lib/checkProductsInventory");
+let Product = require("../proxy").Product;
+let freights = require("../proxy/freight");
+let syncAllListings = require("../lib/syncAllListings");
+let generateProduct = require("../lib/generateProductByListing");
 const logger = require("../common/logger");
 
 const scheduleCronstyle = () => {

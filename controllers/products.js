@@ -379,14 +379,12 @@ exports.deleteInbound = async function (req, res, next) {
 	let inboundId = req.params.inboundId;
 	console.log(inboundId);
 	await Product.deleteInbound(inboundId);
-	let product = await Product.getProductById(productId);
 	res.redirect("/products/" + productId + "/inbounds");
 };
 exports.deleteProducing = async function (req, res, next) {
 	let productId = req.params.productId;
 	let producingId = req.params.producingId;
 	await Product.deleteProducing(producingId);
-	let product = await Product.getProductById(productId);
 	res.redirect("/products/" + productId + "/inbounds");
 };
 
