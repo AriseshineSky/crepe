@@ -5,6 +5,7 @@ var router = express.Router();
 router.post("/api/register", users.create);
 router.get("/register", users.showRegister);
 router.get("/change-password", users.showChangePassword);
+router.post("/change-password", users.changePassword);
 router.get("/api/users", users.list);
 router.get("/login", users.showLogin);
 router.post("/login", users.login);

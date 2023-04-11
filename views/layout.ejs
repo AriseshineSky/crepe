@@ -1,33 +1,50 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title><%=  %></title>
-    <% include header.ejs %>
-</head>
-<body>
-    <div id="wrapper">
-        <% include menu.ejs %>
-        <div id="page-wrapper">
-          <nav class="navbar navbar-expand-lg bg-primary">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-bar navbar-kebab"></span>
-            <span class="navbar-toggler-bar navbar-kebab"></span>
-            <span class="navbar-toggler-bar navbar-kebab"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-              <ul class="navbar-nav">
-                <li class="nav-item active">
-                  <a class="nav-link" href="/products">产品列表 <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="/freights/types">运输方式</a>
-                </li>
-              </ul>
-            </div>
-          </nav>
-          <%- defineContent('pageSection') %>
-        </div>
-    </div>
-<% include footer.ejs %>
-</body>
+	<head>
+		<title><%= %></title>
+		<% include header.ejs %>
+	</head>
+	<body>
+		<div id="wrapper">
+			<% include menu.ejs %>
+			<div id="page-wrapper">
+				<nav class="navbar navbar-expand-lg bg-primary">
+					<button
+						class="navbar-toggler"
+						type="button"
+						data-toggle="collapse"
+						data-target="#navbarNav"
+						aria-controls="navbarNav"
+						aria-expanded="false"
+						aria-label="Toggle navigation"
+					>
+						<span class="navbar-toggler-bar navbar-kebab"></span>
+						<span class="navbar-toggler-bar navbar-kebab"></span>
+						<span class="navbar-toggler-bar navbar-kebab"></span>
+					</button>
+					<div class="collapse navbar-collapse container" id="navbarNav">
+						<ul class="navbar-nav">
+							<li class="nav-item active">
+								<a class="nav-link" href="/products"
+									>产品列表 <span class="sr-only">(current)</span></a
+								>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="/freights/types">运输方式</a>
+							</li>
+						</ul>
+						<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+							<li class="nav-item"><%= user.name %></li>
+							<form action="/logout" method="post">
+								<button class="btn btn-primary" type="submit">Logout</button>
+							</form>
+						</ul>
+					</div>
+				</nav>
+				<%- defineContent('pageSection') %>
+			</div>
+		</div>
+		<% include footer.ejs %>
+	</body>
 </html>
+

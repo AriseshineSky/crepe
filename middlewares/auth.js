@@ -5,20 +5,32 @@ function checkPermission() {
 	return async (req, res, next) => {
 		try {
 			const rawToken = req.cookies.token;
+			console.log(rawToken);
+			if (!rawToken) {
+				res.redirect("/users/login");
+				return;
+			}
 			const tokenData = jwt.verify(rawToken, process.env.SECRET);
 			const id = tokenData.id;
 			const user = await User.findById(id);
 			if (user) {
 				req.user = user;
+				res.locals.user = user;
 				const productId = req.params.productId;
-				const product = await Product.getProductById(productId);
-				if (product.pm === id) {
-					next();
+				if (productId) {
+					const product = await Product.getProductById(productId);
+					console.log(id, product.pm);
+
+					if (product.pm === id) {
+						next();
+					} else {
+						throw Error("forbidden");
+					}
 				} else {
-					throw Error('forbidden');
+					next();
 				}
 			} else {
-				throw Error('forbidden');
+				throw Error("forbidden");
 			}
 		} catch (error) {
 			res.status(403).json({

@@ -145,11 +145,13 @@ async function updateProductDefaultCountries() {
 	console.log(products.length);
 	for (let product of products) {
 		console.log(product.countries);
-		if (len(product.countries) < 1) {
+		if (product.countries.length < 1) {
 			product.countries = ["US", "CA", "MX", "UK", "IT", "DE", "FR", "SP", "JP", "AU"];
 			product.save();
 		}
 	}
+	const ans = await Product.deleteMany({ plwhsId: null });
+	console.log(ans);
 }
 exports.updateProductDefaultCountries = updateProductDefaultCountries;
 
@@ -515,18 +517,18 @@ async function prepareFbaInventoryAndSalesV2(asin, listings) {
 	};
 }
 
-
 async function prepareFbaInventoryAndSalesV3(product, listings) {
 	let inventory = 0;
 	let sales = 0;
 
-  if (!listings) {
+	if (!listings) {
 		listings = await Listing.findLisingsByProduct(product);
 	}
 
 	for (let listing of listings) {
-    inventory = inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
-    sales = sales + listing.ps;
+		inventory =
+			inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
+		sales = sales + listing.ps;
 	}
 	return {
 		inventory: inventory,
@@ -676,7 +678,7 @@ async function getValidProducings(product) {
 	return products[0]?.producings;
 }
 exports.getPlanV3 = async function (productId, producingId) {
-  let product = await getProductById(productId);
+	let product = await getProductById(productId);
 	let fbaInventorySales = await prepareFbaInventoryAndSalesV3(product);
 	console.log(fbaInventorySales);
 	let stock = product.stock + product.plwhs;

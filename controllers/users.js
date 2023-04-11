@@ -6,9 +6,9 @@ exports.create = async function (req, res, next) {
 	res.render("index", { title: "regist" });
 };
 
-exports.showChangePassword = async (req, res, next) {
+exports.showChangePassword = async (req, res, next) => {
 	res.render("user/reset-password", { title: "Change Password", message: "" });
-}
+};
 
 exports.login = async function (req, res, next) {
 	try {
@@ -18,10 +18,7 @@ exports.login = async function (req, res, next) {
 		});
 		console.log(token);
 		res.cookie("token", token);
-		res.send({
-			user,
-			token,
-		});
+		redirect("/products");
 	} catch (error) {
 		return res.status(422).send({
 			message: error,
@@ -54,5 +51,7 @@ exports.showLogin = async function (req, res, next) {
 
 exports.changePassword = async (req, res, next) => {
 	const oldPassword = req.body.oldPassword;
-	
-}
+	const newPassword = req.body.newPassword;
+	const name = req.body.name;
+	const newUser = await User.changePassword({ name, oldPassword, newPassword });
+};

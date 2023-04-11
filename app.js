@@ -27,7 +27,13 @@ app.use(
 		saveUninitialized: false,
 	}),
 );
-const filteredPath = ["/users/login", "/users/api/login", "/users/register", "/users/api/register"];
+const filteredPath = [
+	"/users/login",
+	"/users/api/login",
+	"/users/register",
+	"/users/api/register",
+	"/users/change-password",
+];
 
 app.use(cookieParser());
 app.use("/", async (req, res, next) => {
