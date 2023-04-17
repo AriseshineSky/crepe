@@ -1,15 +1,20 @@
 const schedule = require("node-schedule");
 let checkProductsInventory = require("../lib/checkProductsInventory");
 let Product = require("../proxy").Product;
-let freights = require("../proxy/freight");
+let Role = require("../proxy").Role;
 let syncAllListings = require("../lib/syncAllListings");
-let generateProduct = require("../lib/generateProductByListing");
 const logger = require("../common/logger");
 
 const scheduleCronstyle = () => {
+	Role.init();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
-		checkProductsInventory.checkProductsInventory();
+		// checkProductsInventory.checkProductsInventory();
+	});
+	checkProductsInventory.updateProductsInventory();
+	schedule.scheduleJob("0 0 */1 * * *", () => {
+		logger.info("start to check product inventory");
+		checkProductsInventory.updateProductsInventory();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product sales and inventories");
@@ -34,7 +39,7 @@ const scheduleCronstyle = () => {
 		Product.syncFromPlwhs();
 		Product.updateProductDefaultCountries();
 	});
-	Product.updateProductDefaultCountries();
+	// Product.removeProductsWithoutAsinOrPlwhsId();
 };
 
 exports.initScheduledJobs = () => {

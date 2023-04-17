@@ -87,7 +87,8 @@ exports.findByPlwhsId = async function (id) {
 	}
 	return await User.findOne({ plwhsId: id });
 };
-exports.findById = async function (id) {
+
+exports.findByObjId = async function (id) {
 	if (!id) {
 		return null;
 	}

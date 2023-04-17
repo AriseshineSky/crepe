@@ -4,22 +4,33 @@ let Product = require("../proxy").Product;
 function checkPermission() {
 	return async (req, res, next) => {
 		try {
+			res.locals.message = {};
+			res.locals.user = {};
 			const rawToken = req.cookies.token;
-			console.log(rawToken);
 			if (!rawToken) {
 				res.redirect("/users/login");
 				return;
 			}
-			const tokenData = jwt.verify(rawToken, process.env.SECRET);
-			const id = tokenData.id;
-			const user = await User.findById(id);
+			let id = undefined;
+			try {
+				const tokenData = jwt.verify(rawToken, process.env.SECRET);
+				id = tokenData.id;
+			} catch (error) {
+				res.redirect("/users/login");
+				return;
+			}
+			const user = await User.findByObjId(id);
 			if (user) {
 				req.user = user;
 				res.locals.user = user;
+				const hasRole = user.roles.some((role) => role.name === "admin");
+				if (hasRole) {
+					next();
+					return;
+				}
 				const productId = req.params.productId;
 				if (productId) {
 					const product = await Product.getProductById(productId);
-					console.log(id, product.pm);
 
 					if (product.pm === id) {
 						next();
@@ -30,7 +41,8 @@ function checkPermission() {
 					next();
 				}
 			} else {
-				throw Error("forbidden");
+				console.log("can not find this user");
+				res.redirect("/users/login");
 			}
 		} catch (error) {
 			res.status(403).json({

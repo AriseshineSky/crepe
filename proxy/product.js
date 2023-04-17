@@ -144,45 +144,49 @@ async function updateProductDefaultCountries() {
 
 	console.log(products.length);
 	for (let product of products) {
-		console.log(product.countries);
 		if (product.countries.length < 1) {
 			product.countries = ["US", "CA", "MX", "UK", "IT", "DE", "FR", "SP", "JP", "AU"];
 			product.save();
 		}
 	}
-	const ans = await Product.deleteMany({ plwhsId: null });
-	console.log(ans);
 }
 exports.updateProductDefaultCountries = updateProductDefaultCountries;
 
+exports.removeProductsWithoutAsinOrPlwhsId = async () => {
+	Product.deleteMany({ $or: [{ asin: null }, { asin: { $eq: "" } }] });
+	Product.deleteMany({ plwhsId: null });
+};
 async function syncFromPlwhs() {
+	Product.deleteMany({ $or: [{ asin: null }, { asin: { $eq: "" } }] });
+	let pro = await Product.find({ $or: [{ asin: null }, { asin: { $eq: "" } }] });
+	console.log("pro", pro);
 	const connection = await getDatabaseConnection();
-	connection.query("SELECT * FROM Product;", async (error, results, fields) => {
-		if (error) {
-			console.log(error);
-			// throw error;
-		}
-		for (let product of results) {
-			let savedProduct = await Product.findOne({ plwhsId: product.id });
-			const user = await User.findByPlwhsId(product.appUserId);
-			if (!user) {
-				continue;
-			}
-			if (!savedProduct) {
-				let newProduct = await Product.create({
-					plwhsId: product.id,
-					asin: product.asin,
-					pm: user.id,
-				});
-				console.log(newProduct);
-			} else {
-				if (!savedProduct.pm) {
-					savedProduct.pm = user.id;
-					savedProduct.save();
-				}
-			}
-		}
-	});
+	// connection.query("SELECT * FROM Product;", async (error, results, fields) => {
+	// 	if (error) {
+	// 		console.log(error);
+	// 		// throw error;
+	// 	}
+	// 	for (let product of results) {
+	// 		let savedProduct = await Product.findOne({ plwhsId: product.id });
+	// 		const user = await User.findByPlwhsId(product.appUserId);
+	// 		if (!user) {
+	// 			continue;
+	// 		}
+	// 		if (!savedProduct) {
+	// 			let newProduct = await Product.create({
+	// 				plwhsId: product.id,
+	// 				asin: product.asin,
+	// 				pm: user.id,
+	// 			});
+	// 			console.log(newProduct);
+	// 		} else {
+	// 			if (!savedProduct.pm) {
+	// 				savedProduct.pm = user.id;
+	// 				savedProduct.save();
+	// 			}
+	// 		}
+	// 	}
+	// });
 }
 exports.syncFromPlwhs = syncFromPlwhs;
 async function syncPm() {
@@ -381,10 +385,9 @@ async function addCurrentInventoryToInbounds(totalInventory, inboundShippeds) {
 }
 
 async function addShipmentToInbounds(shipment, inbounds) {
+	let newInbounds = [];
 	if (inbounds) {
-		let newInbounds = JSON.parse(JSON.stringify(inbounds));
-	} else {
-		let newInbounds = [];
+		newInbounds = JSON.parse(JSON.stringify(inbounds));
 	}
 	newInbounds.push({
 		quantity: shipment.quantity,
@@ -535,6 +538,8 @@ async function prepareFbaInventoryAndSalesV3(product, listings) {
 		sales: Math.ceil(sales),
 	};
 }
+exports.prepareFbaInventoryAndSalesV3 = prepareFbaInventoryAndSalesV3;
+
 async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
 	let availableQuantity = 0;
 	let reservedFCTransfer = 0;
@@ -1001,10 +1006,11 @@ async function calculatePlanAmounts(freightPlan, product) {
 }
 
 async function checkVolumeWeight(box, freightType) {
+	let volumeWeight = undefined;
 	if (freightType.indexOf("sea") > 0) {
-		let volumeWeight = (box.length + box.width + box.height) / 5000;
+		volumeWeight = (box.length + box.width + box.height) / 5000;
 	} else {
-		let volumeWeight = (box.length + box.width + box.height) / 6000;
+		volumeWeight = (box.length + box.width + box.height) / 6000;
 	}
 	return volumeWeight < 1.2 * box.wt;
 }

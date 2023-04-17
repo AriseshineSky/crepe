@@ -7,7 +7,16 @@ exports.create = async function (req, res, next) {
 };
 
 exports.showChangePassword = async (req, res, next) => {
-	res.render("user/reset-password", { title: "Change Password", message: "" });
+	res.render("user/reset-password", {
+		title: "Change Password",
+		user: { name: null },
+		message: "",
+	});
+};
+
+exports.logout = async (req, res, next) => {
+	res.cookie("token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;");
+	res.redirect("/users/login");
 };
 
 exports.login = async function (req, res, next) {
@@ -17,12 +26,13 @@ exports.login = async function (req, res, next) {
 			password: req.body.password,
 		});
 		console.log(token);
-		res.cookie("token", token);
-		redirect("/products");
+		res.cookie("token", token, { maxAge: 900000, httpOnly: true });
+		req.flash("success", "Login Successfully");
+		res.redirect("/products");
 	} catch (error) {
-		return res.status(422).send({
-			message: error,
-		});
+		console.log("login error", error);
+		req.flash("error", error);
+		res.redirect("/users/login");
 	}
 };
 exports.list = async function (req, res, next) {};
@@ -46,12 +56,20 @@ exports.showRegister = async function (req, res, next) {
 };
 exports.showLogin = async function (req, res, next) {
 	// res.render("user/login");
-	res.render("user/login", { title: "login" });
+	res.render("user/login", { title: "login", user: { name: null } });
 };
 
 exports.changePassword = async (req, res, next) => {
 	const oldPassword = req.body.oldPassword;
 	const newPassword = req.body.newPassword;
 	const name = req.body.name;
-	const newUser = await User.changePassword({ name, oldPassword, newPassword });
+	try {
+		const { token, user } = await User.changePassword({ name, oldPassword, newPassword });
+		res.cookie("token", token, { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true });
+		res.redirect("/products");
+	} catch (error) {
+		return res.status(422).send({
+			message: error,
+		});
+	}
 };

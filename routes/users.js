@@ -9,5 +9,6 @@ router.post("/change-password", users.changePassword);
 router.get("/api/users", users.list);
 router.get("/login", users.showLogin);
 router.post("/login", users.login);
+router.post("/logout", users.logout);
 
 module.exports = router;

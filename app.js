@@ -38,6 +38,8 @@ const filteredPath = [
 app.use(cookieParser());
 app.use("/", async (req, res, next) => {
 	console.log(req.path);
+	res.locals.messages = {};
+	res.locals.user = {};
 	if (filteredPath.indexOf(req.path) > -1) {
 		return next();
 	}

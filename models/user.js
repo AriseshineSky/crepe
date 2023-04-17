@@ -1,8 +1,9 @@
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-var BaseModel = require("./base_model");
-var Schema = mongoose.Schema;
-var UserSchema = new Schema({
+const BaseModel = require("./base_model");
+const Schema = mongoose.Schema;
+const UserSchema = new Schema({
+	roles: [{ type: Schema.Types.ObjectId, ref: "Role" }],
 	name: { type: String },
 	password: {
 		type: String,
@@ -17,7 +18,7 @@ var UserSchema = new Schema({
 });
 UserSchema.plugin(BaseModel);
 UserSchema.pre("save", function (next) {
-	var now = new Date();
+	const now = new Date();
 	this.updateAt = now;
 	next();
 });
