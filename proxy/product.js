@@ -525,12 +525,16 @@ async function prepareFbaInventoryAndSalesV3(product, listings) {
 	let sales = 0;
 
 	if (!listings) {
-		listings = await Listing.findLisingsByProduct(product);
+		listings = await Listing.findListingsByProduct(product);
 	}
 
 	for (let listing of listings) {
 		inventory =
-			inventory + listing.availableQuantity + listing.reservedFCTransfer + listing.inboundShipped;
+			inventory +
+			listing.availableQuantity +
+			listing.reservedFCTransfer +
+			listing.inboundShipped +
+			listing.reservedFCProcessing;
 		sales = sales + listing.ps;
 	}
 	return {
@@ -657,7 +661,7 @@ exports.getSales = getSales;
 async function updateAllProuctSalesAndInventories() {
 	let products = await findAll();
 	for (let product of products) {
-		const listings = await Listing.findLisingsByProduct(product);
+		const listings = await Listing.findListingsByProduct(product);
 		let fbaInventorySales = await prepareFbaInventoryAndSalesV3(product, listings);
 		await getSales(fbaInventorySales, product);
 		save(product);
