@@ -10,6 +10,7 @@ let getStockByProduct = require("../lib/getStockByProduct");
 let getPlwhsByProduct = require("../lib/getPlwhsByProduct");
 let Freight = require("./freight");
 let Listing = require("./listing");
+let Yisucang = require("./yisucang");
 let logger = require("../common/logger");
 const mysql = require("mysql2");
 
@@ -135,16 +136,16 @@ async function getDatabaseConnection() {
 }
 async function getProductById(id) {
 	if (!id) return null;
+	console.log(id);
 	return await Product.findById(id);
 }
 exports.getProductById = getProductById;
 
 async function updateProductDefaultCountries() {
 	const products = await showAll();
-
 	console.log(products.length);
 	for (let product of products) {
-		if (product.countries.length < 1) {
+		if (!product.countries || product.countries.length < 1) {
 			product.countries = ["US", "CA", "MX", "UK", "IT", "DE", "FR", "SP", "JP", "AU"];
 			product.save();
 		}
@@ -161,32 +162,32 @@ async function syncFromPlwhs() {
 	let pro = await Product.find({ $or: [{ asin: null }, { asin: { $eq: "" } }] });
 	console.log("pro", pro);
 	const connection = await getDatabaseConnection();
-	// connection.query("SELECT * FROM Product;", async (error, results, fields) => {
-	// 	if (error) {
-	// 		console.log(error);
-	// 		// throw error;
-	// 	}
-	// 	for (let product of results) {
-	// 		let savedProduct = await Product.findOne({ plwhsId: product.id });
-	// 		const user = await User.findByPlwhsId(product.appUserId);
-	// 		if (!user) {
-	// 			continue;
-	// 		}
-	// 		if (!savedProduct) {
-	// 			let newProduct = await Product.create({
-	// 				plwhsId: product.id,
-	// 				asin: product.asin,
-	// 				pm: user.id,
-	// 			});
-	// 			console.log(newProduct);
-	// 		} else {
-	// 			if (!savedProduct.pm) {
-	// 				savedProduct.pm = user.id;
-	// 				savedProduct.save();
-	// 			}
-	// 		}
-	// 	}
-	// });
+	connection.query("SELECT * FROM Product;", async (error, results, fields) => {
+		if (error) {
+			console.log(error);
+			// throw error;
+		}
+		for (let product of results) {
+			let savedProduct = await Product.findOne({ plwhsId: product.id });
+			const user = await User.findByPlwhsId(product.appUserId);
+			if (!user) {
+				continue;
+			}
+			if (!savedProduct) {
+				let newProduct = await Product.create({
+					plwhsId: product.id,
+					asin: product.asin,
+					pm: user.id,
+				});
+				console.log(newProduct);
+			} else {
+				if (!savedProduct.pm) {
+					savedProduct.pm = user.id;
+					savedProduct.save();
+				}
+			}
+		}
+	});
 }
 exports.syncFromPlwhs = syncFromPlwhs;
 async function syncPm() {
@@ -440,15 +441,33 @@ async function updateProduct(product, attrs) {
 	}
 }
 exports.updateProduct = updateProduct;
+async function getStockByProductV2(product) {
+	let stock = 0;
+	if (Array.isArray(product.yisucangId)) {
+		for (let yisucangId of product.yisucangId) {
+			yisucang = await Yisucang.findYisucangById(yisucangId);
+			stock += yisucang.stock;
+		}
+	} else {
+		yisucang = await Yisucang.findYisucangById(product.yisucangId);
+		stock += yisucang.stock;
+	}
+	console.log("stock", stock);
+	return stock;
+}
+
+exports.getStockByProductV2 = getStockByProductV2;
+
 async function prepareStock(product) {
 	let quantity = 0;
 	let yStock = 0;
 	let pStock = 0;
-	let stock = await getStockByProduct(product);
+	// let stock = await getStockByProduct(product);
+	let stock = await getStockByProductV2(product);
 	let plwhs = await getPlwhsByProduct(product);
-	if (stock.inventory) {
-		quantity += stock.inventory.SumNumber;
-		yStock = stock.inventory.SumNumber;
+	if (stock) {
+		quantity += stock;
+		yStock = stock;
 	}
 	if (plwhs) {
 		quantity += plwhs.qty;
@@ -547,6 +566,7 @@ exports.prepareFbaInventoryAndSalesV3 = prepareFbaInventoryAndSalesV3;
 async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
 	let availableQuantity = 0;
 	let reservedFCTransfer = 0;
+	let reservedFCProcessing = 0;
 	let inboundShipped = 0;
 	let sales = 0;
 	if (!listings) {
@@ -557,6 +577,7 @@ async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
 			availableQuantity = availableQuantity + listing.availableQuantity;
 			reservedFCTransfer = reservedFCTransfer + listing.reservedFCTransfer;
 			inboundShipped = inboundShipped + listing.inboundShipped;
+			reservedFCProcessing = reservedFCProcessing + listing.reservedFCProcessing;
 			sales = sales + listing.ps;
 		}
 	}
@@ -565,6 +586,7 @@ async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
 		reservedFCTransfer: reservedFCTransfer,
 		inboundShipped: inboundShipped,
 		sales: sales,
+		reservedFCProcessing,
 	};
 }
 
@@ -1439,3 +1461,4 @@ exports.deleteInbound = deleteInbound;
 exports.remove = remove;
 exports.prepareFbaInventoryAndSales = prepareFbaInventoryAndSales;
 exports.prepareFbaInventoryAndSalesV2 = prepareFbaInventoryAndSalesV2;
+exports.prepareFbaInventoryAndSalesV3 = prepareFbaInventoryAndSalesV3;

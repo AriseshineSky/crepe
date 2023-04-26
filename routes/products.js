@@ -31,5 +31,5 @@ router.get("/syncAllFreights", products.syncAllProductFreights);
 router.post("/delete", products.delete);
 router.get("/updateAllProuctSalesAndInventories", products.updateAllProuctSalesAndInventories);
 router.get("/", products.index);
-router.get("/:asin", products.show);
+router.get("/:productId", products.show);
 module.exports = router;

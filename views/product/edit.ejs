@@ -14,17 +14,18 @@
         </div>
       <% }else{ %>
         <% if (typeof(action) !== 'undefined' && action === 'edit') { %>
-          <form id='edit_product_form' action='/products/<%= product.asin %>/edit' method='post'>
+          <form id='edit_product_form' action='/products/<%= product.id %>/edit' method='post'>
             <% } else { %>
-            <form id='create_product_form' action='/products/<%= product.asin %>/save' method='post'>
+            <form id='create_product_form' action='/products/<%= product.id %>/save' method='post'>
               <% } %>
             <div class="card p-4">
               <div class="card-header">
                 Product
               </div>
+                <input type="hidden" name="id" value="<%= product.id %>"/>
                 <div class="input-group input-group-static mb-4">
                   <label>ASIN：</label>
-                  <input type="text" class="form-control" name="asin" readonly value="<%= product.asin %>"/>
+                  <input type="text" class="form-control" name="asin" value="<%= product.asin %>"/>
                 </div>
                 <div class="input-group input-group-static mb-4">
                   <label>生产周期(天):</label>
@@ -88,7 +89,8 @@
                 </div>
                 <div class="input-group input-group-static mb-4">
                   <label>yisucang产品id:</label>
-                  <input type="number" class="form-control" name="yisucangId" value="<%= product.yisucangId %>">
+										<input type="number" class="form-control" name="yisucangId" value="<%= product.yisucangId[0] %>">
+										<input type="number" class="form-control" name="yisucangId" value="<%= product.yisucangId[1] %>">
                 </div>
                 <div class="input-group input-group-static mb-4">
                   <label>装箱尺寸：</label>

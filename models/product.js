@@ -80,7 +80,7 @@ var ProductSchema = new Schema({
 	discontinue: { type: Boolean, default: false },
 	sea: { type: Boolean, default: false },
 	plwhsId: { type: Number, default: 0 },
-	yisucangId: { type: Number, default: 0 },
+	yisucangId: { type: [String] },
 	plan: { type: String },
 	createAt: { type: Date, default: Date.now },
 	updateAt: { type: Date, default: Date.now },

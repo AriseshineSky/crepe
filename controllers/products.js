@@ -251,7 +251,7 @@ exports.create = async function (req, res, next) {
 };
 
 exports.save = async function (req, res, next) {
-	let productId = req.body.productId;
+	let productId = req.body.id;
 	let asin = req.body.asin;
 	let cycle = req.body.cycle;
 	let maxAvgSales = req.body.maxAvgSales;
@@ -266,6 +266,7 @@ exports.save = async function (req, res, next) {
 	};
 	let plwhsId = req.body.plwhsId;
 	let yisucangId = req.body.yisucangId;
+	console.log("yi", yisucangId);
 	let airDelivery = req.body.airDelivery;
 	let sea = req.body.sea;
 	let avgSales = req.body.avgSales;
@@ -292,7 +293,7 @@ exports.save = async function (req, res, next) {
 				return next(err);
 			}
 			console.log(product.asin);
-			res.redirect("/products/" + product.asin);
+			res.redirect("/products/" + product.id);
 		});
 	} else {
 		console.log(asin);

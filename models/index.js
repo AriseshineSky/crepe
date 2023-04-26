@@ -21,10 +21,11 @@ require("./freight");
 require("./token");
 require("./listing");
 require("./role");
+require("./yisucang");
 exports.Product = mongoose.model("Product");
 exports.User = mongoose.model("User");
 exports.Freight = mongoose.model("Freight");
 exports.Token = mongoose.model("Token");
 exports.Listing = mongoose.model("Listing");
 exports.Role = mongoose.model("Role");
-
+exports.Yisucang = mongoose.model("Yisucang");
