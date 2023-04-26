@@ -14,6 +14,7 @@ exports.syncYisucang = async function () {
 		});
 		if (yiInventory) {
 			let product = await findOrCreate(yiProduct.ID.toString());
+			console.log(yiInventory);
 			product.stock = yiInventory.SumNumber;
 			product.save();
 		}
@@ -25,7 +26,7 @@ exports.findAll = async function () {
 };
 
 async function findYisucangById(yisucangId) {
-	return await Yisucang.find({ yisucangId: yisucangId });
+	return await Yisucang.findOne({ yisucangId: yisucangId });
 }
 exports.findYisucangById = findYisucangById;
 

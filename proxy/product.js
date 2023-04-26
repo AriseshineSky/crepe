@@ -445,12 +445,16 @@ async function getStockByProductV2(product) {
 	let stock = 0;
 	if (Array.isArray(product.yisucangId)) {
 		for (let yisucangId of product.yisucangId) {
-			yisucang = await Yisucang.findYisucangById(yisucangId);
-			stock += yisucang.stock;
+			let yisucang = await Yisucang.findYisucangById(yisucangId);
+			if (yisucang) {
+				stock += yisucang.stock;
+			}
 		}
 	} else {
-		yisucang = await Yisucang.findYisucangById(product.yisucangId);
-		stock += yisucang.stock;
+		let yisucang = await Yisucang.findYisucangById(product.yisucangId);
+		if (yisucang) {
+			stock += yisucang.stock;
+		}
 	}
 	console.log("stock", stock);
 	return stock;
