@@ -888,16 +888,17 @@ async function getProducingsFreightPlan(product, sales, inbounds, validProducing
 	let plan = { plans: [] };
 	let producings = await prepareProducings(product, validProducings);
 	for (let i = 0; i < producings.length; i++) {
+		let producingPlan = null;
 		if (!producings[i].deletedAt) {
 			if (plan.inbounds) {
-				let producingPlan = await getProducingFreightPlan(
+				producingPlan = await getProducingFreightPlan(
 					producings[i],
 					product,
 					sales,
 					plan.inbounds,
 				);
 			} else {
-				let producingPlan = await getProducingFreightPlan(producings[i], product, sales, inbounds);
+				producingPlan = await getProducingFreightPlan(producings[i], product, sales, inbounds);
 			}
 			producingPlan.deliveryDue = producings[i].deliveryDue;
 			producingPlan.created = producings[i].created;
