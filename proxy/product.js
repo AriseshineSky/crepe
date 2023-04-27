@@ -486,7 +486,7 @@ let findAll = async function () {
 };
 
 async function findByUser(user) {
-	return await Product.find({ pm: user._id, discontinue: false }).populate("pm");
+	return await Product.find({ pm: user._id, discontinue: false }).populate("pm").sort({ps: -1});
 }
 
 exports.findByUser = findByUser;

@@ -8,8 +8,8 @@ var config = {
 // if (process.env.NODE_ENV === 'test') {
 //   config.db = 'mongodb://127.0.0.1:27017/crepe_test';
 // }
-// config.db = 'mongodb://127.0.0.1:27017/crepe_test';
-config.db = "mongodb://mongodb:27017/crepe_test";
+config.db = 'mongodb://127.0.0.1:27017/crepe_test';
+//config.db = "mongodb://mongodb:27017/crepe_test";
 // config.db = "mongodb://root:root@172.24.0.2:27017/crepe_test";
 // console.log(process.env.NODE_ENV);
 config.SECRET = "fdfhfjdfdjfdjerwrereresaassa2dd@ddds";

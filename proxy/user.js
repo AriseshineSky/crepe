@@ -13,6 +13,7 @@ exports.getToken = async function (user) {
 	}
 	console.log(user);
 	console.log(savedUser);
+	console.log(process.env.SECRET);
 	const isPasswordValid = require("bcryptjs").compareSync(user.password, savedUser.password);
 	if (!isPasswordValid) {
 		throw new Error("invalid password");

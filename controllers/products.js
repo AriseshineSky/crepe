@@ -80,15 +80,15 @@ exports.updatePlan = async function (req, res, next) {
 };
 
 exports.syncFreight = async function (req, res, next) {
-	let asin = req.params.productId;
-	let product = await Product.getProductByAsin(asin);
+	let productId = req.params.productId;
+	let product = await Product.getProductById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
 	} else {
 		await Product.syncFreight(product, 10);
 		await Product.save(product);
-		res.redirect("/products/" + product.asin + "/inbounds");
+		res.redirect("/products/" + product.productId + "/inbounds");
 	}
 };
 
