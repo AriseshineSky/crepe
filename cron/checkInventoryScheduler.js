@@ -8,7 +8,7 @@ const logger = require("../common/logger");
 
 const scheduleCronstyle = () => {
 	// Yisucang.syncYisucang();
-	// Role.init();
+	Role.init();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();
@@ -41,6 +41,10 @@ const scheduleCronstyle = () => {
 		Product.syncFromPlwhs();
 		Product.updateProductDefaultCountries();
 	});
+	// Yisucang.syncYisucang();
+	Product.updateAllStock();
+	// Product.syncPm();
+	// Product.updateProductDefaultCountries();
 	// Product.removeProductsWithoutAsinOrPlwhsId();
 };
 
