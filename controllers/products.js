@@ -88,7 +88,7 @@ exports.syncFreight = async function (req, res, next) {
 	} else {
 		await Product.syncFreight(product, 10);
 		await Product.save(product);
-		res.redirect("/products/" + product.productId + "/inbounds");
+		res.redirect("/products/" + productId + "/inbounds");
 	}
 };
 
