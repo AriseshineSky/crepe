@@ -79,6 +79,11 @@ const YISUCANG_ID_KEYS = [
 		PartnerID: "67527241",
 		PartnerKey: "48c5de4f-860b-a2d1-bbd9-fa82a76ec542",
 	},
+	// josiahrn777
+	{
+		PartnerID: "38831931",
+		PartnerKey: "c8820f87-b856-17ae-5307-d0d796c43de3",
+	},
 ];
 yisucangApis = {
 	inventory: "/OrderAPI/GetInventory",
@@ -99,4 +104,3 @@ async function products() {
 }
 
 exports.yisucangProducts = products;
-
