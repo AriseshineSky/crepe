@@ -486,7 +486,7 @@ let findAll = async function () {
 };
 
 async function findByUser(user) {
-	return await Product.find({ pm: user._id, discontinue: false }).populate("pm").sort({ps: -1});
+	return await Product.find({ pm: user._id, discontinue: false }).populate("pm").sort({ ps: -1 });
 }
 
 exports.findByUser = findByUser;
@@ -551,6 +551,7 @@ async function prepareFbaInventoryAndSalesV3(product, listings) {
 		listings = await Listing.findListingsByProduct(product);
 	}
 
+	console.log(listings);
 	for (let listing of listings) {
 		inventory =
 			inventory +
@@ -891,12 +892,7 @@ async function getProducingsFreightPlan(product, sales, inbounds, validProducing
 		let producingPlan = null;
 		if (!producings[i].deletedAt) {
 			if (plan.inbounds) {
-				producingPlan = await getProducingFreightPlan(
-					producings[i],
-					product,
-					sales,
-					plan.inbounds,
-				);
+				producingPlan = await getProducingFreightPlan(producings[i], product, sales, plan.inbounds);
 			} else {
 				producingPlan = await getProducingFreightPlan(producings[i], product, sales, inbounds);
 			}

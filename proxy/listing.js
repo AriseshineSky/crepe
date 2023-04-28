@@ -14,7 +14,12 @@ exports.findListingsByProduct = async function (product) {
 	const countries = product.countries.map((country) => {
 		return country.toUpperCase();
 	});
-	return await Listing.find({ asin: product.asin, country: { $in: countries } });
+	let weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+	return await Listing.find({
+		asin: product.asin,
+		country: { $in: countries },
+		updateAt: { $gte: weekAgo.toISOString() },
+	});
 };
 
 exports.findOrCreate = async function (listing, data) {
