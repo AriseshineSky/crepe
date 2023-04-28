@@ -126,12 +126,12 @@
   </div>
   <div class="col-sm-6">
     <div class="card">
-      <form id='create_product_inbound_form' action='/products/<%- product.asin %>/inbounds' method='post'>
+      <form id='create_product_inbound_form' action='/products/<%- product.id %>/inbounds' method='post'>
         <div class="card-header">
           <h4>添加运输中货物</h4>
         </div>
         <div class="card-body">
-          <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
+          <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" >
           <div class="input-group input-group-static mb-4">
             <label>数量:</label>
             <input type="number" class="form-control" name="quantity">
@@ -192,9 +192,9 @@
       }).get();     
       var modalBody = $('<div id="modalContent"></div>');
       var inboundId = $(this).data('inbound-id')
-      var modalForm = $(`<form role="form" name="modalForm" id="update_inbound_form" action="/products/<%= product.asin %>/inbound/${inboundId}" method="post"> \
+      var modalForm = $(`<form role="form" name="modalForm" id="update_inbound_form" action="/products/<%= product.id %>/inbound/${inboundId}" method="post"> \
                           
-                            <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
+                            <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" > \
                             <input class="form-control" name="inboundId" value="${inboundId}" type="hidden" > \
                             <div class="input-group input-group-static mb-4"> \
                               <label>数量:</label> \
@@ -222,9 +222,9 @@
       }).get();     
       var modalBody = $('<div id="modalContent"></div>');
       var producingId = $(this).data('producing-id')
-      var modalForm = $(`<form role="form" name="modalForm" id="update_producing_form" action="/products/<%= product.asin %>/producing/${producingId}" method="post"> \
+      var modalForm = $(`<form role="form" name="modalForm" id="update_producing_form" action="/products/<%= product.id %>/producing/${producingId}" method="post"> \
                           <div class="card-body"> \
-                            <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
+                            <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" > \
                             <input class="form-control" name="inboundId" value="${producingId}" type="hidden" > \
                             <div class="input-group input-group-static mb-4"> \
                               <label>数量:</label> \
@@ -256,10 +256,9 @@
       }).get();     
       var modalBody = $('<div id="editProducingContent"></div>');
       var producingId = $(this).data('producing-id')
-      var modalForm = $(`<form role="form" name="modalForm" id="update_form" action="/products/<%= product.asin %>/producing" method="post"> \
+      var modalForm = $(`<form role="form" name="modalForm" id="update_form" action="/products/<%= product.id %>/producing" method="post"> \
                           <div class="card-body"> \
-                            <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
-                            <input class="form-control" name="productId" value="<%= product._id %>" type="hidden" > \
+                            <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" > \
                             <input class="form-control" name="producingId" value="${producingId}" type="hidden" > \
                             <div class="input-group input-group-static mb-4"> \
                               <label>数量:</label> \
@@ -285,9 +284,8 @@
       }).get();     
       var modalBody = $('<div id="editInboundContent"></div>');
       var inboundId = $(this).data('inbound-id')
-      var modalForm = $(`<form role="form" name="modalForm" id="update_form" action="/products/<%= product.asin %>/inbound" method="post"> \
+      var modalForm = $(`<form role="form" name="modalForm" id="update_form" action="/products/<%= product.id %>/inbound" method="post"> \
                           <div class="card-body"> \
-                            <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" > \
                             <input class="form-control" name="productId" value="<%= product._id %>" type="hidden" > \
                             <input class="form-control" name="inboundId" value="${inboundId}" type="hidden" > \
                             <div class="input-group input-group-static mb-4"> \
