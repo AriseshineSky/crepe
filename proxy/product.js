@@ -486,7 +486,11 @@ let findAll = async function () {
 };
 
 async function findByUser(user) {
-	return await Product.find({ pm: user._id, discontinue: false }).populate("pm").sort({ ps: -1 });
+	if (user.name === "admin") {
+		return await Product.find({ discontinue: false }).populate("pm").sort({ ps: -1 });
+	} else {
+		return await Product.find({ pm: user._id, discontinue: false }).populate("pm").sort({ ps: -1 });
+	}
 }
 
 exports.findByUser = findByUser;
