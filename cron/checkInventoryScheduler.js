@@ -5,9 +5,11 @@ let Yisucang = require("../proxy").Yisucang;
 let Role = require("../proxy").Role;
 let syncAllListings = require("../lib/syncAllListings");
 const logger = require("../common/logger");
+let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
 	// Yisucang.syncYisucang();
+	// syncProducts.syncProducts();
 	// Role.init();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
@@ -29,6 +31,7 @@ const scheduleCronstyle = () => {
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update lisings");
 		syncAllListings.syncListings();
+		syncProducts.syncProducts();
 	});
 	// Product.updateAllStock();
 	schedule.scheduleJob("0 0 */1 * * *", () => {
