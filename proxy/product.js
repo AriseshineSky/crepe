@@ -137,7 +137,8 @@ async function getDatabaseConnection() {
 async function getProductById(id) {
 	if (!id) return null;
 	console.log(id);
-	return await Product.findById(id);
+	// return await Product.find({ ps: { $gt: 2 }, discontinue: false }).populate("pm");
+	return await Product.findById(id).populate("pm");
 }
 exports.getProductById = getProductById;
 
@@ -190,36 +191,57 @@ async function syncFromPlwhs() {
 	});
 }
 exports.syncFromPlwhs = syncFromPlwhs;
-async function syncPm() {
-	const connection = mysql.createConnection({
-		host: "mysql",
-		port: 3306,
-		user: "root",
-		password: "root",
-		database: "pl_warehouse",
-	});
-	connection.connect((error) => {
-		console.log(error);
-	});
-	connection.query("SELECT * FROM AppUser;", async (error, results, fields) => {
-		if (error) {
-			console.log(error);
-			// throw error;
-		}
-		console.log(results);
-		for (let user of results) {
-			await User.findOrCreate(user);
-		}
-	});
 
-	// let products = await findAll();
-	// for (let product of products) {
-	// 	let user = await getPm(product.asin, "US");
-	// 	let pm = await User.findOrCreate(user);
-	// 	User.updateUser(user);
-	// 	product.pm = pm;
-	// 	await save(product);
-	// }
+async function syncPmByProduct(productId) {
+	let product = await getProductById(productId);
+	for (let country of product.countries) {
+		let user = await getPm(product.asin, country.toUpperCase());
+		if (user && user !== "unknown") {
+			user.username = user.name;
+			let pm = await User.findOrCreate(user);
+			User.updateUser(user);
+			product.pm = pm;
+			await save(product);
+			return;
+		}
+	}
+}
+exports.syncPmByProduct = syncPmByProduct;
+
+async function syncPm() {
+	// const connection = mysql.createConnection({
+	// 	host: "mysql",
+	// 	port: 3306,
+	// 	user: "root",
+	// 	password: "root",
+	// 	database: "pl_warehouse",
+	// });
+	// connection.connect((error) => {
+	// 	console.log(error);
+	// });
+	// connection.query("SELECT * FROM AppUser;", async (error, results, fields) => {
+	// 	if (error) {
+	// 		console.log(error);
+	// 		// throw error;
+	// 	}
+	// 	console.log(results);
+	// 	for (let user of results) {
+	// 		await User.findOrCreate(user);
+	// 	}
+	// });
+	let products = await findAll();
+	for (let product of products) {
+		for (let country of product.countries) {
+			let user = await getPm(product.asin, country.toUpperCase());
+			if (user) {
+				let pm = await User.findOrCreate(user);
+				User.updateUser(user);
+				product.pm = pm;
+				await save(product);
+				return;
+			}
+		}
+	}
 }
 exports.syncPm = syncPm;
 
@@ -487,9 +509,9 @@ let findAll = async function () {
 
 async function findByUser(user) {
 	if (user.name === "admin") {
-		return await Product.find({ discontinue: false }).populate("pm").sort({ ps: -1 });
+		return await Product.find().populate("pm").sort({ ps: -1 });
 	} else {
-		return await Product.find({ pm: user._id, discontinue: false }).populate("pm").sort({ ps: -1 });
+		return await Product.find({ pm: user._id }).populate("pm").sort({ ps: -1 });
 	}
 }
 

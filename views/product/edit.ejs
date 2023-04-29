@@ -126,6 +126,11 @@
                   </label>
                 </div>
 
+            <% if (product.pm) { %>
+              <%= product.pm.name %>
+            <% } else { %>
+              Unknowun
+            <% } %>
               <div class="card-footer text-muted">
                 <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
               </div>

@@ -63,7 +63,7 @@ exports.findOrCreate = async function (user) {
 	}
 	var savedUser = await User.findOne({ name: user.username });
 	if (savedUser) {
-		return await savedUser.update({
+		await savedUser.update({
 			name: user.username,
 			chatId: user.chat_id,
 			realm: user.realm,

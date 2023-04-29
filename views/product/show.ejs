@@ -100,6 +100,16 @@
               <label>每箱数量(个)：</label>
               <span class="form-control" ><%- product.unitsPerBox %></span>
             </div>
+            <div class="input-group input-group-static mb-4">
+              <label>PM：</label>
+              <span class="form-control" >
+								<% if (product.pm) { %>
+									<%= product.pm.name %>
+								<% } else { %>
+									Unknowun
+								<% } %>
+							</span>
+            </div>
             <div class="form-check">
               <% if (product.discontinue) { %>
                 <input class="form-check-input" type="checkbox" name="discontinue" value="true" checked id="defaultDiscontinue">

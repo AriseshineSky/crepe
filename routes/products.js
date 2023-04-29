@@ -23,6 +23,7 @@ router.get("/:productId/syncFreight", products.syncFreight);
 router.get("/:productId/report", products.generateReport);
 router.get("/:productId/showPlan", products.showPlan);
 router.post("/:productId/plan", products.updatePlan);
+router.get("/:productId/syncpm", products.syncPmByProduct);
 router.post("/create", products.create);
 router.get("/sync", products.sync);
 router.get("/syncpm", products.syncpm);

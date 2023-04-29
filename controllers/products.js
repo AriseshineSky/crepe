@@ -121,6 +121,12 @@ exports.syncpm = async function (req, res, next) {
 	res.render("index");
 };
 
+exports.syncPmByProduct = async function (req, res, next) {
+	let productId = req.params.productId;
+	await Product.syncPmByProduct(productId);
+	res.redirect("/products/" + productId);
+};
+
 exports.plan = async function (req, res, next) {
 	let productId = req.params.productId;
 	let purchase = await Product.getPlanV3(productId);
