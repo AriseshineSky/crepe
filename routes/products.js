@@ -8,7 +8,7 @@ router.get("/csv", products.csv);
 router.get("/:productId/inbounds", products.showInbounds);
 router.post("/:productId/inbounds", products.addInbound);
 router.post("/:productId/inbound", products.updateInbound);
-router.post("/:productId/updateAllStock", products.updateAllStockByAsin);
+router.get("/:productId/updateAllStock", products.updateAllStockByAsin);
 router.post("/:productId/inbound/:inboundId", products.deleteInbound);
 router.post("/:productId/producing/:producingId", products.deleteProducing);
 router.post("/:productId/producing", products.updateProducing);

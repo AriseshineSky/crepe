@@ -711,7 +711,16 @@ async function getSales(fbaInventorySales, product) {
 }
 exports.getSales = getSales;
 
-async function updateAllProuctSalesAndInventories() {
+async function updateProductSalesAndInventories(productId) {
+	let product = await getProductById(productId);
+	const listings = await Listing.findListingsByProduct(product);
+	let fbaInventorySales = await prepareFbaInventoryAndSalesV3(product, listings);
+	await getSales(fbaInventorySales, product);
+	save(product);
+}
+exports.updateProductSalesAndInventories = updateProductSalesAndInventories;
+
+async function updateAllProductSalesAndInventories() {
 	let products = await findAll();
 	for (let product of products) {
 		const listings = await Listing.findListingsByProduct(product);
@@ -721,7 +730,7 @@ async function updateAllProuctSalesAndInventories() {
 	}
 }
 
-exports.updateAllProuctSalesAndInventories = updateAllProuctSalesAndInventories;
+exports.updateAllProductSalesAndInventories = updateAllProductSalesAndInventories;
 
 async function prepareOrderDues(orderDues) {
 	let dues = [];

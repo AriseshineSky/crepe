@@ -13,6 +13,7 @@ exports.updateAllStock = async function (req, res, next) {
 exports.updateAllStockByAsin = async function (req, res, next) {
 	let productId = req.params.productId;
 	Product.updateAllStock(productId);
+	Product.updateProductSalesAndInventories(productId);
 	res.render("index", { title: "regist" });
 };
 
