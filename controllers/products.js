@@ -257,7 +257,7 @@ exports.save = async function (req, res, next) {
 	let maxAvgSales = req.body.maxAvgSales;
 	let unitsPerBox = req.body.unitsPerBox;
 	let minInventory = req.body.minInventory;
-	let discontinue = req.body.discontinue;
+	let discontinue = req.body.discontinue ? req.body.discontinue : false;
 	let box = {
 		length: req.body["box.length"],
 		width: req.body["box.width"],
