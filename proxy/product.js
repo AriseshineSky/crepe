@@ -1373,6 +1373,16 @@ async function findValidProducings(asin) {
 		},
 	]);
 }
+
+const getProductByPlwhsId = async function (plwhsId) {
+	return Product.findOne({ plwhsId })
+		.clone()
+		.catch(function (err) {
+			console.log(err);
+		});
+};
+exports.getProductByPlwhsId = getProductByPlwhsId;
+
 let getProductByAsin = async function (asin) {
 	return Product.findOne({ asin: asin })
 		.clone()
