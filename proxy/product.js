@@ -33,6 +33,9 @@ exports.getInboundShippedCount = getInboundShippedCount;
 async function updateAllStock(productId) {
 	if (productId) {
 		let product = await getProductById(productId);
+		if (product.yisucangId == null) {
+			product.yisucangId = [];
+		}
 		await prepareStock(product);
 		console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
 		await save(product);
