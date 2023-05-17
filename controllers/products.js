@@ -190,6 +190,10 @@ exports.edit = async function (req, res, next) {
 		res.render404("这个产品不存在。");
 		return;
 	} else {
+		if (product.yisucangId == null) {
+			product.yisucangId = [];
+			product.save();
+		}
 		res.render("product/edit", {
 			product: product,
 			title: "",
