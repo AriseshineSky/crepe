@@ -29,7 +29,12 @@ router.get("/", function (req, res, next) {
 });
 
 router.get("/check", async function (req, res, next) {
-	await checkProductsInventory.checkProductsInventory();
+	checkProductsInventory.checkProductsInventory();
+	res.render("index", { title: "regist" });
+});
+
+router.get("/updateAllInfo", async function (req, res, next) {
+	checkProductsInventory.updateProductsInventory();
 	res.render("index", { title: "regist" });
 });
 

@@ -616,10 +616,10 @@ async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
 		}
 	}
 	return {
-		availableQuantity: availableQuantity,
-		reservedFCTransfer: reservedFCTransfer,
-		inboundShipped: inboundShipped,
-		sales: sales,
+		availableQuantity,
+		reservedFCTransfer,
+		inboundShipped,
+		sales,
 		reservedFCProcessing,
 	};
 }

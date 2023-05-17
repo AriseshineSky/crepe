@@ -8,21 +8,17 @@ const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
-	// Yisucang.syncYisucang();
-	// syncProducts.syncProducts();
-	// Role.init();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();
 	});
-	// checkProductsInventory.updateProductsInventory();
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to sync product inventory");
 		Yisucang.syncYisucang();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product sales and inventories");
-		Product.updateAllProuctSalesAndInventories();
+		Product.updateAllProductSalesAndInventories();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product freights");
@@ -33,7 +29,6 @@ const scheduleCronstyle = () => {
 		syncAllListings.syncListings();
 		syncProducts.syncProducts();
 	});
-	// Product.updateAllStock();
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product stocks");
 		Product.updateAllStock();
@@ -42,11 +37,6 @@ const scheduleCronstyle = () => {
 		logger.info("start to update product pm");
 		Product.updateProductDefaultCountries();
 	});
-	// Yisucang.syncYisucang();
-	// Product.updateAllStock();
-	// Product.syncPm();
-	// Product.updateProductDefaultCountries();
-	// Product.removeProductsWithoutAsinOrPlwhsId();
 };
 
 exports.initScheduledJobs = () => {
