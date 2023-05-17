@@ -62,7 +62,7 @@ exports.freights = async function (req, res, next) {
 };
 
 exports.updateAllProuctSalesAndInventories = async function (req, res, next) {
-	Product.updateAllProuctSalesAndInventories();
+	Product.updateAllProductSalesAndInventories();
 	res.render("index", { title: "regist" });
 };
 
