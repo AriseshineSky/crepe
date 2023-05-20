@@ -524,6 +524,11 @@ let showAll = async function () {
 };
 
 exports.showAll = showAll;
+
+exports.productsNeedCheck = async function (ps = 2) {
+	return await Product.find({ ps: { $gte: ps } }).populate("pm");
+};
+
 let findAllAsins = async function () {
 	return Product.find().select("asin");
 };
