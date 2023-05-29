@@ -40,7 +40,7 @@ app.use("/", async (req, res, next) => {
 	console.log(req.path);
 	res.locals.messages = {};
 	res.locals.user = {};
-	if (filteredPath.indexOf(req.path) > -1) {
+	if (filteredPath.indexOf(req.path) > -1 || req.path.endsWith("showPlan")) {
 		return next();
 	}
 	await auth()(req, res, next);
