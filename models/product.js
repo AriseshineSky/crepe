@@ -45,6 +45,7 @@ var ProductSchema = new Schema({
 			},
 		},
 	],
+	purchases: [{ type: Schema.Types.ObjectId, ref: "Purchase" }],
 	producings: [
 		{
 			orderId: { type: String },

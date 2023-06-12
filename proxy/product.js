@@ -11,6 +11,7 @@ let getPlwhsByProduct = require("../lib/getPlwhsByProduct");
 let Freight = require("./freight");
 let Listing = require("./listing");
 let Yisucang = require("./yisucang");
+let Purchase = require("./purchase");
 let logger = require("../common/logger");
 const mysql = require("mysql2");
 

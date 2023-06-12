@@ -9,6 +9,7 @@ var errorPageMiddleware = require("./middlewares/error_page");
 var indexRouter = require("./routes/index");
 const scheduledFunctions = require("./cron/checkInventoryScheduler");
 var moment = require("moment");
+const purchasesRouter = require("./routes/purchases");
 var productsRouter = require("./routes/products");
 var freightsRouter = require("./routes/freights");
 var usersRouter = require("./routes/users");
@@ -56,6 +57,7 @@ app.use("/", indexRouter);
 app.use("/products", productsRouter);
 app.use("/freights", freightsRouter);
 app.use("/users", usersRouter);
+app.use("/purchases", purchasesRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

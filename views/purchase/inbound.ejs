@@ -1,0 +1,310 @@
+<%- contentFor('pageSection') %>
+<div class="card text-center">
+  <div class="card-header">
+    <h4>采购</h4>
+  </div>
+  <div class="card-body">
+    <div class="toolbar">
+      <a href="/products/<%= product.id %>/plan" target="_blank" type="button" class="btn btn-primary">生成采购计划</a>
+      <a href="/products/<%= product.id %>/syncFreight" target="_blank" type="button" class="btn btn-info">同步采购和运输中货物</a>
+    </div>
+   
+    <br/>
+    <table
+      data-toggle="table"
+      data-pagination="true"
+      data-editable-emptytext="Default empty text."
+    >
+      <thead>
+        <tr>
+          <th data-editable="true" data-sortable="true">orderId:</th>
+          <th data-editable="true" data-sortable="true">数量:</th>
+          <th data-editable="true" data-sortable="true">采购创建日期:</th>
+          <th data-editable="true" data-sortable="true">预估出货日期:</th>
+          <th class="">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% product.producings.forEach(function(producing){ %>
+          <% if(!producing.deletedAt) { %>
+            <tr>
+              <td><%= producing.orderId %></td>
+              <td><%= producing.quantity %></td>
+              <td><%= `${producing.created.getMonth() + 1}/${producing.created.getDate()}/${producing.created.getFullYear()}` %></td>
+              <td>
+                <% if (producing.deliveryDue) {%>
+                  <%= `${producing.deliveryDue.getMonth() + 1}/${producing.deliveryDue.getDate()}/${producing.deliveryDue.getFullYear()}` %>
+                <% } %>
+              </td>
+              <td style="text-align:center;">
+                <button class="btn btn-primary producing" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
+                <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
+                <button class="btn btn-danger producing" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
+              </td>
+            </tr>
+          <% } %>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<br/>
+<div class="card text-center">
+  <div class="card-header">
+    <h4>运输中货物</h4>
+  </div>
+  <div class="card-body">
+    <table
+      data-toggle="table"
+      data-pagination="true"
+      data-editable-emptytext="Default empty text."
+    >
+      <thead>
+        <tr>
+          <th data-editable="true" data-sortable="true">orderId:</th>
+          <th data-editable="true" data-sortable="true">数量:</th>
+          <th data-editable="true" data-sortable="true">出货日期:</th>
+          <th data-editable="true" data-sortable="true">预估收货日期:</th>
+          <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
+          <th data-editable="true" data-sortable="true">装箱信息:</th>
+          <th class="">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% inbounds.forEach(function(inbound){ %>
+          <tr>
+            <td><%= inbound.orderId %></td>
+            <td><%= inbound.quantity %></td>
+            <td>
+              <%= moment(inbound.shippedDate).format('YYYY-MM-DD') %>
+            </td>
+            <td>
+              <% if (inbound.deliveryDue) {%>
+                <%= `${inbound.deliveryDue.getMonth() + 1}/${inbound.deliveryDue.getDate()}/${inbound.deliveryDue.getFullYear()}` %>
+              <% } %>
+            </td>
+            <td>
+              <% if (inbound.deliveryDue) {%>
+                <% var date = new Date(inbound.deliveryDue) %>
+                <% date.setDate(date.getDate() + 7) %>
+                <%= `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}` %>
+              <% } %>
+            </td>
+            <td>
+              <% if (inbound.box) {%>
+                <%= inbound.box.length %>*<%= inbound.box.width %>*<%= inbound.box.height %>cm
+              <% } %>
+            </td>
+            <td style="text-align:center;">
+              <button class="btn btn-primary inbound" data-bs-toggle="modal" data-bs-target="#editModal" data-inbound-id="<%=inbound._id%>" >Edit</button>
+              <button class="btn btn-danger inbound" data-bs-toggle="modal" data-bs-target="#myModal" data-inbound-id="<%=inbound._id%>" >Delete</button>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<br/>
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-header">
+        <h4>仓库库存</h4>
+      </div>
+      <div class="card-body">
+        <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
+        <div class="input-group input-group-static mb-4">
+          <label>数量:</label>
+          <span data-bs-toggle="tooltip" class="form-control" data-bs-placement="top" title="Yisucang: <%= product.stock %> | Plwhs:<%= product.plwhs %>">
+            <%= product.stock + product.plwhs %>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card">
+      <form id='create_product_inbound_form' action='/products/<%- product.id %>/inbounds' method='post'>
+        <div class="card-header">
+          <h4>添加运输中货物</h4>
+        </div>
+        <div class="card-body">
+          <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" >
+          <div class="input-group input-group-static mb-4">
+            <label>数量:</label>
+            <input type="number" class="form-control" name="quantity">
+          </div>
+          <div class="input-group input-group-static mb-4">
+            <label>预估收货日期:</label>
+            <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker">
+          </div>
+        </div>
+        <div class="card-footer text-muted">
+          <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Are you sure to delete it?</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger bg-gradient-primary">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="editModalLabel">Purchase</h4>
+      </div>
+      <div class="edit-modal-body modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary edit">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $(".inbound[data-bs-target='#myModal']").click(function() {
+      var columnHeadings = $("thead th").map(function() {
+        return $(this).text();
+      }).get();
+      columnHeadings.pop();
+      var columnValues = $(this).parent().siblings().map(function() {
+        return $(this).text();
+      }).get();     
+      var modalBody = $('<div id="modalContent"></div>');
+      var inboundId = $(this).data('inbound-id')
+      var modalForm = $(`<form role="form" name="modalForm" id="update_inbound_form" action="/products/<%= product.id %>/inbound/${inboundId}" method="post"> \
+                          
+                            <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" > \
+                            <input class="form-control" name="inboundId" value="${inboundId}" type="hidden" > \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>数量:</label> \
+                              <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
+                            </div> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>预估收货日期:</label> \
+                              <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[2]}"> \
+                            </div> \
+                        
+                        </form>`);
+                        console.log(modalBody);
+      modalBody.append(modalForm);
+      console.log(modalForm);
+      $('.modal-body').html(modalBody);
+    });
+
+    $(".producing[data-bs-target='#myModal']").click(function() {
+      var columnHeadings = $("thead th").map(function() {
+        return $(this).text();
+      }).get();
+      columnHeadings.pop();
+      var columnValues = $(this).parent().siblings().map(function() {
+        return $(this).text();
+      }).get();     
+      var modalBody = $('<div id="modalContent"></div>');
+      var producingId = $(this).data('producing-id')
+      var modalForm = $(`<form role="form" name="modalForm" id="update_producing_form" action="/products/<%= product.id %>/producing/${producingId}" method="post"> \
+                          <div class="card-body"> \
+                            <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" > \
+                            <input class="form-control" name="inboundId" value="${producingId}" type="hidden" > \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>数量:</label> \
+                              <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
+                            </div> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>预估出货日期:</label> \
+                              <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[3]}"> \
+                            </div> \
+                          </div> \
+                        </form>`);
+        
+      modalBody.append(modalForm);
+      $('.modal-body').html(modalBody);
+    });
+    
+    
+    $('.modal-footer .btn-danger').click(function() {
+      $('form[name="modalForm"]').submit();
+    });
+
+    $(".producing[data-bs-target='#editModal']").click(function() {
+      var columnHeadings = $("thead th").map(function() {
+        return $(this).text();
+      }).get();
+      columnHeadings.pop();
+      var columnValues = $(this).parent().siblings().map(function() {
+        return $(this).text();
+      }).get();     
+      var modalBody = $('<div id="editProducingContent"></div>');
+      var producingId = $(this).data('producing-id')
+      var modalForm = $(`<form role="form" name="modalForm" id="update_form" action="/products/<%= product.id %>/producing" method="post"> \
+                          <div class="card-body"> \
+                            <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" > \
+                            <input class="form-control" name="producingId" value="${producingId}" type="hidden" > \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>数量:</label> \
+                              <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
+                            </div> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>预估出货日期:</label> \
+                              <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[3]}"> \
+                            </div> \
+                          </div> \
+                        </form>`);
+      modalBody.append(modalForm);
+      $('.edit-modal-body').html(modalBody);
+    })
+
+    $(".inbound[data-bs-target='#editModal']").click(function() {
+      var columnHeadings = $("thead th").map(function() {
+        return $(this).text();
+      }).get();
+      columnHeadings.pop();
+      var columnValues = $(this).parent().siblings().map(function() {
+        return $(this).text();
+      }).get();     
+      var modalBody = $('<div id="editInboundContent"></div>');
+      var inboundId = $(this).data('inbound-id')
+      var modalForm = $(`<form role="form" name="modalForm" id="update_form" action="/products/<%= product.id %>/inbound" method="post"> \
+                          <div class="card-body"> \
+                            <input class="form-control" name="productId" value="<%= product._id %>" type="hidden" > \
+                            <input class="form-control" name="inboundId" value="${inboundId}" type="hidden" > \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>数量:</label> \
+                              <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
+                            </div> \
+                            <div class="input-group input-group-static mb-4"> \
+                              <label>预估收货日期:</label> \
+                              <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker" value="${columnValues[2]}"> \
+                            </div> \
+                          </div> \
+                        </form>`);
+      modalBody.append(modalForm);
+      $('.edit-modal-body').html(modalBody);
+    })
+
+    $('.modal-footer .edit').click(function() {
+      $('form#update_form').submit();
+    });
+    $("[data-bs-toggle='tooltip']").tooltip();
+  })
+</script>

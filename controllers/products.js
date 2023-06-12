@@ -6,6 +6,8 @@ let moment = require("moment");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 let logger = require("../common/logger");
 
+let syncPurchaseOrders = require("../lib/syncPurchaseOrders");
+
 exports.updateAllStock = async function (req, res, next) {
 	Product.updateAllStock();
 	res.render("index", { title: "regist" });
@@ -24,6 +26,7 @@ exports.syncAllProductFreights = async function (req, res, next) {
 exports.show = async function (req, res, next) {
 	let productId = req.params.productId;
 	let product = await Product.getProductById(productId);
+	syncPurchaseOrders.syncPurchaseOrders();
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;

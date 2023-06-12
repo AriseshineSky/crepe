@@ -1,0 +1,37 @@
+var purchases = require("../controllers/purchases");
+var express = require("express");
+var router = express.Router();
+
+router.get("/new", purchases.new);
+router.get("/csv", purchases.csv);
+
+router.get("/:purchaseId/inbounds", purchases.showInbounds);
+router.post("/:purchaseId/inbounds", purchases.addInbound);
+router.post("/:purchaseId/inbound", purchases.updateInbound);
+router.get("/:purchaseId/updateAllStock", purchases.updateAllStockByAsin);
+router.post("/:purchaseId/inbound/:inboundId", purchases.deleteInbound);
+router.post("/:purchaseId/producing/:producingId", purchases.deleteProducing);
+router.post("/:purchaseId/producing", purchases.updateProducing);
+router.post("/:purchaseId/save", purchases.save);
+router.get("/:purchaseId/edit", purchases.edit);
+router.get("/:purchaseId/plan", purchases.plan);
+router.get("/:purchaseId/producing-plan", purchases.producingPlan);
+router.get("/:purchaseId/producings/plan", purchases.producingsPlan);
+router.get("/:purchaseId/producings/:producingId/plan", purchases.producingPlan);
+router.get("/:purchaseId/freights", purchases.freights);
+router.get("/:purchaseId/syncFreight", purchases.syncFreight);
+router.get("/:purchaseId/report", purchases.generateReport);
+router.get("/:purchaseId/showPlan", purchases.showPlan);
+router.post("/:purchaseId/plan", purchases.updatePlan);
+router.get("/:purchaseId/syncpm", purchases.syncPmBypurchase);
+router.post("/create", purchases.create);
+router.get("/sync", purchases.sync);
+router.get("/syncpm", purchases.syncpm);
+router.get("/updateAllStock", purchases.updateAllStock);
+router.get("/syncAllFreights", purchases.syncAllpurchaseFreights);
+router.post("/delete", purchases.delete);
+router.get("/updateAllProuctSalesAndInventories", purchases.updateAllProuctSalesAndInventories);
+router.get("/", purchases.index);
+router.get("/:purchaseId", purchases.show);
+// router.get("/:purchaseId/syncProducings", purchases.syncProducings);
+module.exports = router;

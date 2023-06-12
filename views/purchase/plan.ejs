@@ -1,0 +1,394 @@
+<%- contentFor('pageSection') %>
+<% const FREIGHT_TYPES = ['sea', 'seaExpress', 'airDelivery', 'airExpress'] %>
+<% const TYPES = {
+  'airExpress': '空运',
+  'airDelivery': '空派',
+  'seaExpress': '快船',
+  'sea': '慢船'
+} %>
+
+<div id='content'>
+  <div class='panel'>
+    <div class='inner post'>
+      <div id="purchase" data-purchase="<%= JSON.stringify(purchase) %>"></div>
+      <div id="inbounds" data-inbounds="<%= JSON.stringify(purchase.inboundsCheck) %>"></div>
+      <div id="chart"></div>
+      <br/>
+      <% if (purchase.plan && purchase.plan.plans) {%>
+        <div class="card text-center">
+          <div class="card-header">
+            <h4>采购中货物发货计划</h4>
+          </div>
+          <div class="card-body">
+            <table
+            data-toggle="table"
+            data-pagination="true"
+            data-editable-emptytext="Default empty text."
+            data-sort-name="delivery"
+            data-sort-order="asc"
+            >
+              <thead>
+                <tr>
+                  <th data-editable="true" data-sortable="true">采购ID:</th>
+                  <th data-editable="true" data-sortable="true">发货方式:</th>
+                  <th data-editable="true" data-sortable="true">箱数:</th>
+                  <th data-editable="true" data-sortable="true">数量:</th>
+                  <th data-editable="true" data-sortable="true">重量(kg):</th>
+                  <th data-editable="true" data-sortable="true">运费:</th>
+                  <th data-editable="true" data-sortable="true">采购日期:</th>
+                  <th data-editable="true" data-sortable="true">出货日期:</th>
+                  <th data-field="delivery" data-editable="true" data-sortable="true">到货日期:</th>
+                  <th data-editable="true" data-sortable="true">运输周期(天):</th>
+                  <th data-editable="true" data-sortable="true">亚马逊开卖日期:</th>
+                  <th data-editable="true" data-sortable="true">开卖前库存:</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% purchase.plan.plans.forEach(function(plan){ %>
+                  <% for (var type of FREIGHT_TYPES) { %>
+                    <% if (type in plan && plan[type]['units']) {%>
+                      <% var freight = purchase.freights.find(function(freight){ return freight.type === type}) %>
+                      <tr>
+                        <td><%= plan.orderId %></td>
+                        <td><%= TYPES[type] %></td>
+                        <td><%= plan[type]['boxes'] %></td>
+                        <td><%= plan[type]['units'] %></td>
+                        <td><%= plan[type]['weight'] %></td>
+                        <td><%= plan[type]['amount'] %></td>
+                        <td><%= moment(plan['created']).format('YYYY-MM-DD') %></td>
+                        <td>
+                          <% if (plan.deliveryDue) {%>
+                            <%= moment(plan.deliveryDue).format('YYYY-MM-DD') %>
+                          <% } else { %>
+                            <%= moment().add(plan['deliveryPeriod'], 'days').format('YYYY-MM-DD') %>
+                          <% } %>
+                        </td>
+                        <td>
+                          <%= moment().add(plan['deliveryPeriod'] + freight.period, 'days').format('YYYY-MM-DD') %>
+                        </td>
+                        <td><%= freight.period %></td>
+                        <td>
+                          <%= moment().add(plan['deliveryPeriod'] + freight.period + GAP, 'days').format('YYYY-MM-DD') %>
+                        </td>
+                        <td>
+                          <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['deliveryPeriod'] + freight.period + GAP}) %>
+                          <%= status.before %>
+                        </td>
+                      </tr>
+                    <% } %>
+                  <% } %>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+      <% if (purchase.quantity && purchase.quantity.boxes > 0 && (purchase.plan.airExpress || purchase.plan.seaExpress)) {%>
+        <div class="card text-center">
+          <div class="card-header">
+            <h4>采购计划</h4>
+          </div>
+          <div class="card-body">
+          
+            <form role="form" name="saveProduct" id="save_product" action=<%- `/products/${purchase.product.id}/plan` %> method="post">
+              <div class="modal-footer justify-content-end">
+                <input class="form-control" name="plan" value="<%= JSON.stringify(purchase) %>" type="hidden" >
+                <button type="submit" class="btn btn-primary btn-lg">Save</button>
+              </div> 
+            </form>
+            <table
+            data-toggle="table"
+            data-pagination="true"
+            data-editable-emptytext="Default empty text."
+            data-sort-name="delivery"
+            data-sort-order="asc"
+            >
+              <thead>
+                <tr>
+                  <th data-editable="true" data-sortable="true">发货方式:</th>
+                  <th data-editable="true" data-sortable="true">箱数:</th>
+                  <th data-editable="true" data-sortable="true">数量:</th>
+                  <th data-editable="true" data-sortable="true">重量(kg):</th>
+                  <th data-editable="true" data-sortable="true">运费:</th>
+                  <th data-editable="true" data-sortable="true">采购日期:</th>
+                  <th data-editable="true" data-sortable="true">出货日期:</th>
+                  <th data-field="delivery" data-editable="true" data-sortable="true">到货日期:</th>
+                  <th data-editable="true" data-sortable="true">运输周期(天):</th>
+                  <th data-editable="true" data-sortable="true">亚马逊开卖日期:</th>
+                  <th data-editable="true" data-sortable="true">开卖前库存:</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for (var type of FREIGHT_TYPES) { %>
+                  <% if (type in purchase.plan && purchase.plan[type]['units']) {%>
+                    <tr>
+                      <td><%= TYPES[type] %></td>
+                      <td><%= purchase.plan[type]['boxes'] %></td>
+                      <td><%= purchase.plan[type]['units']  %></td>
+                      <td><%= purchase.plan[type]['weight'] %></td>
+                      <td><%= purchase.plan[type]['amount'] %></td>
+                      <td><%= moment().format('YYYY-MM-DD') %></td>
+                      <td><%= moment().add(purchase.product.cycle, 'days').format('YYYY-MM-DD') %></td>
+                      <td>
+                        <% var freight = purchase.freights.find(function(freight){ return freight.type === type}) %>
+                        <%= moment().add(purchase.product.cycle + freight.period, 'days').format('YYYY-MM-DD') %>
+                      </td>
+                      <td><%= freight.period %></td>
+                      <td>
+                        <%= moment().add(purchase.product.cycle + freight.period + GAP, 'days').format('YYYY-MM-DD') %>
+                      </td>
+                      <td>
+                        <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === purchase.product.cycle + freight.period + GAP}) %>
+                        <% if (status) {%>
+                          <%= status.before %>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% } %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+      <% if (purchase.inboundShippeds && purchase.inboundShippeds.length > 0) {%>
+        <div class="card text-center">
+          <div class="card-header">
+            <h4>运输中货物</h4>
+          </div>
+          <div class="card-body">
+            <table
+            data-toggle="table"
+            data-pagination="true"
+            data-editable-emptytext="Default empty text."
+            data-sort-name="delivery"
+            data-sort-order="asc"
+            >
+              <thead>
+                <tr>
+                  <th data-editable="true" data-sortable="true">orderId:</th>
+                  <th data-editable="true" data-sortable="true">数量:</th>
+                  <th data-field="delivery" data-editable="true" data-sortable="true">预估收货日期:</th>
+                  <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
+                  <th data-editable="true" data-sortable="true">开卖前库存:</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% purchase.inboundShippeds.forEach(function(inbound){ %>
+                  <tr>
+                    <td><%= inbound.orderId %></td>
+                    <td><%= inbound.quantity %></td>
+                    <td>
+                      <% if (inbound.deliveryDue) {%>
+                        <%= moment(inbound.deliveryDue).format("YYYY-MM-DD") %>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% var inboundStatus = null %>
+                      <% if (inbound.deliveryDue) { 
+                        for (var status of purchase.plan.inventoryStatus) {
+                          if (Math.abs(status.period - GAP - moment(inbound.deliveryDue).diff(moment(), "days")) <= 1 && status.after - status.before === inbound.quantity) {
+                            inboundStatus = status;
+                          }                    
+                        }
+                      } %>
+                      <% if (inboundStatus) { %>
+                        <%= moment().add(inboundStatus.period, 'days').format('YYYY-MM-DD') %>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (inboundStatus) { %>
+                        <%= inboundStatus.before %>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <%}%>
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="input-group input-group-static mb-4">
+                <label>ASIN：</label>
+                <span class="form-control" ><%- purchase.product.asin %></span>
+              </div>
+              <% if (purchase.quantity && purchase.quantity.boxes > 0 && (purchase.plan.airExpress || purchase.plan.seaExpress)) {%>
+                <div class="input-group input-group-static mb-4">
+                  <label>采购数量(个)：</label>
+                  <span class="form-control" ><%- purchase.quantity.quantity || 0 %></span>
+                </div>
+              <% }%>
+              <div class="input-group input-group-static mb-4">
+                <label>生产周期(天):</label>
+                <span class="form-control" ><%- purchase.product.cycle %></span>
+              </div>
+              <div class="input-group input-group-static mb-4">
+                <label>亚马逊库存:</label>
+                <span class="form-control" ><%- purchase.fbaInventory %></span>
+              </div>
+              <div class="input-group input-group-static mb-4">
+                <label>仓库库存:</label>
+                <span class="form-control" ><%- purchase.stock %></span>
+              </div>
+              <% if (purchase.plan && purchase.plan.airExpress) {%>
+                <div class="input-group input-group-static mb-4">
+                  <label>空运数量(个)：</label>
+                  <span class="form-control" ><%- purchase.plan.airExpress.units || 0 %></span>
+                </div>
+                <% if (purchase.product.airDelivery) { %>
+                  <div class="input-group input-group-static mb-4">
+                    <label>空派数量(个)：</label>
+                    <span class="form-control" ><%- purchase.plan.airDelivery.units || 0 %></span>
+                  </div>
+                <% } %>
+                <div class="input-group input-group-static mb-4">
+                  <label>快船数量(个)：</label>
+                  <span class="form-control" ><%- purchase.plan.seaExpress.units || 0 %></span>
+                </div>
+                <% if (purchase.product.sea) { %>
+                  <div class="input-group input-group-static mb-4">
+                    <label>慢船数量(个)：</label>
+                    <span class="form-control" ><%- purchase.plan.sea.units || 0 %></span>
+                  </div>
+                <% } %>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="input-group input-group-static mb-4">
+                <label>预估最大销量:</label>
+                <span class="form-control" ><%- purchase.product.maxAvgSales %></span>
+              </div>
+              <div class="input-group input-group-static mb-4">
+                <label>设置平均销量:</label>
+                <span class="form-control" ><%- purchase.product.avgSales %></span>
+              </div>
+              <div class="input-group input-group-static mb-4">
+                <label>亚马逊最近7天平均销量:</label>
+                <span class="form-control" ><%- purchase.product.ps %></span>
+              </div>
+              <div class="input-group input-group-static mb-4">
+                <label>计算使用的平均销量:</label>
+                <span class="form-control" ><%- purchase.sales.minAvgSales %></span>
+              </div>   
+              <div class="input-group input-group-static mb-4">
+                <label>维持最小库存量(天):</label>
+                <span class="form-control" ><%- purchase.product.minInventory %></span>
+              </div>
+              <a href="/products/<%- purchase.product.id %>/edit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Edit</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  $(document).ready(function() {
+    const FREIGHT_TYPES = ['sea', 'seaExpress', 'airDelivery', 'airExpress'];
+    var purchase =$('#purchase').data('purchase');
+    var data = { 0: {
+                      before: purchase.totalInventory,
+                      after: purchase.totalInventory
+                    }
+                }
+  
+    var inboundsX = [0];
+    var inboundsY = [purchase.totalInventory];
+    var x = [0];
+    var y = [purchase.totalInventory];
+    var inboundsData =$('#inbounds').data('inbounds');
+      
+    for (var date in inboundsData) {
+      if (inboundsData[date]) {
+        if (inboundsData[date].before === inboundsData[date].after) {
+          inboundsX.push(date);
+          inboundsY.push(inboundsData[date].before);
+        } else {
+          inboundsX.push(date);
+          inboundsY.push(inboundsData[date].before);
+          inboundsX.push(Number(date)+1);
+          inboundsY.push(inboundsData[date].after);
+        }
+      }
+    }
+   
+    async function changeNumberToDate(x) {
+      return new Promise((resolve, reject) => {
+        var days = [];
+        var day = new Date();
+        days = x.map(function(n) {
+          return moment().add(Number(n), 'days').format('YYYY-MM-DD');
+        });
+        resolve(days);
+      })
+    }
+    if (purchase.plan) {
+      var status = purchase.plan.inventoryStatus;
+      for (var data of purchase.plan.inventoryStatus) {
+        if (data.before === data.after) {
+          x.push(data.period);
+          y.push(data.before);
+        } else {
+          x.push(data.period);
+          y.push(data.before);
+          x.push(Number(data.period)+1);
+          y.push(data.after);
+        }
+        
+      }
+      changeNumberToDate(x).then((days) => {
+        var chart = c3.generate({
+          data: {
+            x: 'x',
+            columns: [
+              ['x'].concat(days),
+              ['inventory'].concat(y)
+            ]
+          },
+          axis: {
+            x: {
+              type: 'timeseries',
+              tick: {
+                count: days.length,
+                format: '%Y-%m-%d'
+              }
+            }
+          },
+        });
+      })
+    } else {
+      changeNumberToDate(inboundsX).then((days) => {
+        var chart = c3.generate({
+          data: {
+            x: 'x',
+            columns: [
+              ['x'].concat(days),
+              ['inbound'].concat(inboundsY),
+            ]
+          },
+          axis: {
+            x: {
+              type: 'timeseries',
+              tick: {
+                count: days.length,
+                format: '%Y-%m-%d'
+              }
+            }
+          },
+        });
+      })
+    }
+
+    if (window.location.href.split('/').pop() === 'showPlan') {
+      $("#save_product").hide();
+    }
+  })
+</script>

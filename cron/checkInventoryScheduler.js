@@ -4,10 +4,12 @@ let Product = require("../proxy").Product;
 let Yisucang = require("../proxy").Yisucang;
 let Role = require("../proxy").Role;
 let syncAllListings = require("../lib/syncAllListings");
+let syncPurchaseOrders = require("../lib/syncPurchaseOrders");
 const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
+	syncPurchaseOrders.syncPurchaseOrders();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();

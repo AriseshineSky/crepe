@@ -21,6 +21,7 @@ open_apis = {
 	saleProfitDataGrid: "/api/v2/finance/salesoperations/saleProfitDataGrid",
 	fbaInventory: "/api/v2/warehouse/fbaInventory",
 	marketAnalyze: "/api/v2/finance/salesoperations/marketAnalyze",
+	purchaseProcure: "/api/v2/purchase/procure",
 };
 
 /* GET home page. */

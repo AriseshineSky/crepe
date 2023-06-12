@@ -1,0 +1,110 @@
+<%- contentFor('pageSection') %>
+<br/>
+<% const TYPES = {
+  'airExpress': '空运',
+  'airDelivery': '空派',
+  'seaExpress': '快船',
+  'sea': '慢船'
+} %>
+<div class="card text-center">
+  <h4>采购列表</h4>
+  <table
+    data-toggle="table"
+    data-pagination="true"
+    data-search="true"
+    class="table table-hover"
+  >
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Qty</th>
+        <th>Product</th>
+        <th>unInboundQuantity</th>
+        <th>supervisorId</th>
+        <th>supplierCode</th>
+        <th>code</th>
+        <th>customCode</th>
+        <th>orderTotalAmount</th>
+        <th>updateTime</th>
+        <th>createTime</th>
+        <th>stock</th>
+        <th>createAt</th>
+        <th>updateAt</th>
+        <th>deletedAt</th>
+        <th>Memo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% purchases.forEach(function(purchase) { %>
+        <tr>
+          <td><%= purchase.id %></td>
+					<td><%= purchase.totalQuantity %></td>
+					<td><%= purchase.product %></td>
+					<td><%= purchase.unInboundQuantity %></td>
+					<td><%= purchase.supervisorId %></td>
+					<td><%= purchase.supplierCode %></td>
+					<td><%= purchase.code %></td>
+					<td><%= purchase.customCode %></td>
+					<td><%= purchase.orderTotalAmount %></td>
+					<td><%= purchase.updateTime %></td>
+					<td><%= purchase.createTime %></td>
+					<td><%= purchase.stock %></td>
+					<td><%= purchase.createAt %></td>
+					<td><%= purchase.updateAt %></td>
+					<td><%= purchase.deletedAt %></td>
+					<td><%= purchase.memo %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <a id="add" type="button" class="btn btn-primary" href="/purchases/new">
+    Add New purchase
+  </a>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Are you sure to delete this purchase?</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger">Delete</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $("#myModal").on('shown.bs.modal', function(e) {
+      var modalBody = $('<div id="myModal"></div>');
+      var purchaseId = $(e.relatedTarget).data('purchase-id');
+      var modalForm = $(`<div class="modal-dialog modal-confirm"> \
+                          <div class="modal-content">\
+                            <div class="modal-header flex-column">\
+                              <h4 class="modal-title w-100">Are you sure?</h4>\
+                            </div>\
+                            <div class="modal-body">\
+                              <p>Do you really want to delete this purchase? This process cannot be undone.</p>\
+                            </div>\
+                            <form role="form" name="modalForm" id="delete_purchase" action="/purchases/delete" method="post"> \
+                              <div class="modal-footer justify-content-center"> \
+                                <input class="form-control" name="purchaseId" value="${purchaseId}" type="hidden" > \
+                              </div> \
+                            </form>\
+	                        </div>\
+                        </div>`);
+      modalBody.append(modalForm);
+      $('.modal-body').html(modalBody);
+    });
+    $('.modal-footer .btn-danger').click(function() {
+      $('form[name="modalForm"]').submit();
+    });
+    $('[data-toggle="table"]').on('post-body.bs.table', function() {
+      $("[data-bs-toggle='tooltip']").tooltip();
+    })
+    $("[data-bs-toggle='tooltip']").tooltip();
+  });
+</script>

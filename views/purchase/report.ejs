@@ -1,0 +1,119 @@
+<%- contentFor('pageSection') %>
+<div id='content'>
+  <div class='panel'>
+    <div class='header'>
+      <ol class='breadcrumb'>
+        <li><a href='/'>主页</a><span class='divider'>/</span></li>
+      </ol>
+    </div>
+    <div class='inner post'>
+      
+      <div id="chart"></div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  $(document).ready(function() {
+    const FREIGHT_TYPES = ['sea', 'seaExpress', 'airDelivery', 'airExpress'];
+    var purchase =$('#purchase').data('purchase');
+    var freight =$('#freight').data('freight');
+    var data = { 0: {
+                      before: purchase.totalInventory,
+                      after: purchase.totalInventory
+                    }
+                }
+  
+    var inboundsX = [0];
+    var inboundsY = [purchase.totalInventory];
+    var x = [0];
+    var y = [purchase.totalInventory];
+    var inboundsData =$('#inbounds').data('inbounds');
+      
+    for (var date in inboundsData) {
+      if (inboundsData[date]) {
+        if (inboundsData[date].before === inboundsData[date].after) {
+          inboundsX.push(date);
+          inboundsY.push(inboundsData[date].before);
+        } else {
+          inboundsX.push(date);
+          inboundsY.push(inboundsData[date].before);
+          inboundsX.push(Number(date)+1);
+          inboundsY.push(inboundsData[date].after);
+        }
+      }
+    }
+
+    console.log(inboundsX);
+    console.log(inboundsY);
+   
+    async function changeNumberToDate(x) {
+      return new Promise((resolve, reject) => {
+        var days = [];
+        var day = new Date();
+        days = x.map(function(n) {
+          return moment().add(Number(n), 'days').format('YYYY-MM-DD');
+        });
+        resolve(days);
+      })
+    }
+    if (purchase.plan) {
+      console.log(purchase.plan);
+      var status = purchase.plan.inventoryStatus;
+      for (var data of purchase.plan.inventoryStatus) {
+        if (data.before === data.after) {
+          x.push(data.period);
+          y.push(data.before);
+        } else {
+          x.push(data.period);
+          y.push(data.before);
+          x.push(Number(data.period)+1);
+          y.push(data.after);
+        }
+        
+      }
+      changeNumberToDate(x).then((days) => {
+        console.log(days);
+        var chart = c3.generate({
+          data: {
+            x: 'x',
+            columns: [
+              ['x'].concat(days),
+              ['inventory'].concat(y)
+            ]
+          },
+          axis: {
+            x: {
+              type: 'timeseries',
+              tick: {
+                count: days.length,
+                format: '%Y-%m-%d'
+              }
+            }
+          },
+        });
+      })
+    } else {
+      changeNumberToDate(inboundsX).then((days) => {
+        console.log(days);
+        var chart = c3.generate({
+          data: {
+            x: 'x',
+            columns: [
+              ['x'].concat(days),
+              ['inbound'].concat(inboundsY),
+            ]
+          },
+          axis: {
+            x: {
+              type: 'timeseries',
+              tick: {
+                count: days.length,
+                format: '%Y-%m-%d'
+              }
+            }
+          },
+        });
+      })
+    }
+  })
+</script>
