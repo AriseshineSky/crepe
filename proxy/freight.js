@@ -4,6 +4,7 @@ var Purchase = require("./purchases");
 var Product = require("./product");
 var models = require("../models");
 var FreightType = models.Freight;
+var Freight = models.Freight;
 
 var moment = require("moment");
 var getStockByProduct = require("../lib/getStockByProduct");
@@ -23,6 +24,7 @@ const HEADER = [
 ];
 const PRODUCT_ATTR = ["asin", "plwhsId", "yisucangId", "cycle", "maxAvgSales", "unitsPerBox"];
 const INBOUND_ATTR = ["deliveryDue", "quantity"];
+
 var syncFreights = async function () {
 	var freights = [];
 	// var rows = await larksuiteApi.listFreights();
@@ -36,9 +38,9 @@ var syncFreights = async function () {
 	var boxIndex = header.indexOf("装箱信息");
 	var typeIndex = header.indexOf("PM要求");
 
-	for (var row of rows) {
+	for (let row of rows) {
 		if (row[0] && row[1]) {
-			var freight = await parseRow(
+			let freight = await parseRow(
 				row,
 				orderIndex,
 				deliveryIndex,
@@ -48,15 +50,29 @@ var syncFreights = async function () {
 				shippedDateIndex,
 				typeIndex,
 			);
-			if (freight.orderId == "OR5638") {
-				console.log(freight);
-			}
 			freights.push(freight);
 		}
 	}
 	return freights;
 };
 
+async function getAllFreghts() {
+	const allFreights = await syncFreights();
+	allFreights.forEach(async (freight) => {
+		await updateOrCreate(freight);
+	});
+}
+
+async function updateOrCreate(freight) {
+	let existFreight = await Freight.findOne({ id: freight.id });
+	if (existFreight) {
+		Object.assign(existFreight, freight);
+		await existFreight.save();
+	} else {
+		const newFreight = new Freight(freight);
+		await newFreight.save();
+	}
+}
 async function formatFreightsAndProductings(freightsAndProducings) {
 	var inboundShippeds = [];
 	var producings = [];
@@ -394,7 +410,7 @@ var parseDate = async function (dateInfo) {
 
 var parseOrderId = async function (orderId) {
 	if (orderId) {
-		var re = /OR\d*/;
+		let re = /(OR|PO)\d*/;
 		orderId = orderId.match(re);
 		if (orderId) {
 			return orderId[0];
@@ -660,4 +676,3 @@ exports.syncFreightTypes = syncFreightTypes;
 exports.freightTypes = freightTypes;
 exports.syncFreights = syncFreights;
 exports.getFreightsAndProductingsByProduct = getFreightsAndProductingsByProduct;
-

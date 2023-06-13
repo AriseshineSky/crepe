@@ -6,19 +6,12 @@ const getPm = require("../api/getPM");
 let moment = require("moment");
 const GAP = 6;
 let getFbaInventoryByASIN = require("../lib/getFbaInventoryByASIN");
-let getStockByProduct = require("../lib/getStockByProduct");
 let getPlwhsByProduct = require("../lib/getPlwhsByProduct");
 let Freight = require("./freight");
 let Listing = require("./listing");
 let Yisucang = require("./yisucang");
-let Purchase = require("./purchase");
 let logger = require("../common/logger");
 const mysql = require("mysql2");
-
-async function updateStock(product) {
-	await prepareStock(product);
-	await save(product);
-}
 
 async function getInboundShippedCount(asin) {
 	let shipped = 0;
@@ -289,17 +282,6 @@ async function calculateOutOfStockPeriod(status) {
 	let period = 0;
 
 	for (let i = 0; i < status.length - 1; i++) {
-		if (status[i].before === 0 && status[i].after === 0) {
-			period += status[i + 1].period - status[i].period + 1;
-		}
-	}
-	return period;
-}
-
-async function calculateProducingFirstOutOfStockPeriod(status) {
-	let period = 0;
-
-	for (let i = 0; i < status.length; i++) {
 		if (status[i].before === 0 && status[i].after === 0) {
 			period += status[i + 1].period - status[i].period + 1;
 		}
@@ -1031,33 +1013,6 @@ async function getQuantity(sales, totalInventory, product) {
 		return { boxes: boxes, days: days };
 	}
 }
-async function getDeliveryDue(totalInventory, inboundShippeds, sales) {
-	let due = totalInventory / sales.maxAvgSales;
-
-	inboundShippeds = inboundShippeds.sort(function (m, n) {
-		return moment(m.deliveryDue).isBefore(n.deliveryDue);
-	});
-
-	for (let inbound of inboundShippeds) {
-		let total = totalInventory;
-		for (let fasterInbound of inboundShippeds) {
-			if (moment(fasterInbound.deliveryDue).isBefore(inbound.deliveryDue)) {
-				total += inbound.quantity;
-			}
-		}
-		let delivery = moment(inbound.deliveryDue);
-		if (total > sales.maxAvgSales * (delivery.diff(moment(), "days") + 1)) {
-			total += inbound.quantity;
-		}
-		if (total / sales.maxAvgSales > due) {
-			due = total / sales.maxAvgSales;
-		} else {
-			break;
-		}
-	}
-	return moment(moment().add(due - GAP, "days")).format("YYYY-MM-DD");
-}
-
 async function totalUnits(boxCount, unitsPerBox) {
 	return boxCount * unitsPerBox;
 }
@@ -1137,15 +1092,6 @@ async function calculatePlan(freightPlan, freightType, inbounds, product, sales,
 	}
 
 	return result;
-}
-
-async function checkMinInventory(minInventory, product) {
-	for (let key in minInventory) {
-		if (minInventory[key] < product.minInventory) {
-			return false;
-		}
-	}
-	return true;
 }
 
 async function calculateProducingPlan(

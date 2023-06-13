@@ -9,10 +9,13 @@ const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
-	syncPurchaseOrders.syncPurchaseOrders();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();
+	});
+	schedule.scheduleJob("0 0 */1 * * *", () => {
+		logger.info("start to sync product inventory");
+		syncPurchaseOrders.syncPurchaseOrders();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to sync product inventory");
