@@ -22,6 +22,7 @@ open_apis = {
 	fbaInventory: "/api/v2/warehouse/fbaInventory",
 	marketAnalyze: "/api/v2/finance/salesoperations/marketAnalyze",
 	purchaseProcure: "/api/v2/purchase/procure",
+	delivery: "/api/v2/purchase/delivery",
 };
 
 /* GET home page. */

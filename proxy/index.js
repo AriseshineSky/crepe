@@ -7,3 +7,4 @@ exports.Listing = require("./listing");
 exports.Purchase = require("./purchase");
 exports.Role = require("./role");
 exports.Yisucang = require("./yisucang");
+exports.Delivery = require("./Delivery");

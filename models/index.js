@@ -26,6 +26,7 @@ require("./purchase");
 exports.Product = mongoose.model("Product");
 exports.User = mongoose.model("User");
 exports.Freight = mongoose.model("Freight");
+exports.Delivery = mongoose.model("Delivery");
 exports.Token = mongoose.model("Token");
 exports.Listing = mongoose.model("Listing");
 exports.Role = mongoose.model("Role");
