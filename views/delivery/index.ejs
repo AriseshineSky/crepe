@@ -1,0 +1,192 @@
+<%- contentFor('pageSection') %>
+<br/>
+<div class="card text-center">
+  <h4>运输列表</h4>
+  <table
+    data-toggle="table"
+    data-pagination="true"
+    data-search="true"
+    class="table table-hover"
+  >
+    <thead>
+      <tr>
+				<th>memo</th>
+				<th>box</th>
+				<th>chargeWeight</th>
+				<th>estimatedAmount</th>
+				<th>receiveRnQuantity</th>
+				<th>quantity</th>
+				<th>receiptQuantity</th>
+				<th>actualAmount</th>
+				<th>code</th>
+				<th>status</th>
+				<th>statusName</th>
+				<th>trackings</th>
+				<th>transport</th>
+				<th>transportMode</th>
+				<th>transportName</th>
+				<th>transportPrescription</th>
+				<th>volumeWeightCoefficient</th>
+				<th>orderId</th>
+				<th>shipmentDate</th>
+				<th>fromWarehouseNames</th>
+				<th>warehouseNames</th>
+				<th>confirmShipmentDate</th>
+				<th>estimateArrivePortDate</th>
+				<th>expectShipmentDate</th>
+				<th>sailDate</th>
+				<th>actualArrivePortDate</th>
+				<th>actualAmountTime</th>
+				<th>actualArrivalDate</th>
+				<th>arrivalWarehouseId</th>
+				<th>deliveryStatus</th>
+				<th>createAt</th>
+				<th>updateAt</th>
+				<th>deletedAt</th>
+				<th>actualArrivalDate</th>
+				<th>packingCodeList</th>
+				<th>channelId</th>
+				<th>chargeUnitPrice</th>
+				<th>chargeWeight</th>
+				<th>spiltTrackings</th>
+				<th>chargeWeightUnit</th>
+				<th>code</th>
+				<th>relevanceCodeList</th>
+				<th>containerType</th>
+				<th>country</th>
+				<th>updateTime</th>
+				<th>createdAt</th>
+				<th>expectShipmentDate</th>
+				<th>fbaWarehouse</th>
+				<th>flCodeList</th>
+				<th>importCompany</th>
+				<th>importCompanyName</th>
+				<th>createdTime</th>
+				<th>isShipment</th>
+				<th>receiptDate</th>
+				<th>receivingAt</th>
+				<th>receiptQuantity</th>
+				<th>diffQuantity</th>
+				<th>supplierCode</th>
+				<th>expectArrivalDate</th>
+				<th>expectShipmentDate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% deliveries.forEach(function(delivery) { %>
+        <tr>
+					<td><%= delivery.memo %></td>
+					<td><%= delivery.box %></td>
+					<td><%= delivery.chargeWeight %></td>
+					<td><%= delivery.estimatedAmount %></td>
+					<td><%= delivery.receiveRnQuantity %></td>
+					<td><%= delivery.quantity %></td>
+					<td><%= delivery.receiptQuantity %></td>
+					<td><%= delivery.actualAmount %></td>
+					<td><%= delivery.code %></td>
+					<td><%= delivery.status %></td>
+					<td><%= delivery.statusName %></td>
+					<td><%= delivery.trackings %></td>
+					<td><%= delivery.transport %></td>
+					<td><%= delivery.transportMode %></td>
+					<td><%= delivery.transportName %></td>
+					<td><%= delivery.transportPrescription %></td>
+					<td><%= delivery.volumeWeightCoefficient %></td>
+					<td><%= delivery.orderId %></td>
+					<td><%= delivery.shipmentDate %></td>
+					<td><%= delivery.fromWarehouseNames %></td>
+					<td><%= delivery.warehouseNames %></td>
+					<td><%= delivery.confirmShipmentDate ? delivery.confirmShipmentDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.estimateArrivePortDate ? delivery.estimateArrivePortDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.expectShipmentDate ? delivery.expectShipmentDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.sailDate ? delivery.sailDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.actualArrivePortDate ? delivery.actualArrivePortDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.actualAmountTime ? delivery.actualAmountTime.toLocaleDateString() : '' %></td>
+					<td><%= delivery.actualArrivalDate ? delivery.actualArrivalDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.arrivalWarehouseId %></td>
+					<td><%= delivery.deliveryStatus %></td>
+					<td><%= delivery.createAt ? delivery.createAt.toLocaleDateString() : '' %></td>
+					<td><%= delivery.updateAt ? delivery.updateAt.toLocaleDateString() : '' %></td>
+					<td><%= delivery.deletedAt %></td>
+					<td><%= delivery.actualArrivalDate ? delivery.actualArrivalDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.packingCodeList %></td>
+					<td><%= delivery.channelId %></td>
+					<td><%= delivery.chargeUnitPrice %></td>
+					<td><%= delivery.chargeWeight %></td>
+					<td><%= delivery.spiltTrackings %></td>
+					<td><%= delivery.chargeWeightUnit %></td>
+					<td><%= delivery.code %></td>
+					<td><%= delivery.relevanceCodeList %></td>
+					<td><%= delivery.containerType %></td>
+					<td><%= delivery.country %></td>
+					<td><%= delivery.updateTime ? delivery.updateTime.toLocaleDateString() : '' %></td>
+					<td><%= delivery.createdAt ? delivery.createdAt.toLocaleDateString() : '' %></td>
+					<td><%= delivery.expectShipmentDate ? delivery.expectShipmentDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.fbaWarehouse %></td>
+					<td><%= delivery.flCodeList %></td>
+					<td><%= delivery.importCompany %></td>
+					<td><%= delivery.importCompanyName %></td>
+					<td><%= delivery.createdTime ? delivery.createdTime.toLocaleDateString() : '' %></td>
+					<td><%= delivery.isShipment %></td>
+					<td><%= delivery.receiptDate ? delivery.receiptDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.receivingAt ? delivery.receivingAt.toLocaleDateString() : '' %></td>
+					<td><%= delivery.receiptQuantity %></td>
+					<td><%= delivery.diffQuantity %></td>
+					<td><%= delivery.supplierCode %></td>
+					<td><%= delivery.expectArrivalDate ? delivery.expectArrivalDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.expectShipmentDate ? delivery.expectShipmentDate.toLocaleDateString() : '' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <a id="add" type="button" class="btn btn-primary" href="/deliverys/new">
+    Add New delivery
+  </a>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Are you sure to delete this delivery?</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger">Delete</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $("#myModal").on('shown.bs.modal', function(e) {
+      var modalBody = $('<div id="myModal"></div>');
+      var deliveryId = $(e.relatedTarget).data('delivery-id');
+      var modalForm = $(`<div class="modal-dialog modal-confirm"> \
+                          <div class="modal-content">\
+                            <div class="modal-header flex-column">\
+                              <h4 class="modal-title w-100">Are you sure?</h4>\
+                            </div>\
+                            <div class="modal-body">\
+                              <p>Do you really want to delete this delivery? This process cannot be undone.</p>\
+                            </div>\
+                            <form role="form" name="modalForm" id="delete_delivery" action="/deliverys/delete" method="post"> \
+                              <div class="modal-footer justify-content-center"> \
+                                <input class="form-control" name="deliveryId" value="${deliveryId}" type="hidden" > \
+                              </div> \
+                            </form>\
+	                        </div>\
+                        </div>`);
+      modalBody.append(modalForm);
+      $('.modal-body').html(modalBody);
+    });
+    $('.modal-footer .btn-danger').click(function() {
+      $('form[name="modalForm"]').submit();
+    });
+    $('[data-toggle="table"]').on('post-body.bs.table', function() {
+      $("[data-bs-toggle='tooltip']").tooltip();
+    })
+    $("[data-bs-toggle='tooltip']").tooltip();
+  });
+</script>

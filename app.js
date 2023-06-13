@@ -1,21 +1,22 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
 const session = require("express-session");
 const flash = require("connect-flash");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-var errorPageMiddleware = require("./middlewares/error_page");
-var indexRouter = require("./routes/index");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const errorPageMiddleware = require("./middlewares/error_page");
+const indexRouter = require("./routes/index");
 const scheduledFunctions = require("./cron/checkInventoryScheduler");
-var moment = require("moment");
+const moment = require("moment");
 const purchasesRouter = require("./routes/purchases");
-var productsRouter = require("./routes/products");
-var freightsRouter = require("./routes/freights");
-var usersRouter = require("./routes/users");
-var expressLayouts = require("express-ejs-layouts");
+const productsRouter = require("./routes/products");
+const freightsRouter = require("./routes/freights");
+const usersRouter = require("./routes/users");
+const deliveriesRouter = require("./routes/deliveries");
+const expressLayouts = require("express-ejs-layouts");
 const auth = require("./middlewares/auth");
-var app = express();
+const app = express();
 require("dotenv").config();
 scheduledFunctions.initScheduledJobs();
 // view engine setup
@@ -58,6 +59,7 @@ app.use("/products", productsRouter);
 app.use("/freights", freightsRouter);
 app.use("/users", usersRouter);
 app.use("/purchases", purchasesRouter);
+app.use("/deliveries", deliveriesRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

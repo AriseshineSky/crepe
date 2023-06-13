@@ -24,6 +24,10 @@ open_apis = {
 	purchaseProcure: "/api/v2/purchase/procure",
 	delivery: "/api/v2/purchase/delivery",
 	deliveryDetail: "/api/supply/tms/delivery/relevanceSkuInfoByCode",
+	procureItem: "/api/v2/purchase/procureItem/getProcureItemView",
+	productInfo: "/api/v2/purchase/plan/relevancePoInfo",
+	lotNoDetailsView: "/api/supply/srm/purchase/lotno/lotNoDetailsView",
+	supplierSkuQuote: "/api/v2/purchase/supplierSkuQuote",
 };
 
 /* GET home page. */

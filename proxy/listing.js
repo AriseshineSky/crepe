@@ -22,6 +22,25 @@ exports.findListingsByProduct = async function (product) {
 	});
 };
 
+exports.createOrUpdate = async function (listing, data) {
+	let savedlisting = await Listing.findOne({
+		asin: listing.asin,
+		country: data.country,
+		fnsku: listing.fnsku,
+		account: data.account,
+	});
+	if (savedlisting) {
+		return savedlisting;
+	} else {
+		return await Listing.create({
+			asin: listing.asin,
+			country: data.country,
+			fnsku: listing.fnsku,
+			account: data.account,
+		});
+	}
+};
+
 exports.findOrCreate = async function (listing, data) {
 	var savedlisting = await Listing.findOne({
 		asin: listing.asin,
@@ -30,6 +49,12 @@ exports.findOrCreate = async function (listing, data) {
 		account: data.account,
 	});
 	if (savedlisting) {
+		savedlisting.availableQuantity = listing.availableQuantity;
+		savedlisting.reservedFCTransfer = listing.reservedFCTransfer;
+		savedlisting.reservedFCProcessing = listing.reservedFCProcessing;
+		savedlisting.inboundShipped = listing.inboundShipped;
+		savedlisting.ps = listing.ps;
+		await savedlisting.save();
 		return savedlisting;
 	} else {
 		return await Listing.create({

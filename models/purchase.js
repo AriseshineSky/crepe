@@ -1,17 +1,18 @@
-var mongoose = require("mongoose");
-var BaseModel = require("./base_model");
-var Schema = mongoose.Schema;
-var PurchaseSchema = new Schema({
+let mongoose = require("mongoose");
+let BaseModel = require("./base_model");
+let Schema = mongoose.Schema;
+let PurchaseSchema = new Schema({
 	id: {
 		type: String,
 		required: true,
-		unique: true,
 	},
 	productId: {
 		type: Schema.Types.ObjectId,
 		ref: "Product",
 	},
 	product: { type: String },
+	productName: { type: String },
+	sellerSku: { type: String },
 	memo: { type: String },
 	totalQuantity: { type: Number },
 	unInboundQuantity: { type: Number },
@@ -30,6 +31,7 @@ var PurchaseSchema = new Schema({
 	inboundQuantity: { type: String },
 	orderQuantity: { type: String },
 	actualQuantity: { type: String },
+	inboundDetailsVoList: { type: String },
 	stock: { type: Number, default: 0 },
 	createAt: { type: Date, default: Date.now() },
 	updateAt: { type: Date, default: Date.now() },
@@ -38,7 +40,7 @@ var PurchaseSchema = new Schema({
 
 PurchaseSchema.plugin(BaseModel);
 PurchaseSchema.pre("save", function (next) {
-	var now = new Date();
+	let now = new Date();
 	this.updateAt = now;
 	next();
 });

@@ -25,8 +25,8 @@ async function all() {
 	return await Purchase.find();
 }
 
-async function findOrCreate(purchase) {
-	let existPurchase = await Purchase.findOne({ id: purchase.id });
+async function createOrUpdate(purchase) {
+	let existPurchase = await Purchase.findOne({ code: purchase.code });
 
 	if (existPurchase) {
 		Object.assign(existPurchase, purchase);
@@ -39,7 +39,7 @@ async function findOrCreate(purchase) {
 
 async function findOrUpdate() {}
 module.exports = {
-	findOrCreate,
+	createOrUpdate,
 	findOrUpdate,
 	all,
 };
