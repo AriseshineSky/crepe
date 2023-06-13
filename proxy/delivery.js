@@ -3,6 +3,7 @@ const Delivery = models.Delivery;
 
 const productsApi = require("../api/delivery/products");
 const inventoriesApi = require("../api/delivery/inventories");
+const batchSize = 200;
 
 exports.syncDelivery = async function () {
 	let yiProducts = await productsApi.deliveryProducts();
@@ -21,6 +22,17 @@ exports.syncDelivery = async function () {
 	}
 };
 
+async function getDeliveriesByBatch() {
+	try {
+		const totalCount = await Delivery.countDocuments({})
+		const totalPage = Math.ceil(totalCount / batchSize)
+		for (let page = 1; page <= totalPage; page++) {
+			const deliveries = await Delivery.find({}, {deliveryCode: 1}).skip((page - 1) * batchSize).limit(batchSize)
+			const deliveryCodes = deliveries.map(delivery => delivery.deliveryCode)
+			await 
+		}
+	}
+}
 exports.findAll = async function () {
 	return await Delivery.find({});
 };

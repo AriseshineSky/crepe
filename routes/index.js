@@ -23,6 +23,7 @@ open_apis = {
 	marketAnalyze: "/api/v2/finance/salesoperations/marketAnalyze",
 	purchaseProcure: "/api/v2/purchase/procure",
 	delivery: "/api/v2/purchase/delivery",
+	deliveryDetail: "/api/supply/tms/delivery/relevanceSkuInfoByCode",
 };
 
 /* GET home page. */
