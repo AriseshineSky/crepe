@@ -2,6 +2,7 @@ const schedule = require("node-schedule");
 let checkProductsInventory = require("../lib/checkProductsInventory");
 let Product = require("../proxy").Product;
 let Yisucang = require("../proxy").Yisucang;
+let Delivery = require("../proxy").Delivery;
 let Role = require("../proxy").Role;
 let syncAllListings = require("../lib/syncAllListings");
 let lotDetail = require("../lib/lotDetail");
@@ -14,9 +15,10 @@ const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
-	syncPurchaseOrders.syncPurchaseOrders();
-	syncDeliveries.syncDeliveries();
-	syncPurchaseOrders.syncPurchaseOrders();
+	Delivery.updateDeliveryPurchaseId();
+	// syncPurchaseOrders.syncPurchaseOrders();
+	// syncDeliveries.syncDeliveries();
+	// syncPurchaseOrders.syncPurchaseOrders();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();

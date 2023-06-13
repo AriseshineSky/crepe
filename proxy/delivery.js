@@ -1,4 +1,5 @@
 const models = require("../models");
+const Purchase = models.Purchase;
 const Delivery = models.Delivery;
 
 const batchSize = 200;
@@ -33,6 +34,24 @@ async function getDeliveriesByBatch() {
 	} catch (error) {}
 }
 
+function getDeliveryCode(code) {
+	if (!code) {
+		return null;
+	}
+	return code.split("-")[0];
+}
+
+async function updateDeliveryPurchaseId() {
+	let deliveries = await all();
+	for (let delivery of deliveries) {
+		const purchase = await Purchase.findOne({ code: getDeliveryCode(delivery.memo) });
+		if (purchase) {
+			delivery.purchase = purchase._id;
+			await delivery.save();
+		}
+	}
+}
+
 async function all() {
 	return await Delivery.find({});
 }
@@ -61,4 +80,5 @@ async function createOrUpdate(delivery) {
 module.exports = {
 	all,
 	createOrUpdate,
+	updateDeliveryPurchaseId,
 };
