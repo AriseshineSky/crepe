@@ -1,4 +1,5 @@
 exports.Product = require("./product");
+exports.GProduct = require("./g_product");
 exports.Csv = require("./csv");
 exports.User = require("./user");
 exports.sheetApi = require("./sheetApi");

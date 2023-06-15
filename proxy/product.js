@@ -24,6 +24,27 @@ async function getInboundShippedCount(asin) {
 
 exports.getInboundShippedCount = getInboundShippedCount;
 
+async function updateAllPurchase(productId) {
+	if (productId) {
+		let product = await getProductById(productId);
+		if (product.yisucangId == null) {
+			product.yisucangId = [];
+		}
+		await prepareStock(product);
+		console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
+		await save(product);
+	} else {
+		const products = await findBySales(0);
+		for (let product of products) {
+			await prepareStock(product);
+			console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
+			await save(product);
+		}
+	}
+}
+
+exports.updateAllStock = updateAllStock;
+
 async function updateAllStock(productId) {
 	if (productId) {
 		let product = await getProductById(productId);
@@ -489,6 +510,11 @@ async function prepareStock(product) {
 	return quantity;
 }
 exports.prepareStock = prepareStock;
+
+async function findBySales(sales) {
+	return await Product.find({ ps: { $gte: sales }, discontinue: false }).populate("pm");
+}
+
 let findAll = async function () {
 	return await Product.find({ ps: { $gt: 2 }, discontinue: false }).populate("pm");
 };
@@ -1378,6 +1404,22 @@ let getProductByAsin = async function (asin) {
 };
 exports.getProductByAsin = getProductByAsin;
 
+exports.createOrUpdate = async function (product) {
+	let existProduct = await Product.findOne({ plwhsId: product.plwhsId });
+
+	if (!existProduct) {
+		existProduct = await Product.findOne({ plwhsId: parseInt(product.plwhsId) });
+	}
+
+	if (existProduct) {
+		Object.assign(existProduct, product);
+		await existProduct.save();
+	} else {
+		const newProduct = new Product(product);
+		await newProduct.save();
+	}
+};
+
 exports.newAndSave = function (data, callback) {
 	let product = new Product();
 	product.asin = data.asin;
@@ -1414,6 +1456,7 @@ let deleteProducing = async function (producingId) {
 		{ $set: { "producings.$.deletedAt": Date.now(), "producings.$.deleted": true } },
 	);
 };
+
 let updateInbound = async function (inboundId, deliveryDue, quantity) {
 	let objId = mongoose.Types.ObjectId(inboundId);
 	await Product.updateOne(
@@ -1440,6 +1483,7 @@ async function updateProductProducingStatus() {
 	}
 }
 exports.updateProductProducingStatus = updateProductProducingStatus;
+
 async function updateProducing(producingId, deliveryDue, quantity) {
 	let objId = mongoose.Types.ObjectId(producingId);
 	await Product.updateOne(

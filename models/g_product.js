@@ -1,11 +1,51 @@
 const { ObjectId } = require("mongodb");
-var mongoose = require("mongoose");
-var BaseModel = require("./base_model");
-var Schema = mongoose.Schema;
-var ProductSchema = new Schema({
-	pm: { type: Schema.Types.ObjectId, ref: "User" },
-	asin: { type: String },
-	countries: { type: [String] },
+const mongoose = require("mongoose");
+const BaseModel = require("./base_model");
+const Schema = mongoose.Schema;
+const GProductSchema = new Schema({
+	pm: { type: Schema.Types.ObjectId, ref: "GUser" },
+	fid: { type: String },
+	auditStatusCode: { type: String },
+	productName: { type: String },
+	moq: { type: Number },
+	purchaseUrl: { type: String },
+	createdAt: { type: String },
+	price: { type: String },
+	invoiceType: { type: String },
+	id: { type: String },
+	auditStatusName: { type: String },
+	quoteFlag: { type: String },
+	productImageUrl: { type: String },
+	quoteRemark: { type: String },
+	includedTax: { type: String },
+	supplierWarehouse: { type: String },
+	productState: { type: String },
+	invoiceTaxRate: { type: String },
+	taxRebateRate: { type: String },
+	taxRate: { type: String },
+	gradientQuote: { type: String },
+	creater: { type: String },
+	includeTaxPrice: { type: String },
+	attachmentIds: { type: String },
+	syncDeliveryDays: { type: String },
+	supplierGradientQuoteJson: { type: String },
+	bucklePackage: { type: String },
+	status: { type: String },
+	invoiceTypeName: { type: String },
+	editPage: { type: String },
+	supplierNumber: { type: String },
+	supplierCode: { type: String },
+	includePackage: { type: String },
+	buyerManagerId: { type: String },
+	baseInfoRemark: { type: String },
+	defaultSupplier: { type: String },
+	supplierName: { type: String },
+	product: { type: String },
+	productStateName: { type: String },
+	buyerManagerAccount: { type: String },
+	deliveryDays: { type: String },
+	buyerManager: { type: String },
+	ountries: { type: [String] },
 	cycle: { type: Number, default: 20 },
 	gSku: { type: String },
 	unitsPerBox: { type: Number, default: 1 },
@@ -89,12 +129,12 @@ var ProductSchema = new Schema({
 	deletedAt: { type: Date },
 });
 
-ProductSchema.plugin(BaseModel);
+GProductSchema.plugin(BaseModel);
 
-ProductSchema.pre("save", function (next) {
-	var now = new Date();
+GProductSchema.pre("save", function (next) {
+	const now = new Date();
 	this.updateAt = now;
 	next();
 });
 
-mongoose.model("Product", ProductSchema);
+mongoose.model("GProduct", GProductSchema);

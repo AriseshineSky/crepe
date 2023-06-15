@@ -15,7 +15,8 @@ const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
-	Delivery.updateDeliveryPurchaseId();
+	syncSupplierSku.syncProductInfo();
+	// Delivery.updateDeliveryPurchaseId();
 	// syncPurchaseOrders.syncPurchaseOrders();
 	// syncDeliveries.syncDeliveries();
 	// syncPurchaseOrders.syncPurchaseOrders();

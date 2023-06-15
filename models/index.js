@@ -16,6 +16,7 @@ mongoose.connect(
 );
 
 require("./product");
+require("./g_product");
 require("./user");
 require("./freight");
 require("./token");
@@ -25,6 +26,7 @@ require("./yisucang");
 require("./purchase");
 require("./delivery");
 exports.Product = mongoose.model("Product");
+exports.GProduct = mongoose.model("GProduct");
 exports.User = mongoose.model("User");
 exports.Freight = mongoose.model("Freight");
 exports.Delivery = mongoose.model("Delivery");
