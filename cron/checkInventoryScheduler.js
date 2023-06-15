@@ -15,11 +15,11 @@ const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
-	syncSupplierSku.syncProductInfo();
+	// syncSupplierSku.syncProductInfo();
 	// Delivery.updateDeliveryPurchaseId();
 	// syncPurchaseOrders.syncPurchaseOrders();
 	// syncDeliveries.syncDeliveries();
-	// syncPurchaseOrders.syncPurchaseOrders();
+	syncPurchaseDetails.syncPurchaseOrderDetails();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();
