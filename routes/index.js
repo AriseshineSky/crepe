@@ -27,6 +27,7 @@ open_apis = {
 	procureItem: "/api/v2/purchase/procureItem/getProcureItemView",
 	productInfo: "/api/v2/purchase/plan/relevancePoInfo",
 	lotNoDetailsView: "/api/supply/srm/purchase/lotno/lotNoDetailsView",
+	lotNoPageList: "/api/v2/purchase/lotno/pageList",
 	supplierSkuQuote: "/api/v2/purchase/supplierSkuQuote",
 };
 
