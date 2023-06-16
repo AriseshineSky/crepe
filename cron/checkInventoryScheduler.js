@@ -12,7 +12,7 @@ let syncPurchaseDetails = require("../lib/syncPurchaseOrderDetails");
 let syncPurchaseOrders = require("../lib/syncPurchaseOrders");
 let syncSupplierSku = require("../lib/syncSupplierSku");
 let syncDeliveries = require("../lib/syncDeliveries");
-let syncProductInfo = require("../lib/syncProductInfo");
+const syncProductInfo = require("../lib/syncProductInfo");
 const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
