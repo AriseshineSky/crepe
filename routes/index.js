@@ -5,10 +5,15 @@ var syncAllListings = require("../lib/syncAllListings");
 
 let Yisucang = require("../proxy").Yisucang;
 
+{
+ appId: 'e641bb282e4b02f90eb23bd52',
+ appKey: 'k641bb282e4b02f90eb23bd53',
+}
 yisucangApis = {
 	inventory: "/OrderAPI/GetInventory",
 	product: "/OrderAPI/GetProductList",
 };
+
 gerpgo_api_prefix = "https://prodopenflat.apist.gerpgo.com/open-api";
 open_apis = {
 	token: "/api_token",
