@@ -13,7 +13,7 @@ class GerpgoClient {
 		try {
 			await this.ensureToken();
 			const sign = md5(JSON.stringify(data) + this.appId);
-			const response = await axios(options("POST", data, sign, url));
+			const response = await axios(this.options("POST", data, sign, url));
 			return response.data;
 		} catch (error) {
 			console.error("Error fetching data from gerpgo:", error);
@@ -29,7 +29,7 @@ class GerpgoClient {
 				sign: sign,
 			},
 			data: data,
-			url,
+			url: `https://${this.domain}/api/open${url}`,
 		};
 	}
 
@@ -48,6 +48,7 @@ class GerpgoClient {
 				accessToken: res.data.data.accessToken,
 				expiresIn: Date.now() / 1000 + res.data.data.expiresIn,
 			};
+			console.log(this.token);
 			return this.token;
 		} catch (error) {
 			console.log(error);

@@ -10,7 +10,6 @@ yisucangApis = {
 	product: "/OrderAPI/GetProductList",
 };
 
-gerpgo_api_prefix = "https://prodopenflat.apist.gerpgo.com/open-api";
 open_apis = {
 	token: "/api_token",
 	sales: "/api/v2/finance/salesoperations/saleProfitDataGrid",
@@ -26,6 +25,7 @@ open_apis = {
 	delivery: "/api/v2/purchase/delivery",
 	deliveryDetail: "/api/supply/tms/delivery/relevanceSkuInfoByCode",
 	procureItem: "/api/v2/purchase/procureItem/getProcureItemView",
+	purchase: "/purchase/srm/procure/page",
 	productInfo: "/api/v2/purchase/plan/relevancePoInfo",
 	lotNoDetailsView: "/api/supply/srm/purchase/lotno/lotNoDetailsView",
 	lotNoPageList: "/api/v2/purchase/lotno/pageList",
