@@ -5,10 +5,6 @@ var syncAllListings = require("../lib/syncAllListings");
 
 let Yisucang = require("../proxy").Yisucang;
 
-{
- appId: 'e641bb282e4b02f90eb23bd52',
- appKey: 'k641bb282e4b02f90eb23bd53',
-}
 yisucangApis = {
 	inventory: "/OrderAPI/GetInventory",
 	product: "/OrderAPI/GetProductList",
