@@ -1,9 +1,9 @@
-const { ObjectId } = require("mongodb");
-var mongoose = require("mongoose");
-var BaseModel = require("./base_model");
-var Schema = mongoose.Schema;
-var ProductSchema = new Schema({
+const mongoose = require("mongoose");
+const BaseModel = require("./base_model");
+const Schema = mongoose.Schema;
+const ProductSchema = new Schema({
 	pm: { type: Schema.Types.ObjectId, ref: "User" },
+	listings: [{ type: Schema.Types.ObjectId, ref: "Listing" }],
 	asin: { type: String },
 	countries: { type: [String] },
 	cycle: { type: Number, default: 20 },
@@ -81,6 +81,7 @@ var ProductSchema = new Schema({
 	airDelivery: { type: Boolean, default: false },
 	discontinue: { type: Boolean, default: false },
 	sea: { type: Boolean, default: false },
+	logisticsChanels: [{ type: String }],
 	plwhsId: { type: Number, default: 0 },
 	yisucangId: { type: [String] },
 	plan: { type: String },

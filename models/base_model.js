@@ -6,7 +6,7 @@ const timestampPlugin = funcion(schema, options) {
 	})
 
 	schema.pre('save', function(next) {
-		this.updateAt = new Date();
+		this.updatedAt = new Date();
 		next();
 	})
 }

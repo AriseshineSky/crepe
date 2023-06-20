@@ -49,7 +49,6 @@ let PurchaseSchema = new Schema({
 	businessOrderOrigin: { type: String },
 	uninboundAmount: { type: String },
 	reduceQuantity: { type: String },
-	id: { type: String },
 	invoicesStatusName: { type: String },
 	taxFlag: { type: String },
 	invoicesStatus: { type: String },
