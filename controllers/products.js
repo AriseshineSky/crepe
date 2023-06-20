@@ -203,65 +203,64 @@ exports.edit = async function (req, res, next) {
 		});
 	}
 };
+
 exports.new = function (req, res, next) {
-	console.log("new");
 	res.render("product/new", {
 		title: "New",
 	});
 };
 
-exports.create = async function (req, res, next) {
-	let asin = req.body.asin;
-	let cycle = req.body.cycle;
-	let maxAvgSales = req.body.maxAvgSales;
-	let unitsPerBox = req.body.unitsPerBox;
-	let box = {
-		length: req.body["box.length"],
-		width: req.body["box.width"],
-		height: req.body["box.height"],
-		weight: req.body["box.weight"],
+exports.update = function (req, res, next) {
+	const productId = req.params.id;
+
+	const { asin, cycle, maxAvgSales, unitsPerBox, box, plwhsId, yisucangId, airDelivery, sea } =
+		req.body;
+
+	const { length, width, height, weight } = box;
+
+	const newProduct = {
+		asin,
+		cycle,
+		maxAvgSales,
+		unitsPerBox,
+		box: { length, width, height, weight },
+		plwhsId,
+		yisucangId,
+		airDelivery,
+		sea,
 	};
-	let plwhsId = req.body.plwhsId;
-	let yisucangId = req.body.yisucangId;
-	let airDelivery = req.body.airDelivery;
-	let sea = req.body.sea;
-	let product = await Product.getProductByAsin(asin);
-	console.log(product);
-	if (!product) {
-		let newProduct = {
-			asin: asin,
-			cycle: cycle,
-			unitsPerBox: unitsPerBox,
-			box: box,
-			maxAvgSales: maxAvgSales,
-			plwhsId: plwhsId,
-			yisucangId: yisucangId,
-			airDelivery: airDelivery,
-			sea: sea,
-		};
-		Product.newAndSave(newProduct, function (err, product) {
-			console.log(product);
-			if (err) {
-				return next(err);
-			}
-			res.redirect("/products");
+	Product.findByIdAndUpdate(productId, newProduct)
+		.then(() => {
+			res.redirect(`/products/${productId}`);
+		})
+		.catch((error) => {
+			res.status(500).send("Internal Server Error");
 		});
-	} else {
-		product.cycle = cycle;
-		product.maxAvgSales = maxAvgSales;
-		product.unitsPerBox = unitsPerBox;
-		product.box = box;
-		product.plwhsId = plwhsId;
-		product.yisucangId = yisucangId;
-		product.airDelivery = airDelivery;
-		product.sea = sea;
-		product.save(function (err) {
-			if (err) {
-				return next(err);
-			}
-			res.redirect("/products/");
-		});
-	}
+};
+
+exports.create = async function (req, res, next) {
+	const { asin, cycle, maxAvgSales, unitsPerBox, box, plwhsId, yisucangId, airDelivery, sea } =
+		req.body;
+
+	const { length, width, height, weight } = box;
+
+	const newProduct = {
+		asin,
+		cycle,
+		maxAvgSales,
+		unitsPerBox,
+		box: { length, width, height, weight },
+		plwhsId,
+		yisucangId,
+		airDelivery,
+		sea,
+	};
+	Product.newAndSave(newProduct, function (err) {
+		if (err) {
+			return next(err);
+		}
+		res.redirect("/products");
+	});
 };
 
 exports.save = async function (req, res, next) {
