@@ -169,10 +169,5 @@ const LotSchema = new Schema({
 });
 
 LotSchema.plugin(BaseModel);
-LotSchema.pre("save", function (next) {
-	const now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("Lot", LotSchema);

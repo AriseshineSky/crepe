@@ -1,15 +1,14 @@
-/**
- * 给所有的 Model 扩展功能
- * http://mongoosejs.com/docs/plugins.html
- */
-var tools = require('../common/tools');
+const timestampPlugin = funcion(schema, options) {
+	schema.add({
+		createdAt: { type: Date, default: Date.now },
+		updatedAt: { type: Date, default: Date.now },
+		deletedAt: { type: Date }
+	})
 
-module.exports = function (schema) {
-  schema.methods.create_at_ago = function () {
-    return tools.formatDate(this.create_at, true);
-  };
+	schema.pre('save', function(next) {
+		this.updateAt = new Date();
+		next();
+	})
+}
 
-  schema.methods.update_at_ago = function () {
-    return tools.formatDate(this.update_at, true);
-  };
-};
+module.exports = timestampPlugin;

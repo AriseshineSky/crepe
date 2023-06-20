@@ -140,10 +140,5 @@ let PurchaseSchema = new Schema({
 });
 
 PurchaseSchema.plugin(BaseModel);
-PurchaseSchema.pre("save", function (next) {
-	let now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("Purchase", PurchaseSchema);

@@ -84,17 +84,8 @@ var ProductSchema = new Schema({
 	plwhsId: { type: Number, default: 0 },
 	yisucangId: { type: [String] },
 	plan: { type: String },
-	createAt: { type: Date, default: Date.now },
-	updateAt: { type: Date, default: Date.now },
-	deletedAt: { type: Date },
 });
 
 ProductSchema.plugin(BaseModel);
-
-ProductSchema.pre("save", function (next) {
-	var now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("Product", ProductSchema);

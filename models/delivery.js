@@ -75,10 +75,5 @@ var DeliverySchema = new Schema({
 });
 
 DeliverySchema.plugin(BaseModel);
-DeliverySchema.pre("save", function (next) {
-	var now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("Delivery", DeliverySchema);

@@ -17,10 +17,5 @@ const GUserSchema = new Schema({
 	plwhsId: { type: Number },
 });
 GUserSchema.plugin(BaseModel);
-GUserSchema.pre("save", function (next) {
-	const now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("User", GUserSchema);
