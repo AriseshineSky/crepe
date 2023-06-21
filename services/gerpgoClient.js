@@ -10,15 +10,11 @@ class GerpgoClient {
 	}
 
 	async baseFetchApi(url, data) {
-		try {
-			await this.ensureToken();
-			const sign = md5(JSON.stringify(data) + this.appKey);
-			console.log(this.options("POST", data, sign, url));
-			const response = await axios(this.options("POST", data, sign, url));
-			return response.data;
-		} catch (error) {
-			console.error("Error fetching data from gerpgo:", error);
-		}
+		await this.ensureToken();
+		const sign = md5(JSON.stringify(data) + this.appKey);
+		console.log(this.options("POST", data, sign, url));
+		const response = await axios(this.options("POST", data, sign, url));
+		return response.data;
 	}
 
 	async fetchSupplierSkuQuote(url, data) {
@@ -31,11 +27,7 @@ class GerpgoClient {
 
 	async fetchSuppliers(url, data) {
 		try {
-			await this.ensureToken();
-			const sign = md5(JSON.stringify(data) + this.appKey);
-			console.log(this.options("POST", data, sign, url));
-			const response = await axios(this.options("POST", data, sign, url));
-			return response.data;
+			return await this.baseFetchApi(url, data);
 		} catch (error) {
 			console.error("Error fetching data from gerpgo:", error);
 		}
@@ -43,11 +35,7 @@ class GerpgoClient {
 
 	async fetchPurchaseDetail(url, data) {
 		try {
-			await this.ensureToken();
-			const sign = md5(JSON.stringify(data) + this.appKey);
-			console.log(this.options("POST", data, sign, url));
-			const response = await axios(this.options("POST", data, sign, url));
-			return response.data;
+			return await this.baseFetchApi(url, data);
 		} catch (error) {
 			console.error("Error fetching data from gerpgo:", error);
 		}
@@ -55,11 +43,7 @@ class GerpgoClient {
 
 	async fetchPurchases(url, data) {
 		try {
-			await this.ensureToken();
-			const sign = md5(JSON.stringify(data) + this.appKey);
-			console.log(this.options("POST", data, sign, url));
-			const response = await axios(this.options("POST", data, sign, url));
-			return response.data;
+			return await this.baseFetchApi(url, data);
 		} catch (error) {
 			console.error("Error fetching data from gerpgo:", error);
 		}

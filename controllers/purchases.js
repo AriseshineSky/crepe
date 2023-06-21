@@ -38,21 +38,6 @@ exports.show = async function (req, res, next) {
 	}
 };
 
-exports.generateReport = async function (req, res, next) {
-	let asin = req.params.purchaseId;
-	let purchase = await purchase.getpurchaseByAsin(asin);
-	if (!purchase) {
-		res.render404("这个产品不存在。");
-		return;
-	} else {
-		await purchase.generateReport(asin);
-		res.render("purchase/report", {
-			purchase: purchase,
-			title: "",
-		});
-	}
-};
-
 exports.freights = async function (req, res, next) {
 	let asin = req.params.purchaseId;
 	let purchase = await purchase.getpurchaseByAsin(asin);
@@ -169,39 +154,6 @@ exports.producingsPlan = async function (req, res, next) {
 	}
 };
 
-exports.report = async function (req, res, next) {
-	let asin = req.params.purchaseId;
-	let purchase = await purchase.getpurchaseByAsin(asin);
-	await generateReport(asin);
-	if (!purchase) {
-		res.render404("这个产品不存在。");
-		return;
-	} else {
-		res.render("purchase/edit", {
-			purchase: purchase,
-			title: "",
-		});
-	}
-};
-
-exports.edit = async function (req, res, next) {
-	let purchaseId = req.params.purchaseId;
-	let purchase = await purchase.getpurchaseById(purchaseId);
-
-	if (!purchase) {
-		res.render404("这个产品不存在。");
-		return;
-	} else {
-		if (purchase.yisucangId == null) {
-			purchase.yisucangId = [];
-			purchase.save();
-		}
-		res.render("purchase/edit", {
-			purchase: purchase,
-			title: "",
-		});
-	}
-};
 exports.new = function (req, res, next) {
 	console.log("new");
 	res.render("purchase/new", {

@@ -1,17 +1,13 @@
 let Product = require("../proxy").Product;
-let Csv = require("../proxy").Csv;
-let Freight = require("../proxy").Freight;
-let mongoose = require("mongoose");
 let moment = require("moment");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 let logger = require("../common/logger");
-
-let syncPurchaseOrders = require("../lib/syncPurchaseOrders");
 
 exports.updateAllStock = async function (req, res, next) {
 	Product.updateAllStock();
 	res.render("index", { title: "regist" });
 };
+
 exports.updateAllStockByAsin = async function (req, res, next) {
 	let productId = req.params.productId;
 	Product.updateAllStock(productId);
@@ -23,44 +19,17 @@ exports.syncAllProductFreights = async function (req, res, next) {
 	Product.syncAllProductFreights(2);
 	res.render("index", { title: "regist" });
 };
+
 exports.show = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.getProductById(productId);
-	syncPurchaseOrders.syncPurchaseOrders();
+	let product = await Product.findProductById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
 	} else {
 		res.render("product/show", {
 			product: product,
-			title: "",
 		});
-	}
-};
-
-exports.generateReport = async function (req, res, next) {
-	let asin = req.params.productId;
-	let product = await Product.getProductByAsin(asin);
-	if (!product) {
-		res.render404("这个产品不存在。");
-		return;
-	} else {
-		await Product.generateReport(asin);
-		res.render("product/report", {
-			product: product,
-			title: "",
-		});
-	}
-};
-
-exports.freights = async function (req, res, next) {
-	let asin = req.params.productId;
-	let product = await Product.getProductByAsin(asin);
-	if (!product) {
-		res.render404("这个产品不存在。");
-		return;
-	} else {
-		Product.getFreight(product);
 	}
 };
 
@@ -72,7 +41,7 @@ exports.updateAllProuctSalesAndInventories = async function (req, res, next) {
 exports.updatePlan = async function (req, res, next) {
 	let productId = req.params.productId;
 	let plan = req.body.plan;
-	let product = await Product.getProductById(productId);
+	let product = await Product.findProductById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -85,7 +54,7 @@ exports.updatePlan = async function (req, res, next) {
 
 exports.syncFreight = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.getProductById(productId);
+	let product = await Product.findProductById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -97,14 +66,12 @@ exports.syncFreight = async function (req, res, next) {
 };
 
 exports.delete = async function (req, res, next) {
-	let asin = req.body.asin;
 	let productId = req.body.productId;
-	await Product.remove(asin, productId);
+	await Product.remove(productId);
 	res.redirect("/products");
 };
 
 exports.index = async function (req, res, next) {
-	// let products = await Product.showAll();
 	const products = await Product.findByUser(req.user);
 	res.render("product/index", {
 		products: products,
@@ -143,7 +110,7 @@ exports.plan = async function (req, res, next) {
 
 exports.showPlan = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.getProductById(productId);
+	let product = await Product.findProductById(productId);
 	if (product.plan) {
 		res.render("product/plan", { purchase: JSON.parse(product.plan) });
 	}
@@ -170,98 +137,56 @@ exports.producingsPlan = async function (req, res, next) {
 	}
 };
 
-exports.report = async function (req, res, next) {
-	let asin = req.params.productId;
-	let product = await Product.getProductByAsin(asin);
-	await generateReport(asin);
-	if (!product) {
-		res.render404("这个产品不存在。");
-		return;
-	} else {
-		res.render("product/edit", {
-			product: product,
-			title: "",
-		});
-	}
-};
-
 exports.edit = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.getProductById(productId);
-
+	let product = await Product.findProductById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
 	} else {
-		if (product.yisucangId == null) {
-			product.yisucangId = [];
-			product.save();
-		}
 		res.render("product/edit", {
 			product: product,
-			title: "",
 		});
 	}
 };
+
 exports.new = function (req, res, next) {
-	console.log("new");
 	res.render("product/new", {
 		title: "New",
 	});
 };
 
 exports.create = async function (req, res, next) {
-	let asin = req.body.asin;
-	let cycle = req.body.cycle;
-	let maxAvgSales = req.body.maxAvgSales;
-	let unitsPerBox = req.body.unitsPerBox;
-	let box = {
-		length: req.body["box.length"],
-		width: req.body["box.width"],
-		height: req.body["box.height"],
-		weight: req.body["box.weight"],
+	const {
+		asin,
+		cycle,
+		maxAvgSales,
+		unitsPerBox,
+		box,
+		plwhsId,
+		yisucangId,
+		sea,
+		air,
+		airDelivery,
+		seaExpress,
+	} = req.body;
+
+	const newProduct = {
+		asin,
+		cycle,
+		maxAvgSales,
+		unitsPerBox,
+		box,
+		plwhsId,
+		yisucangId,
+		sea,
+		air,
+		airDelivery,
+		seaExpress,
 	};
-	let plwhsId = req.body.plwhsId;
-	let yisucangId = req.body.yisucangId;
-	let airDelivery = req.body.airDelivery;
-	let sea = req.body.sea;
-	let product = await Product.getProductByAsin(asin);
-	console.log(product);
-	if (!product) {
-		let newProduct = {
-			asin: asin,
-			cycle: cycle,
-			unitsPerBox: unitsPerBox,
-			box: box,
-			maxAvgSales: maxAvgSales,
-			plwhsId: plwhsId,
-			yisucangId: yisucangId,
-			airDelivery: airDelivery,
-			sea: sea,
-		};
-		Product.newAndSave(newProduct, function (err, product) {
-			console.log(product);
-			if (err) {
-				return next(err);
-			}
-			res.redirect("/products");
-		});
-	} else {
-		product.cycle = cycle;
-		product.maxAvgSales = maxAvgSales;
-		product.unitsPerBox = unitsPerBox;
-		product.box = box;
-		product.plwhsId = plwhsId;
-		product.yisucangId = yisucangId;
-		product.airDelivery = airDelivery;
-		product.sea = sea;
-		product.save(function (err) {
-			if (err) {
-				return next(err);
-			}
-			res.redirect("/products/");
-		});
-	}
+
+	const product = await Product.newAndSave(newProduct);
+	res.redirect("/products" + product._id);
 };
 
 exports.save = async function (req, res, next) {
@@ -284,7 +209,7 @@ exports.save = async function (req, res, next) {
 	let airDelivery = req.body.airDelivery;
 	let sea = req.body.sea;
 	let avgSales = req.body.avgSales;
-	let product = await Product.getProductById(productId);
+	let product = await Product.findProductById(productId);
 	const countries = req.body.countries;
 	console.log(product);
 	if (!product) {
@@ -373,7 +298,7 @@ exports.addInbound = async function (req, res, next) {
 	let quantity = req.body.quantity;
 	let deliveryDue = req.body.deliveryDue;
 	console.log(quantity);
-	let product = await Product.getProductById(productId);
+	let product = await Product.findProductById(productId);
 	if (!product) {
 		return;
 	} else {
@@ -421,7 +346,7 @@ exports.updateInbound = async function (req, res, next) {
 };
 exports.showInbounds = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.getProductById(productId);
+	let product = await Product.findProductById(productId);
 	console.log(product);
 	if (!product) {
 		return;
@@ -433,41 +358,37 @@ exports.showInbounds = async function (req, res, next) {
 	}
 };
 
-exports.update = function (req, res, next) {
-	let asin = req.body.asin;
-	let cycle = req.body.cycle;
-	let maxAvgSales = req.body.maxAvgSales;
-	let unitsPerBox = req.body.unitsPerBox;
-	let box = {
-		length: req.body["box.length"],
-		width: req.body["box.width"],
-		height: req.body["box.height"],
-		weight: req.body["box.weight"],
+exports.update = async function (req, res, next) {
+	const {
+		asin,
+		cycle,
+		maxAvgSales,
+		unitsPerBox,
+		box,
+		plwhsId,
+		yisucangId,
+		productId,
+		sea,
+		air,
+		airDelivery,
+		seaExpress,
+	} = req.body;
+
+	const product = {
+		asin,
+		cycle,
+		maxAvgSales,
+		unitsPerBox,
+		box,
+		plwhsId,
+		yisucangId,
+		sea,
+		air,
+		airDelivery,
+		seaExpress,
+		productId,
 	};
-	const countries = req.body.countries;
-	let product = Product.getProductByAsin(asin);
-	if (!product) {
-		res.render404("此产品不存在或已被删除。");
-		return;
-	}
-	product.cycle = cycle;
-	product.maxAvgSales = maxAvgSales;
-	product.unitsPerBox = unitsPerBox;
-	product.box = box;
 
-	product.countries = countries;
-	console.log(countries);
-	product.save(function (err) {
-		if (err) {
-			return next(err);
-		}
-		res.redirect("/products/" + product.asin);
-	});
-};
-
-exports.csv = async function (req, res, next) {
-	let products = await Csv.parseCsv("ProductDailyProfit-10212022-11042022.csv");
-	res.render("/product/csv", {
-		products: products,
-	});
+	await Product.createOrUpdate(product);
+	res.redirect("/products" + product.productId);
 };

@@ -65,9 +65,11 @@ async function updateAllStock(productId) {
 }
 
 exports.updateAllStock = updateAllStock;
+
 async function getFreight(product) {
 	Freight.getFreightsAndProductingsByProduct(product);
 }
+
 async function checkProducings(product, freightsAndProducings) {
 	for (let j = 0; j < freightsAndProducings.producings.length; j++) {
 		for (let i = 0; i < product.producings.length; i++) {
@@ -125,16 +127,6 @@ exports.syncAllProductFreights = syncAllProductFreights;
 exports.syncFreight = syncFreight;
 exports.getFreight = getFreight;
 
-async function save(product) {
-	product.save(function (error) {
-		if (error) {
-			logger.error(error);
-		} else {
-			logger.info(product.asin, "saved");
-		}
-	});
-}
-exports.save = save;
 async function checkStatus(inbound, units, sales) {
 	return units - inbound.period * sales.minAvgSales;
 }
@@ -152,13 +144,11 @@ async function getDatabaseConnection() {
 	});
 	return connection;
 }
-async function getProductById(id) {
-	if (!id) return null;
-	console.log(id);
-	// return await Product.find({ ps: { $gt: 2 }, discontinue: false }).populate("pm");
+
+async function findProductById(id) {
 	return await Product.findById(id).populate("pm");
 }
-exports.getProductById = getProductById;
+exports.findProductById = findProductById;
 
 async function updateProductDefaultCountries() {
 	const products = await showAll();
@@ -255,7 +245,7 @@ async function syncPm() {
 				let pm = await User.findOrCreate(user);
 				User.updateUser(user);
 				product.pm = pm;
-				await save(product);
+				await product.save();
 				return;
 			}
 		}
@@ -515,10 +505,6 @@ async function findBySales(sales) {
 	return await Product.find({ ps: { $gte: sales }, discontinue: false }).populate("pm");
 }
 
-let findAll = async function () {
-	return await Product.find({ ps: { $gt: 2 }, discontinue: false }).populate("pm");
-};
-
 async function findByUser(user) {
 	if (user.name === "admin") {
 		return await Product.find().populate("pm").sort({ ps: -1 });
@@ -527,21 +513,6 @@ async function findByUser(user) {
 	}
 }
 
-exports.findByUser = findByUser;
-let showAll = async function () {
-	return await Product.find({ ps: { $gte: 0 } }).populate("pm");
-};
-
-exports.showAll = showAll;
-
-exports.productsNeedCheck = async function (ps = 2) {
-	return await Product.find({ ps: { $gte: ps } }).populate("pm");
-};
-
-let findAllAsins = async function () {
-	return Product.find().select("asin");
-};
-exports.findAllAsins = findAllAsins;
 async function prepareFbaInventoryAndSales(asin, listings) {
 	let inventory = 0;
 	let sales = 0;
@@ -609,7 +580,6 @@ async function prepareFbaInventoryAndSalesV3(product, listings) {
 		sales: Math.ceil(sales),
 	};
 }
-exports.prepareFbaInventoryAndSalesV3 = prepareFbaInventoryAndSalesV3;
 
 async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
 	let availableQuantity = 0;
@@ -638,8 +608,6 @@ async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
 	};
 }
 
-exports.prepareFbaInventoryAndSalesByCountryV2 = prepareFbaInventoryAndSalesByCountryV2;
-
 async function removeDeliveredInbounds(product) {
 	product.inboundShippeds.forEach(async function (inbound) {
 		if (moment(new Date()).diff(moment(inbound.deliveryDue), "days") > 10) {
@@ -650,7 +618,7 @@ async function removeDeliveredInbounds(product) {
 		}
 	});
 }
-exports.removeDeliveredInbounds = removeDeliveredInbounds;
+
 async function getFbaSalesPeriod(fbaInventorySales) {
 	return Math.floor(fbaInventorySales.inventory / fbaInventorySales.sales);
 }
@@ -658,23 +626,6 @@ async function getFbaSalesPeriod(fbaInventorySales) {
 async function getStockSalesPeriod(fbaInventorySales, stock) {
 	return Math.floor(stock / fbaInventorySales.sales);
 }
-
-let generateReport = async function (asin) {
-	let messages = [];
-	let report = await getInventoryReport(asin);
-	if (report.fbaSalesPeriod < 10) {
-		messages.push(`${asin} 亚马逊库存不足10天`);
-		if (report.stock > 0) {
-			messages.push(`请把仓库中${report.stock}发往亚马逊`);
-		}
-	}
-	if (report.gap > 0) {
-		messages.push(`当前的发货计划可能会造成断货`);
-	}
-	console.log(report);
-};
-
-exports.generateReport = generateReport;
 
 let getInventoryReport = async function (asin) {
 	let report = {};
@@ -726,7 +677,6 @@ async function getSales(fbaInventorySales, product) {
 	};
 	return sales;
 }
-exports.getSales = getSales;
 
 async function updateProductSalesAndInventories(productId) {
 	let product = await getProductById(productId);
@@ -735,7 +685,6 @@ async function updateProductSalesAndInventories(productId) {
 	await getSales(fbaInventorySales, product);
 	save(product);
 }
-exports.updateProductSalesAndInventories = updateProductSalesAndInventories;
 
 async function updateAllProductSalesAndInventories() {
 	let products = await findAll();
@@ -747,8 +696,6 @@ async function updateAllProductSalesAndInventories() {
 	}
 }
 
-exports.updateAllProductSalesAndInventories = updateAllProductSalesAndInventories;
-
 async function prepareOrderDues(orderDues) {
 	let dues = [];
 	for (let type in orderDues) {
@@ -759,13 +706,13 @@ async function prepareOrderDues(orderDues) {
 	}
 	return dues;
 }
-exports.prepareOrderDues = prepareOrderDues;
 
 async function getValidProducings(product) {
 	let products = await findValidProducings(product.asin);
 	return products[0]?.producings;
 }
-exports.getPlanV3 = async function (productId, producingId) {
+
+async function getPlanV3(productId, producingId) {
 	let product = await getProductById(productId);
 	let fbaInventorySales = await prepareFbaInventoryAndSalesV3(product);
 	console.log(fbaInventorySales);
@@ -856,7 +803,7 @@ exports.getPlanV3 = async function (productId, producingId) {
 	};
 	console.log(purchase);
 	return purchase;
-};
+}
 
 async function convertProducingQtyIntoBox(producing, product) {
 	if (product.unitsPerBox === 0) {
@@ -963,13 +910,10 @@ async function getProducingsFreightPlan(product, sales, inbounds, validProducing
 	return plan;
 }
 
-exports.getProducingFreightPlan = getProducingFreightPlan;
-
 async function findFreightByType(type) {
 	let freights = await Freight.freightTypes();
 	return freights.find((freight) => freight.type === type);
 }
-exports.findFreightByType = findFreightByType;
 async function getOrderDue(product, totalInventory, sales) {
 	let freightType = ["airExpress", "seaExpress", "sea"];
 	if (product.airDelivery) {
@@ -1008,8 +952,6 @@ async function getOrderDue(product, totalInventory, sales) {
 	return orderDues;
 }
 
-exports.getOrderDue = getOrderDue;
-exports.getQuantity = getQuantity;
 async function getQuantity(sales, totalInventory, product) {
 	let total = totalInventory;
 	if (product.inboundShippeds) {
@@ -1393,23 +1335,17 @@ const getProductByPlwhsId = async function (plwhsId) {
 			console.log(err);
 		});
 };
-exports.getProductByPlwhsId = getProductByPlwhsId;
 
-let getProductByAsin = async function (asin) {
+async function getProductByAsin(asin) {
 	return Product.findOne({ asin: asin })
 		.clone()
 		.catch(function (err) {
 			console.log(err);
 		});
-};
-exports.getProductByAsin = getProductByAsin;
+}
 
-exports.createOrUpdate = async function (product) {
-	let existProduct = await Product.findOne({ plwhsId: product.plwhsId });
-
-	if (!existProduct) {
-		existProduct = await Product.findOne({ plwhsId: parseInt(product.plwhsId) });
-	}
+async function createOrUpdate(product) {
+	let existProduct = await Product.findById(product.productId);
 
 	if (existProduct) {
 		Object.assign(existProduct, product);
@@ -1418,29 +1354,18 @@ exports.createOrUpdate = async function (product) {
 		const newProduct = new Product(product);
 		await newProduct.save();
 	}
-};
+}
 
-exports.newAndSave = function (data, callback) {
+async function newAndSave(data) {
+	let product = new Product(data);
+	return await product.save();
+}
+
+async function createNewProduct(data, callback) {
 	let product = new Product();
 	product.asin = data.asin;
-	product.cycle = data.cycle;
-	product.unitsPerBox = data.unitsPerBox;
-	product.box = data.box;
-	product.maxAvgSales = data.maxAvgSales;
-	product.plwhsId = data.plwhsId;
-	product.yisucangId = data.yisucangId;
-	product.minInventory = data.minInventory;
-	console.log(product);
 	product.save(callback);
-};
-
-exports.createNewProduct = function (data, callback) {
-	let product = new Product();
-	product.asin = data.asin;
-	console.log(product);
-	product.save(callback);
-};
-exports.findAll = findAll;
+}
 
 let deleteInbound = async function (inboundId) {
 	let objId = mongoose.Types.ObjectId(inboundId);
@@ -1482,7 +1407,6 @@ async function updateProductProducingStatus() {
 		await save(product);
 	}
 }
-exports.updateProductProducingStatus = updateProductProducingStatus;
 
 async function updateProducing(producingId, deliveryDue, quantity) {
 	let objId = mongoose.Types.ObjectId(producingId);
@@ -1492,18 +1416,37 @@ async function updateProducing(producingId, deliveryDue, quantity) {
 	);
 }
 
-let remove = async function (asin, productId) {
-	if (asin) {
-		await Product.deleteOne({ asin: asin });
-	} else if (productId) {
-		await Product.deleteOne({ _id: mongoose.Types.ObjectId(productId) });
-	}
+async function remove(productId) {
+	await Product.deleteOne({ _id: mongoose.Types.ObjectId(productId) });
+}
+
+module.exports = {
+	updateProducing,
+	deleteProducing,
+	updateInbound,
+	deleteInbound,
+	remove,
+	prepareFbaInventoryAndSales,
+	prepareFbaInventoryAndSalesV2,
+	prepareFbaInventoryAndSalesV3,
+	updateProductProducingStatus,
+	findAll,
+	newAndSave,
+	createOrUpdate,
+	createNewProduct,
+	getProductByAsin,
+	getProductByPlwhsId,
+	getOrderDue,
+	getQuantity,
+	findFreightByType,
+	getProducingFreightPlan,
+	prepareOrderDues,
+	getPlanV3,
+	updateAllProductSalesAndInventories,
+	updateProductSalesAndInventories,
+	getSales,
+	removeDeliveredInbounds,
+	prepareFbaInventoryAndSalesByCountryV2,
+	prepareFbaInventoryAndSalesV3,
+	findByUser,
 };
-exports.updateProducing = updateProducing;
-exports.deleteProducing = deleteProducing;
-exports.updateInbound = updateInbound;
-exports.deleteInbound = deleteInbound;
-exports.remove = remove;
-exports.prepareFbaInventoryAndSales = prepareFbaInventoryAndSales;
-exports.prepareFbaInventoryAndSalesV2 = prepareFbaInventoryAndSalesV2;
-exports.prepareFbaInventoryAndSalesV3 = prepareFbaInventoryAndSalesV3;
