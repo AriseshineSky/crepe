@@ -16,6 +16,7 @@ mongoose.connect(
 );
 
 require("./product");
+require("./supplier");
 require("./lot");
 require("./g_product");
 require("./user");
@@ -38,3 +39,4 @@ exports.Role = mongoose.model("Role");
 exports.Yisucang = mongoose.model("Yisucang");
 exports.Purchase = mongoose.model("Purchase");
 exports.Delivery = mongoose.model("Delivery");
+exports.Supplier = mongoose.model("Supplier");

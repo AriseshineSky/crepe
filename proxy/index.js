@@ -10,3 +10,4 @@ exports.Role = require("./role");
 exports.Yisucang = require("./yisucang");
 exports.Delivery = require("./delivery");
 exports.Lot = require("./lot");
+exports.Supplier = require("./supplier");

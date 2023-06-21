@@ -8,16 +8,21 @@ let syncAllListings = require("../lib/syncAllListings");
 let lotDetail = require("../lib/lotDetail");
 let syncLotPageList = require("../lib/syncLotPageList");
 let syncProcureItem = require("../lib/syncProcureItem");
-let syncPurchaseDetails = require("../lib/syncPurchaseOrderDetails");
+let syncPurchaseDetails = require("../lib/syncPurchasesDetail");
 let syncPurchaseOrders = require("../lib/syncPurchaseOrders");
+let syncPurchases = require("../lib/syncPurchases");
 let syncSupplierSku = require("../lib/syncSupplierSku");
+let syncSupplier = require("../lib/syncSupplier");
 let syncDeliveries = require("../lib/syncDeliveries");
 const syncProductInfo = require("../lib/syncProductInfo");
 const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
-	syncProductInfo.syncProductInfo();
+	// syncPurchases.syncPurchaseProcures();
+	// syncPurchaseDetails.syncPurchasesDetail();
+	syncSupplierSku.syncProductInfo();
+	// syncSupplier.syncSuppliers();
 	// Delivery.updateDeliveryPurchaseId();
 	// syncPurchaseOrders.syncPurchaseOrders();
 	// syncDeliveries.syncDeliveries();
