@@ -37,9 +37,16 @@ async function createOrUpdate(purchase) {
 	}
 }
 
-async function findOrUpdate() {}
+const { find, updateMany, deleteMany, updateOne, findById } = Purchase;
+
 module.exports = {
+	find,
+	update,
+	findById,
 	createOrUpdate,
 	findOrUpdate,
 	all,
+	updateMany,
+	deleteMany,
+	updateOne,
 };
