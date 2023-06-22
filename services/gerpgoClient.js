@@ -17,6 +17,14 @@ class GerpgoClient {
 		return response.data;
 	}
 
+	async fetchListings(url, data) {
+		try {
+			return await this.baseFetchApi(url, data);
+		} catch (error) {
+			console.error("Error fetching data from gerpgo:", error);
+		}
+	}
+
 	async fetchSupplierSkuQuote(url, data) {
 		try {
 			return await this.baseFetchApi(url, data);

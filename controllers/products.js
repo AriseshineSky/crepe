@@ -139,7 +139,7 @@ exports.producingsPlan = async function (req, res, next) {
 
 exports.edit = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.findProductById(productId);
+	let product = await Product.findById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;

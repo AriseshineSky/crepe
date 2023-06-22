@@ -21,7 +21,7 @@ let syncProducts = require("../lib/getInfoFromGoogleSheet");
 const scheduleCronstyle = () => {
 	// syncPurchases.syncPurchaseProcures();
 	// syncPurchaseDetails.syncPurchasesDetail();
-	syncSupplierSku.syncProductInfo();
+	// syncSupplierSku.syncProductInfo();
 	// syncSupplier.syncSuppliers();
 	// Delivery.updateDeliveryPurchaseId();
 	// syncPurchaseOrders.syncPurchaseOrders();
@@ -30,6 +30,8 @@ const scheduleCronstyle = () => {
 	// lotDetail.syncLotNoDetails();
 	// syncLotPageList.syncPageList();
 	// syncProcureItem.syncProcureItems();
+	//
+	syncAllListings.syncListings();
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();
@@ -44,7 +46,7 @@ const scheduleCronstyle = () => {
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product sales and inventories");
-		Product.updateAllProductSalesAndInventories();
+		Product.updateAllSalesAndInventories();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product freights");

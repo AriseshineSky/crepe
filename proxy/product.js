@@ -1,7 +1,7 @@
-let models = require("../models");
-let Product = models.Product;
-let User = require("./user");
-let mongoose = require("mongoose");
+const models = require("../models");
+const Product = models.Product;
+const User = require("./user");
+const mongoose = require("mongoose");
 const getPm = require("../api/getPM");
 let moment = require("moment");
 const GAP = 6;
@@ -43,28 +43,25 @@ async function updateAllPurchase(productId) {
 	}
 }
 
-exports.updateAllStock = updateAllStock;
-
 async function updateAllStock(productId) {
 	if (productId) {
-		let product = await getProductById(productId);
+		let product = await Product.findById(productId);
 		if (product.yisucangId == null) {
 			product.yisucangId = [];
 		}
-		await prepareStock(product);
-		console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
-		await save(product);
+
+		const { yisucangdStock, plwhsStock } = await prepareStock(product);
+		product.set({ yisucangdStock, plwhsStock });
+		await product.save();
 	} else {
-		const products = await findAll();
+		const products = await Product.find();
 		for (let product of products) {
-			await prepareStock(product);
-			console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
-			await save(product);
+			const { yisucangdStock, plwhsStock } = await prepareStock(product);
+			product.set({ yisucangdStock, plwhsStock });
+			await product.save();
 		}
 	}
 }
-
-exports.updateAllStock = updateAllStock;
 
 async function getFreight(product) {
 	Freight.getFreightsAndProductingsByProduct(product);
@@ -100,7 +97,7 @@ async function syncFreight(product, days) {
 }
 
 async function syncAllProductFreights(days) {
-	let products = await findAll();
+	let products = await Product.find();
 	const types = await Freight.freightTypes();
 	const allFreights = await Freight.syncFreights();
 	const yisucangInbounds = await Freight.getYisucangInbounds();
@@ -237,7 +234,7 @@ async function syncPm() {
 	// 		await User.findOrCreate(user);
 	// 	}
 	// });
-	let products = await findAll();
+	let products = await Product.find();
 	for (let product of products) {
 		for (let country of product.countries) {
 			let user = await getPm(product.asin, country.toUpperCase());
@@ -482,22 +479,10 @@ async function getStockByProductV2(product) {
 exports.getStockByProductV2 = getStockByProductV2;
 
 async function prepareStock(product) {
-	let quantity = 0;
-	let yStock = 0;
-	let pStock = 0;
-	// let stock = await getStockByProduct(product);
-	let stock = await getStockByProductV2(product);
-	let plwhs = await getPlwhsByProduct(product);
-	if (stock) {
-		quantity += stock;
-		yStock = stock;
-	}
-	if (plwhs) {
-		quantity += plwhs.qty;
-		pStock = plwhs.qty;
-	}
-	await updateProduct(product, { stock: yStock, plwhs: pStock });
-	return quantity;
+	const yisucangdStock = await getStockByProductV2(product);
+	const plwhsStock = await getPlwhsByProduct(product);
+
+	return { yisucangdStock, plwhsStock };
 }
 exports.prepareStock = prepareStock;
 
@@ -558,26 +543,27 @@ async function prepareFbaInventoryAndSalesV2(asin, listings) {
 }
 
 async function prepareFbaInventoryAndSalesV3(product, listings) {
-	let inventory = 0;
+	let fbaInventory = 0;
 	let sales = 0;
 
 	if (!listings) {
-		listings = await Listing.findListingsByProduct(product);
+		listings = await Listing.findByProduct(product);
 	}
 
-	console.log(listings);
-	for (let listing of listings) {
-		inventory =
+	for (const listing of listings) {
+		fbaInventory =
 			inventory +
 			listing.availableQuantity +
 			listing.reservedFCTransfer +
 			listing.inboundShipped +
 			listing.reservedFCProcessing;
+
 		sales = sales + listing.ps;
 	}
+
 	return {
-		inventory: inventory,
-		sales: Math.ceil(sales),
+		fbaInventory,
+		sales,
 	};
 }
 
@@ -686,13 +672,13 @@ async function updateProductSalesAndInventories(productId) {
 	save(product);
 }
 
-async function updateAllProductSalesAndInventories() {
-	let products = await findAll();
+async function updateAllSalesAndInventories() {
+	let products = await Product.find();
 	for (let product of products) {
-		const listings = await Listing.findListingsByProduct(product);
-		let fbaInventorySales = await prepareFbaInventoryAndSalesV3(product, listings);
-		await getSales(fbaInventorySales, product);
-		save(product);
+		const listings = await Listing.findByProduct(product);
+		const { fbaInventory, sales } = await prepareFbaInventoryAndSalesV3(product, listings);
+		product.set({ fbaInventory, sales });
+		await product.save();
 	}
 }
 
@@ -1396,7 +1382,7 @@ let updateInbound = async function (inboundId, deliveryDue, quantity) {
 };
 
 async function updateProductProducingStatus() {
-	let products = await findAll();
+	let products = await Product.find();
 	for (let product of products) {
 		console.log(product.asin);
 		if (product.producings) {
@@ -1421,6 +1407,8 @@ async function remove(productId) {
 }
 
 module.exports = {
+	findById: Product.findById.bind(Product),
+	find: Product.find.bind(Product),
 	updateProducing,
 	deleteProducing,
 	updateInbound,
@@ -1430,7 +1418,6 @@ module.exports = {
 	prepareFbaInventoryAndSalesV2,
 	prepareFbaInventoryAndSalesV3,
 	updateProductProducingStatus,
-	findAll,
 	newAndSave,
 	createOrUpdate,
 	createNewProduct,
@@ -1442,11 +1429,12 @@ module.exports = {
 	getProducingFreightPlan,
 	prepareOrderDues,
 	getPlanV3,
-	updateAllProductSalesAndInventories,
+	updateAllSalesAndInventories,
 	updateProductSalesAndInventories,
 	getSales,
 	removeDeliveredInbounds,
 	prepareFbaInventoryAndSalesByCountryV2,
 	prepareFbaInventoryAndSalesV3,
 	findByUser,
+	updateAllStock,
 };

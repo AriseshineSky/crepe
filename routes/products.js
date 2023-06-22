@@ -3,7 +3,6 @@ var express = require("express");
 var router = express.Router();
 
 router.get("/new", products.new);
-router.get("/csv", products.csv);
 
 router.get("/:productId/inbounds", products.showInbounds);
 router.post("/:productId/inbounds", products.addInbound);
@@ -18,9 +17,7 @@ router.get("/:productId/plan", products.plan);
 router.get("/:productId/producing-plan", products.producingPlan);
 router.get("/:productId/producings/plan", products.producingsPlan);
 router.get("/:productId/producings/:producingId/plan", products.producingPlan);
-router.get("/:productId/freights", products.freights);
 router.get("/:productId/syncFreight", products.syncFreight);
-router.get("/:productId/report", products.generateReport);
 router.get("/:productId/showPlan", products.showPlan);
 router.post("/:productId/plan", products.updatePlan);
 router.get("/:productId/syncpm", products.syncPmByProduct);

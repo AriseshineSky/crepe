@@ -1,16 +1,12 @@
-var models = require("../models");
-var Listing = models.Listing;
-var logger = require("../common/logger");
-
-exports.findAll = async function () {
-	return await Listing.find({});
-};
+const models = require("../models");
+const Listing = models.Listing;
+const logger = require("../common/logger");
 
 exports.findLisingsByAsin = async function (asin) {
 	return await Listing.find({ asin: asin });
 };
 
-exports.findListingsByProduct = async function (product) {
+async function findByProduct(product) {
 	const countries = product.countries.map((country) => {
 		return country.toUpperCase();
 	});
@@ -20,29 +16,34 @@ exports.findListingsByProduct = async function (product) {
 		country: { $in: countries },
 		updateAt: { $gte: weekAgo.toISOString() },
 	});
-};
+}
 
-exports.createOrUpdate = async function (listing, data) {
+async function createOrUpdate(listing) {
+	const [account, country] = listing.marketName.split(":");
+
+	const { asin, fnsku } = listing;
 	let savedlisting = await Listing.findOne({
-		asin: listing.asin,
-		country: data.country,
-		fnsku: listing.fnsku,
-		account: data.account,
+		asin,
+		country,
+		fnsku,
+		account,
 	});
+
 	if (savedlisting) {
-		return savedlisting;
+		savedlisting = { ...savedlisting, ...listing };
+		return await savedlisting.save();
 	} else {
 		return await Listing.create({
-			asin: listing.asin,
-			country: data.country,
-			fnsku: listing.fnsku,
-			account: data.account,
+			asin,
+			country,
+			fnsku,
+			account,
 		});
 	}
-};
+}
 
 exports.findOrCreate = async function (listing, data) {
-	var savedlisting = await Listing.findOne({
+	const savedlisting = await Listing.findOne({
 		asin: listing.asin,
 		country: data.country,
 		fnsku: listing.fnsku,
@@ -77,4 +78,10 @@ exports.update = async function (listing, newListing) {
 			logger.error(error);
 		}
 	});
+};
+
+module.exports = {
+	find: Listing.find.bind(Listing),
+	findByProduct,
+	createOrUpdate,
 };

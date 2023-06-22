@@ -5,7 +5,8 @@ var Schema = mongoose.Schema;
 var ProductSchema = new Schema({
 	pm: { type: Schema.Types.ObjectId, ref: "User" },
 	asin: { type: String },
-	countries: { type: [String] },
+	countries: { type: [String], default: ["US", "CA"] },
+	shipmentTypes: { type: [String], default: ["airExpress", "seaExpress"] },
 	cycle: { type: Number, default: 20 },
 	gSku: { type: String },
 	unitsPerBox: { type: Number, default: 1 },

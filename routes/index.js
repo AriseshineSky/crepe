@@ -32,6 +32,7 @@ open_apis = {
 	lotNoPageList: "/api/v2/purchase/lotno/pageList",
 	supplierSkuQuote: "/purchase/srm/supplierSkuQuote/page",
 	supplier: "/purchase/srm/supplier/page",
+	listings: "/operation/sale/selling/page",
 };
 
 /* GET home page. */
