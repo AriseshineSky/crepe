@@ -3,6 +3,7 @@ const Product = models.Product;
 const User = require("./user");
 const mongoose = require("mongoose");
 const getPm = require("../api/getPM");
+const helper = require("../lib/util/helper");
 let moment = require("moment");
 const GAP = 6;
 let getFbaInventoryByASIN = require("../lib/getFbaInventoryByASIN");
@@ -25,48 +26,6 @@ async function getInboundShippedCount(asin) {
 }
 
 exports.getInboundShippedCount = getInboundShippedCount;
-
-async function updateAllPurchase(productId) {
-	if (productId) {
-		let product = await getProductById(productId);
-		if (product.yisucangId == null) {
-			product.yisucangId = [];
-		}
-		await prepareStock(product);
-		console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
-		await save(product);
-	} else {
-		const products = await findBySales(0);
-		for (let product of products) {
-			await prepareStock(product);
-			console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
-			await save(product);
-		}
-	}
-}
-
-async function updateProductSaStocklesAndInventories(productId) {
-	let product = await Product.findById(productId);
-	const { yisucangdStock, plwhsStock } = await prepareStock(product);
-	product.set({ yisucangdStock, plwhsStock });
-	await product.save();
-}
-
-async function updateStock(productId) {
-	let product = await Product.findById(productId);
-	const { yisucangdStock, plwhsStock } = await prepareStock(product);
-	product.set({ yisucangdStock, plwhsStock });
-	await product.save();
-}
-
-async function updateAllStock() {
-	const products = await Product.find();
-	for (let product of products) {
-		const { yisucangdStock, plwhsStock } = await prepareStock(product);
-		product.set({ yisucangdStock, plwhsStock });
-		await product.save();
-	}
-}
 
 async function getFreight(product) {
 	Freight.getFreightsAndProductingsByProduct(product);
@@ -148,27 +107,11 @@ async function getDatabaseConnection() {
 	return connection;
 }
 
-async function findProductById(id) {
-	return await Product.findById(id).populate("pm");
-}
-exports.findProductById = findProductById;
-
-async function updateProductDefaultCountries() {
-	const products = await showAll();
-	console.log(products.length);
-	for (let product of products) {
-		if (!product.countries || product.countries.length < 1) {
-			product.countries = ["US", "CA", "MX", "UK", "IT", "DE", "FR", "SP", "JP", "AU"];
-			product.save();
-		}
-	}
-}
-exports.updateProductDefaultCountries = updateProductDefaultCountries;
-
 exports.removeProductsWithoutAsinOrPlwhsId = async () => {
 	Product.deleteMany({ $or: [{ asin: null }, { asin: { $eq: "" } }] });
 	Product.deleteMany({ plwhsId: null });
 };
+
 async function syncFromPlwhs() {
 	Product.deleteMany({ $or: [{ asin: null }, { asin: { $eq: "" } }] });
 	let pro = await Product.find({ $or: [{ asin: null }, { asin: { $eq: "" } }] });
@@ -349,7 +292,7 @@ async function calculateProducingMinInventory(freightType, status, sales, produc
 
 async function recalculateInboundQueue(inboundQueue, sales) {
 	let states = [];
-	let newInboundQueue = JSON.parse(JSON.stringify(inboundQueue));
+	let newInboundQueue = helper.deepClone(inboundQueue);
 	for (let i = 0; i < newInboundQueue.length; i++) {
 		if (newInboundQueue[i].inventory.before < 0) {
 			let period = Math.ceil(-newInboundQueue[i].inventory.before / sales.minAvgSales);
@@ -373,15 +316,9 @@ async function recalculateInboundQueue(inboundQueue, sales) {
 	return states;
 }
 
-async function convertDateToPeroid(date) {
-	return moment(date).diff(moment(), "days");
-}
-
-exports.convertDeliveryDueToPeroid = convertDeliveryDueToPeroid;
-
 async function updateRemainingArrivalDays(deliveries) {
 	for (let delivery of deliveries) {
-		delivery.remainingArrivalDays = await convertDateToPeroid(delivery.expectArrivalDate);
+		delivery.remainingArrivalDays = helper.convertDateToPeroid(delivery.expectArrivalDate);
 		delivery.save();
 	}
 }
@@ -705,10 +642,17 @@ async function getValidProducings(product) {
 
 async function getTotalInventory(product) {}
 
+async function updateAll() {
+	const products = await Product.find();
+	for (let product of products) {
+		const productUpdator = ProductUpdator(product);
+		await productUpdator.updateAll();
+	}
+}
 async function getPlanV3(productId, producingId) {
 	let product = await Product.findById(productId).populate("deliveries").exec();
-	const updator = ProductUpdator(product);
-	await updator.updateAll();
+	const productUpdator = ProductUpdator(product);
+	await productUpdator.updateAll();
 
 	await updateRemainingArrivalDays(product.deliveries);
 	await addCurrentInventoryToInbounds(totalInventory, inbounds);
@@ -1429,14 +1373,10 @@ module.exports = {
 	getProducingFreightPlan,
 	prepareOrderDues,
 	getPlanV3,
-	updateAllSalesAndInventories,
-	updateProductSalesAndInventories,
 	getSales,
 	removeDeliveredInbounds,
 	prepareFbaInventoryAndSalesByCountryV2,
 	prepareFbaInventoryAndSalesV3,
 	findByUser,
-	updateAllStock,
-	updateStock,
-	updateSalesAndInventory,
+	updateAll,
 };

@@ -19,26 +19,29 @@ const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
-	// syncPurchases.syncPurchaseProcures();
-	// syncPurchaseDetails.syncPurchasesDetail();
+	syncPurchaseDetails.syncPurchasesDetail();
 	// syncSupplierSku.syncProductInfo();
 	// syncSupplier.syncSuppliers();
 	// Delivery.updateDeliveryPurchaseId();
 	// syncPurchaseOrders.syncPurchaseOrders();
 	// syncDeliveries.syncDeliveries();
-	// syncPurchaseDetails.syncPurchaseOrderDetails();
 	// lotDetail.syncLotNoDetails();
 	// syncLotPageList.syncPageList();
 	// syncProcureItem.syncProcureItems();
-	//
-	syncAllListings.syncListings();
+	// syncAllListings.syncListings();
+	syncPurchases.syncPurchaseProcures();
+
 	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to sync product inventory");
-		syncPurchaseOrders.syncPurchaseOrders();
+		syncPurchases.syncPurchaseProcures();
+	});
+	schedule.scheduleJob("0 0 */1 * * *", () => {
+		logger.info("start to sync product inventory");
+		syncPurchaseDetails.syncPurchasesDetail();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to sync product inventory");
@@ -54,12 +57,15 @@ const scheduleCronstyle = () => {
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update lisings");
-		syncAllListings.syncListings();
 		syncProducts.syncProducts();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
+		logger.info("start to update lisings");
+		syncAllListings.syncListings();
+	});
+	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product stocks");
-		Product.updateAllStock();
+		Product.updateAll();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product pm");

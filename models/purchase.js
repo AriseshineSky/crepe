@@ -87,7 +87,6 @@ let PurchaseSchema = new Schema({
 	skuSpecies: { type: String },
 	transferWarehouseName: { type: String },
 	creator: { type: String },
-	product: { type: String },
 	actualAmount: { type: String },
 	updateTime: { type: String },
 	appliedAmount: { type: String },

@@ -5,7 +5,10 @@ var Schema = mongoose.Schema;
 var ProductSchema = new Schema({
 	pm: { type: Schema.Types.ObjectId, ref: "User" },
 	asin: { type: String },
-	countries: { type: [String], default: ["US", "CA"] },
+	countries: {
+		type: [String],
+		default: ["US", "CA", "MX", "UK", "IT", "DE", "FR", "SP", "JP", "AU"],
+	},
 	shipmentTypes: { type: [String], default: ["airExpress", "seaExpress"] },
 	cycle: { type: Number, default: 20 },
 	gSku: { type: String },
@@ -14,8 +17,9 @@ var ProductSchema = new Schema({
 	avgSales: { type: Number },
 	ps: { type: Number, default: 0 },
 	stock: { type: Number, default: 0 },
-	fbaInventory: { type: Number },
-	plwhs: { type: Number, default: 0 },
+	yisucangInventory: { type: Number, default: 0 },
+	fbaInventory: { type: Number, default: 0 },
+	plwhsInventory: { type: Number, default: 0 },
 	purchase: { type: Number, default: 0 },
 	minInventory: { type: Number, default: 7 },
 	orderQuantity: { type: Number },
@@ -54,7 +58,6 @@ var ProductSchema = new Schema({
 			quantity: { type: Number, default: 0 },
 			deliveryDue: { type: Date },
 			created: { type: Date },
-			shipped: { type: Boolean },
 			inboundShippeds: [
 				{
 					orderId: { type: String },
@@ -70,8 +73,6 @@ var ProductSchema = new Schema({
 					},
 				},
 			],
-			deleted: { type: Boolean, default: false },
-			deletedAt: { type: Date },
 		},
 	],
 	peak: {
@@ -79,9 +80,7 @@ var ProductSchema = new Schema({
 		end: { type: Date },
 		maxSales: { type: Number },
 	},
-	airDelivery: { type: Boolean, default: false },
 	discontinue: { type: Boolean, default: false },
-	sea: { type: Boolean, default: false },
 	plwhsId: { type: Number, default: 0 },
 	yisucangId: { type: [String] },
 	plan: { type: String },

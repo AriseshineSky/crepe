@@ -1,6 +1,6 @@
 const models = require("../models");
 const Product = models.Product;
-const User = require("./user");
+const DeliveryUpdator = require("./delivery_updator");
 const moment = require("moment");
 const GAP = 6;
 const getPlwhsByProduct = require("../lib/getPlwhsByProduct");
@@ -13,20 +13,14 @@ const logger = require("../common/logger");
 class ProductUpdator {
 	constructor(product) {
 		this.product = product;
-		this.undeliveredDeliveris = null;
-		this.unshippedPurchases = null;
 	}
 
 	async getUnshippedPurchases() {
-		if (!this.unshippedPurchases) {
-			Purchase.findUnshippedByProduct(this.product)
-		}
+		return await Purchase.findUnshippedByProduct(this.product);
 	}
 
 	async getUndeliveredDeliveris() {
-		if (!this.undeliveredDeliveris) {
-			Delivery.findUndeliveredByProduct(this.product)
-		}
+		return await Delivery.findUndeliveredByProduct(this.product);
 	}
 
 	static async updateAllSalesAndInventories() {
@@ -52,17 +46,20 @@ class ProductUpdator {
 			unshippedQty,
 			undeliveredQty,
 			salesPeriod,
-			orderDues
+			orderDues,
 		);
 		await this.product.save();
+
+		await this.updateUndeliveredDeliveris();
 	}
 
 	async getOrderDues() {
 		let orderDues = {};
-		const {salesPeriod, cycle, minInventory} = this.product
+		const { salesPeriod, cycle, minInventory } = this.product;
 		for (const type of this.product.shipmentTypes) {
 			const shipmentType = await ShipmentType.findOne({ name: type });
-			orderDues[type] = moment().add(salesPeriod - cycle - shipmentType.period - GAP - minInventory,
+			orderDues[type] = moment().add(
+				salesPeriod - cycle - shipmentType.period - GAP - minInventory,
 				"days",
 			);
 		}
@@ -79,9 +76,9 @@ class ProductUpdator {
 		if (this.product.ps === 0) {
 			return 1000000;
 		}
-		const { fbaInventory, yisucangInventory, plwhsInventory, unshippedQty, undeliveredQty, ps } = this.product;
-		const stock = fbaInventory + yisucangInventory + plwhsInventory + unshippedQty + undeliveredQty;
-		return	stock / ps,
+		// const { fbaInventory, yisucangInventory, plwhsInventory, unshippedQty, undeliveredQty, ps } = this.product;
+		// const stock = fbaInventory + yisucangInventory + plwhsInventory + unshippedQty + undeliveredQty;
+		// return (stock / ps),
 	}
 
 	async getUndeliveredQty() {
@@ -89,6 +86,14 @@ class ProductUpdator {
 		return this.undeliveredDeliveris.reduce((total, delivery) => {
 			return total + delivery.quantity;
 		}, 0);
+	}
+
+	async updateUndeliveredDeliveris() {
+		let deliveries = await this.getUndeliveredDeliveris();
+		for (let delivery of deliveries) {
+			const deliveryUpdator = new DeliveryUpdator(delivery);
+			deliveryUpdator.updateRemainingArrivalDays();
+		}
 	}
 
 	async updateSalesPeriod() {
@@ -169,4 +174,3 @@ class ProductUpdator {
 }
 
 module.exports = ProductUpdator;
-
