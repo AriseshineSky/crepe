@@ -1,7 +1,7 @@
-var mongoose = require("mongoose");
-var BaseModel = require("./base_model");
-var Schema = mongoose.Schema;
-var DeliverySchema = new Schema({
+const mongoose = require("mongoose");
+const BaseModel = require("./base_model");
+const Schema = mongoose.Schema;
+const DeliverySchema = new Schema({
 	id: {
 		type: String,
 		required: true,
@@ -71,12 +71,13 @@ var DeliverySchema = new Schema({
 	diffQuantity: { type: String },
 	supplierCode: { type: String },
 	expectArrivalDate: { type: Date },
+	remainingArrivalDays: { type: Number },
 	expectShipmentDate: { type: Date },
 });
 
 DeliverySchema.plugin(BaseModel);
 DeliverySchema.pre("save", function (next) {
-	var now = new Date();
+	const now = new Date();
 	this.updateAt = now;
 	next();
 });

@@ -3,17 +3,144 @@ const Product = models.Product;
 const User = require("./user");
 const mongoose = require("mongoose");
 const getPm = require("../api/getPM");
-let moment = require("moment");
+const moment = require("moment");
 const GAP = 6;
-let getFbaInventoryByASIN = require("../lib/getFbaInventoryByASIN");
-let getPlwhsByProduct = require("../lib/getPlwhsByProduct");
-let Freight = require("./freight");
-const ProductUpdator = require("./product_updator");
-let Listing = require("./listing");
-let Yisucang = require("./yisucang");
-let logger = require("../common/logger");
+const getFbaInventoryByASIN = require("../lib/getFbaInventoryByASIN");
+const getPlwhsByProduct = require("../lib/getPlwhsByProduct");
+const Freight = require("./freight");
+const Listing = require("./listing");
+const Yisucang = require("./yisucang");
+const logger = require("../common/logger");
 const mysql = require("mysql2");
 const { Delivery } = require(".");
+
+class ProductUpdator {
+	constructor(product) {
+		this.product = product;
+		this.undeliveredDeliveris = null;
+		this.unshippedPurchases = null;
+	}
+
+	async getUnshippedPurchases() {
+		if (!this.unshippedPurchases) {
+		}
+	}
+
+	async getUndeliveredDeliveris() {
+		if (!this.undeliveredDeliveris) {
+		}
+	}
+
+	static async updateAllSalesAndInventories() {
+		let products = await Product.find();
+		for (let product of products) {
+			const updator = new ProductUpdator(product);
+			await updator.updateSalesAndInventory();
+		}
+	}
+
+	async updateAll() {
+		const { fbaInventory, sales } = await this.getFbaInventoryAndSalesV3();
+		const { yisucangInventory, plwhsInventory } = await prepareWarehouseInvetories();
+		const unshippedQty = await this.getUnshippedQty();
+		const undeliveredQty = await this.getUndeliveredQty();
+		await this.updatePurchase();
+		this.product.set(
+			fbaInventory,
+			sales,
+			yisucangInventory,
+			plwhsInventory,
+			unshippedQty,
+			undeliveredQty,
+		);
+		await this.product.save();
+	}
+
+	async getUndeliveredQty() {
+		await this.getUndeliveredDeliveris();
+		return this.undeliveredDeliveris.reduce((total, delivery) => {
+			return total + delivery.quantity;
+		}, 0);
+	}
+
+	async updateUndeliveredQty() {
+		const undeliveredQty = await this.getUndeliveredQty();
+		this.product.set({ undeliveredQty });
+		await this.product.save();
+	}
+
+	async getUnshippedQty() {
+		await this.getUnshippedPurchases();
+		return (unshippedQty = this.unshippedPurchases.reduce((total, purchase) => {
+			return total + purchase.quantity;
+		}, 0));
+	}
+
+	async updateUnshippedQty() {
+		const unshippedQty = await this.getUnshippedQty();
+		this.product.set({ unshippedQty });
+		await this.product.save();
+	}
+
+	async updateSalesAndFbaInventory() {
+		const { fbaInventory, sales } = await this.getFbaInventoryAndSalesV3();
+		this.product.set({ fbaInventory, sales });
+		await this.product.save();
+	}
+
+	async getFbaInventoryAndSalesV3() {
+		let fbaInventory = 0;
+		let sales = 0;
+
+		const listings = await Listing.findByProduct(this.product);
+		for (const listing of listings) {
+			fbaInventory =
+				fbaInventory +
+				listing.availableQuantity +
+				listing.reservedFCTransfer +
+				listing.inboundShipped +
+				listing.reservedFCProcessing;
+
+			sales = sales + listing.ps;
+		}
+
+		return {
+			fbaInventory,
+			sales,
+		};
+	}
+
+	async updateAllPurchase(productId) {
+		await prepareStock(product);
+		console.log(`asin: ${product.asin}, yisucang: ${product.stock}`);
+		await save(product);
+	}
+
+	async updateWarehouseInventories() {
+		const { yisucangInventory, plwhsInventory } = await prepareWarehouseInvetories();
+		this.product.set({ yisucangInventory, plwhsInventory });
+		await this.product.save();
+	}
+
+	async prepareWarehouseInvetories() {
+		const yisucangInventory = await getYisucangInventory();
+		const plwhsInventory = await getPlwhsByProduct();
+		return { yisucangInventory, plwhsInventory };
+	}
+
+	async getYisucangInventory() {
+		let inventory = 0;
+		for (const yisucangId of this.product.yisucangIds) {
+			const yisucang = await Yisucang.findYisucangById(yisucangId);
+			if (yisucang) {
+				inventory += yisucang.stock;
+			}
+		}
+		return inventory;
+	}
+}
+
+module.exports = ProductUpdator;
 
 async function getInboundShippedCount(asin) {
 	let shipped = 0;
@@ -50,22 +177,6 @@ async function updateProductSaStocklesAndInventories(productId) {
 	const { yisucangdStock, plwhsStock } = await prepareStock(product);
 	product.set({ yisucangdStock, plwhsStock });
 	await product.save();
-}
-
-async function updateStock(productId) {
-	let product = await Product.findById(productId);
-	const { yisucangdStock, plwhsStock } = await prepareStock(product);
-	product.set({ yisucangdStock, plwhsStock });
-	await product.save();
-}
-
-async function updateAllStock() {
-	const products = await Product.find();
-	for (let product of products) {
-		const { yisucangdStock, plwhsStock } = await prepareStock(product);
-		product.set({ yisucangdStock, plwhsStock });
-		await product.save();
-	}
 }
 
 async function getFreight(product) {
@@ -489,16 +600,6 @@ async function getStockByProductV2(product) {
 	return stock;
 }
 
-exports.getStockByProductV2 = getStockByProductV2;
-
-async function prepareStock(product) {
-	const yisucangdStock = await getStockByProductV2(product);
-	const plwhsStock = await getPlwhsByProduct(product);
-
-	return { yisucangdStock, plwhsStock };
-}
-exports.prepareStock = prepareStock;
-
 async function findBySales(sales) {
 	return await Product.find({ ps: { $gte: sales }, discontinue: false }).populate("pm");
 }
@@ -552,31 +653,6 @@ async function prepareFbaInventoryAndSalesV2(asin, listings) {
 	return {
 		inventory: inventory,
 		sales: Math.ceil(sales),
-	};
-}
-
-async function prepareFbaInventoryAndSalesV3(product, listings) {
-	let fbaInventory = 0;
-	let sales = 0;
-
-	if (!listings) {
-		listings = await Listing.findByProduct(product);
-	}
-
-	for (const listing of listings) {
-		fbaInventory =
-			inventory +
-			listing.availableQuantity +
-			listing.reservedFCTransfer +
-			listing.inboundShipped +
-			listing.reservedFCProcessing;
-
-		sales = sales + listing.ps;
-	}
-
-	return {
-		fbaInventory,
-		sales,
 	};
 }
 
@@ -707,12 +783,12 @@ async function getTotalInventory(product) {}
 
 async function getPlanV3(productId, producingId) {
 	let product = await Product.findById(productId).populate("deliveries").exec();
-	const updator = ProductUpdator(product);
-	await updator.updateAll();
-
+	await updateStock(productId);
+	const { fbaInventory, sales } = await prepareFbaInventoryAndSalesV3(product);
+	let totalInventory = fbaInventorySales.inventory + stock;
 	await updateRemainingArrivalDays(product.deliveries);
+	await updateSalesAndInventory(productId);
 	await addCurrentInventoryToInbounds(totalInventory, inbounds);
-
 	const minTotalSalesPeriod = totalInventory / product.maxAvgSales;
 	const maxTotalSalesPeriod = totalInventory / product.ps;
 
@@ -907,7 +983,13 @@ async function findFreightByType(type) {
 	return freights.find((freight) => freight.type === type);
 }
 async function getOrderDue(product, totalInventory, sales) {
-	if (product.inTransitShipments) {
+	let freightType = ["airExpress", "seaExpress", "sea"];
+	if (product.airDelivery) {
+		freightType = ["airExpress", "airDelivery", "seaExpress", "sea"];
+	}
+	let quantity = totalInventory;
+
+	if (product.inboundShippeds) {
 		for (let inbound of product.inboundShippeds) {
 			let total = totalInventory;
 			for (let fasterInbound of product.inboundShippeds) {

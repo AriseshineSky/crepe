@@ -15,6 +15,48 @@ let logger = require("../common/logger");
 const mysql = require("mysql2");
 const { Delivery } = require(".");
 
+class ProductCalculator {
+	constructor(product) {
+		this.product = product;
+		this.undeliveredDeliveris = null;
+		this.unshippedPurchases = null;
+	}
+
+	async getUnshippedPurchases() {
+		if (!this.unshippedPurchases) {
+		}
+	}
+
+	async getUndeliveredDeliveris() {
+		if (!this.undeliveredDeliveris) {
+		}
+	}
+
+	async getOrderDue() {
+		await this.getUnshippedPurchases();
+		await this.getUndeliveredDeliveris();
+
+		const undeliveredQty = this.undeliveredDeliveris.reduce((total, delivery) => {
+			return total + delivery.quantity;
+		}, 0);
+		const unshippedQty = this.unshippedPurchases.reduce((total, purchase) => {
+			return total + purchase.quantity;
+		}, 0);
+
+		let orderDues = {};
+		for (let type of freightType) {
+			let freight = await findFreightByType(type);
+			orderDues[type] = moment().add(
+				quantity / sales.minAvgSales - product.cycle - freight.period - GAP - product.minInventory,
+				"days",
+			);
+		}
+		return orderDues;
+	}
+}
+
+module.exports = ProductCalculator;
+
 async function getInboundShippedCount(asin) {
 	let shipped = 0;
 	let listings = await Listing.findLisingsByAsin(asin);

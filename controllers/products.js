@@ -8,14 +8,7 @@ exports.updateAllStock = async function (req, res, next) {
 	res.render("index", { title: "regist" });
 };
 
-exports.updateAllStockByAsin = async function (req, res, next) {
-	let productId = req.params.productId;
-	Product.updateAllStock(productId);
-	Product.updateProductSalesAndInventories(productId);
-	res.render("index", { title: "regist" });
-};
-
-exports.syncAllProductFreights = async function (req, res, next) {
+exports.syncAllFreights = async function (req, res, next) {
 	Product.syncAllProductFreights(2);
 	res.render("index", { title: "regist" });
 };
@@ -33,8 +26,8 @@ exports.show = async function (req, res, next) {
 	}
 };
 
-exports.updateAllProuctSalesAndInventories = async function (req, res, next) {
-	Product.updateAllProductSalesAndInventories();
+exports.updateAllSalesAndInventories = async function (req, res, next) {
+	Product.updateAllSalesAndInventories();
 	res.render("index", { title: "regist" });
 };
 

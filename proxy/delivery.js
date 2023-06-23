@@ -77,8 +77,13 @@ async function createOrUpdate(delivery) {
 	}
 }
 
+async function findByProductId(productId) {
+	return Delivery.find({ product: productId }).populate("product").exec();
+}
+
 module.exports = {
 	all,
 	createOrUpdate,
 	updateDeliveryPurchaseId,
+	findByProductId,
 };
