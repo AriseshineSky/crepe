@@ -1,4 +1,5 @@
 var base = require("./base");
+const helper = require("../../lib/util/helper");
 var FormData = require("form-data");
 const YISUCANG_ID_KEYS = [
 	{
@@ -92,10 +93,10 @@ function inventories() {
 			if (res.Data) {
 				inventories = inventories.concat(res.Data);
 			}
+			helper.wait(200);
 		}
 		resolve(inventories);
 	});
 }
 
 exports.inventories = inventories;
-

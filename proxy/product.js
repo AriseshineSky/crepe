@@ -663,6 +663,7 @@ async function getPlanV3(productId, producingId) {
 	let orderDues = await getOrderDue(product, totalInventory, sales);
 	logger.debug("orderDues", orderDues);
 	let quantity = await getQuantity(sales, totalInventory, product);
+
 	let plan = { plans: [] };
 	if (producingId) {
 		for (let producing of product.producings) {

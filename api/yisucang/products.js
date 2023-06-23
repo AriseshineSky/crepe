@@ -1,5 +1,6 @@
-var base = require("./base");
-var FormData = require("form-data");
+const base = require("./base");
+const FormData = require("form-data");
+const helper = require("../../lib/util/helper");
 
 const YISUCANG_ID_KEYS = [
 	{
@@ -99,6 +100,7 @@ async function products() {
 		if (res.Data) {
 			products = products.concat(res.Data);
 		}
+		helper.wait(200);
 	}
 	return products;
 }

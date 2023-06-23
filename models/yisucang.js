@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var YisucangSchema = new Schema({
 	yisucangId: { type: String },
 	upc: { type: String },
-	stock: { type: Number, default: 0 },
+	inventory: { type: Number, default: 0 },
 	createAt: { type: Date, default: Date.now },
 	updateAt: { type: Date, default: Date.now },
 	deletedAt: { type: Date },

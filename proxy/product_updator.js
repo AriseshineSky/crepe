@@ -38,6 +38,8 @@ class ProductUpdator {
 		const undeliveredQty = await this.getUndeliveredQty();
 		const salesPeriod = await this.getSalesPeriod();
 		const orderDues = await this.getOrderDues();
+		const producings = await this.getProducings();
+		const shipments = await this.getShipments();
 		this.product.set(
 			fbaInventory,
 			sales,
@@ -47,10 +49,54 @@ class ProductUpdator {
 			undeliveredQty,
 			salesPeriod,
 			orderDues,
+			producings,
+			shipments,
 		);
 		await this.product.save();
 
 		await this.updateUndeliveredDeliveris();
+	}
+
+	async getShipments() {
+		const undeliveredDeliveris = await Delivery.findUndeliveredByProduct(this.product);
+		let shipments = [];
+		for (const delivery of undeliveredDeliveris) {
+			const {
+				code,
+				expectArrivalDate,
+				createdAt,
+				memo,
+				box,
+				quantity,
+				confirmShipmentDate,
+				tracking,
+				remainingArrivalDays,
+			} = delivery;
+			const shipment = {
+				code,
+				expectArrivalDate,
+				createdAt,
+				memo,
+				box,
+				quantity,
+				confirmShipmentDate,
+				tracking,
+				remainingArrivalDays,
+			};
+			shipments.append(shipment);
+		}
+		return shipments;
+	}
+
+	async getProducings() {
+		const unshippedPurchases = await Purchase.findUnshippedByProduct(this.product);
+		let producings = [];
+		for (const purchase of unshippedPurchases) {
+			const { unIndoundQuantity, code, expectDeliveryDate, createdAt } = purchase;
+			const producing = { unIndoundQuantity, code, expectDeliveryDate, createdAt };
+			producings.append(producing);
+		}
+		return producings;
 	}
 
 	async getOrderDues() {
@@ -92,7 +138,7 @@ class ProductUpdator {
 		let deliveries = await this.getUndeliveredDeliveris();
 		for (let delivery of deliveries) {
 			const deliveryUpdator = new DeliveryUpdator(delivery);
-			deliveryUpdator.updateRemainingArrivalDays();
+			await deliveryUpdator.updateRemainingArrivalDays();
 		}
 	}
 
