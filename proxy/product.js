@@ -906,7 +906,7 @@ async function findFreightByType(type) {
 	let freights = await Freight.freightTypes();
 	return freights.find((freight) => freight.type === type);
 }
-async function getOrderDue(product, totalInventory, sales) {
+async function getOrderDue() {
 	if (product.inTransitShipments) {
 		for (let inbound of product.inboundShippeds) {
 			let total = totalInventory;

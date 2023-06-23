@@ -80,10 +80,14 @@ async function createOrUpdate(delivery) {
 async function findByProductId(productId) {
 	return Delivery.find({ product: productId }).populate("product").exec();
 }
+async function findUndeliveredByProduct(product) {
+	return Delivery.find({ product: product.id });
+}
 
 module.exports = {
 	all,
 	createOrUpdate,
 	updateDeliveryPurchaseId,
 	findByProductId,
+	findUndeliveredByProduct,
 };

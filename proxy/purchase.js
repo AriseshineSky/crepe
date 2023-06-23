@@ -1,6 +1,5 @@
-var models = require("../models");
-var Purchase = models.Purchase;
-
+const models = require("../models");
+const Purchase = models.Purchase;
 async function formatPurchase(purchase) {
 	return {
 		orderId: `OR${purchase.id}`,
@@ -8,6 +7,11 @@ async function formatPurchase(purchase) {
 		delivery: purchase.us_arrival_date,
 		created: purchase.created,
 	};
+}
+
+async function findUnshippedByProduct(product) {
+	// TODO
+	await Purchase.find({ productId: product._id });
 }
 
 async function getPurchasesByProductId(productId) {
@@ -38,8 +42,10 @@ async function createOrUpdate(purchase) {
 }
 
 async function findOrUpdate() {}
+
 module.exports = {
 	createOrUpdate,
 	findOrUpdate,
 	all,
+	findUnshippedByProduct,
 };
