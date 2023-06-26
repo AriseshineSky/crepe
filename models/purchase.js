@@ -159,6 +159,7 @@ let PurchaseSchema = new Schema({
 	productImageUrl: { type: String },
 	arrivalWarehouseId: { type: String },
 	expectDeliveryDate: { type: String },
+	expectDeliveryDays: { type: Number, default: 0 },
 	inboundQuantity: { type: String },
 	totalExcludeTaxAmount: { type: String },
 	totalAmount: { type: String },

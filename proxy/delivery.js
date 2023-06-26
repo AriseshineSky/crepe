@@ -81,6 +81,7 @@ async function findByProductId(productId) {
 	return Delivery.find({ product: productId }).populate("product").exec();
 }
 async function findUndeliveredByProduct(product) {
+	// TODO;
 	return Delivery.find({ product: product.id });
 }
 

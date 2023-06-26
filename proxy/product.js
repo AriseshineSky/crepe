@@ -16,6 +16,25 @@ let logger = require("../common/logger");
 const mysql = require("mysql2");
 const { Delivery } = require(".");
 
+const ShipmentTypesInfo = {
+	airExpress: {
+		price: 55,
+		period: 8,
+	},
+	airDelivery: {
+		price: 55,
+		period: 8,
+	},
+	seaExpress: {
+		price: 55,
+		period: 8,
+	},
+	sea: {
+		price: 55,
+		period: 8,
+	},
+};
+
 async function getInboundShippedCount(asin) {
 	let shipped = 0;
 	let listings = await Listing.findLisingsByAsin(asin);
@@ -343,23 +362,11 @@ async function convertInboundsToSortedQueue(inbounds) {
 	return sortedInbounds;
 }
 
-async function addCurrentInventoryToInbounds(totalInventory, inboundShippeds) {
-	inboundShippeds.push({
+function addCurrentInventoryToInbounds(totalInventory, inbounds) {
+	inbounds.push({
 		quantity: totalInventory,
 		period: 0,
 	});
-}
-
-async function addShipmentToInbounds(shipment, inbounds) {
-	let newInbounds = [];
-	if (inbounds) {
-		newInbounds = JSON.parse(JSON.stringify(inbounds));
-	}
-	newInbounds.push({
-		quantity: shipment.quantity,
-		period: shipment.period,
-	});
-	return newInbounds;
 }
 
 async function addFreightPlanToInbounds(freightPlan, inbounds, product) {
@@ -388,15 +395,18 @@ async function getProducingPeriod(product, producing) {
 	return days;
 }
 async function addProducingFreightPlanToInbounds(freightPlan, inbounds, product, producing) {
-	let newInbounds = JSON.parse(JSON.stringify(inbounds));
-	let days = await getProducingPeriod(product, producing);
+	let newInbounds = helper.deepClone(inbounds);
 	for (let type in freightPlan) {
-		let freight = await findFreightByType(type);
+		let freight = ShipmentTypesInfo[type];
 		let shipment = {
-			quantity: await totalUnits(freightPlan[type].boxes, product.unitsPerBox),
-			period: days + freight.period + GAP,
+			quantity: freightPlan[type].boxes * product.unitsPerBox,
+			period: producing.expectDeliveryDays + freight.period + GAP,
 		};
-		newInbounds = await addShipmentToInbounds(shipment, newInbounds);
+
+		newInbounds.push({
+			quantity: shipment.quantity,
+			period: shipment.period,
+		});
 	}
 	return newInbounds;
 }
@@ -649,27 +659,29 @@ async function updateAll() {
 		await productUpdator.updateAll();
 	}
 }
-async function getPlanV3(productId, producingId) {
+
+async function getPlanV3(productId, purchaseCode) {
 	let product = await Product.findById(productId).populate("deliveries").exec();
 	const productUpdator = ProductUpdator(product);
 	await productUpdator.updateAll();
 
-	await updateRemainingArrivalDays(product.deliveries);
-	await addCurrentInventoryToInbounds(totalInventory, inbounds);
+	const { totalInventory, shipments, maxAvgSales, ps } = product;
 
-	const minTotalSalesPeriod = totalInventory / product.maxAvgSales;
-	const maxTotalSalesPeriod = totalInventory / product.ps;
+	let inbounds = helper.deepClone(shipments);
 
-	let orderDues = await getOrderDue(product, totalInventory, sales);
+	addCurrentInventoryToInbounds(totalInventory, inbounds);
+
+	const minTotalSalesPeriod = totalInventory / maxAvgSales;
+	const maxTotalSalesPeriod = totalInventory / ps;
+
+	let orderDues = await getOrderDue(product);
 	logger.debug("orderDues", orderDues);
-	let quantity = await getQuantity(sales, totalInventory, product);
 
 	let plan = { plans: [] };
-	if (producingId) {
+	if (purchaseCode) {
 		for (let producing of product.producings) {
-			if (producing._id.toString() === producingId) {
-				logger.debug(producing);
-				let producingPlan = await getProducingFreightPlan(producing, product, sales, inbounds);
+			if (producing.code === purchaseCode) {
+				let producingPlan = await getProducingFreightPlan(producing, product, inbounds);
 				producingPlan.deliveryDue = producing.deliveryDue;
 				producingPlan.created = producing.created;
 				producingPlan.deliveryPeriod = await getProducingPeriod(product, producing);
@@ -743,35 +755,27 @@ async function getPlanV3(productId, producingId) {
 }
 
 async function convertProducingQtyIntoBox(producing, product) {
-	if (product.unitsPerBox === 0) {
-		product.unitsPerBox = 30;
-	}
-	let quantity = {
+	return {
+		quantity: quantity,
 		boxes: Math.ceil(producing.quantity / product.unitsPerBox),
 	};
-	return quantity;
 }
 
-async function bestProducingsFreightPlanForAllDelivery(
-	producing,
-	product,
-	sales,
-	freightType,
-	inbounds,
-) {
+async function bestProducingsFreightPlanForAllDelivery(producing, product, inbounds) {
 	let quantity = await convertProducingQtyIntoBox(producing, product);
-	let freight = await findFreightByType("airExpress");
+
+	const shipmentTypes = helper.deepClone(product.shipmentTypes);
 
 	let plan = {
-		airExpress: {
+		[shipmentTypes[0]]: {
 			boxes: quantity.boxes,
 		},
 		gap: 100000,
 		minInventory: -100,
-		totalAmount: quantity.boxes * freight.price * product.box.weight,
+		totalAmount: quantity.boxes * ShipmentTypesInfo[shipmentTypes[0]].price * product.box.weight,
 	};
-	for (let i = 1; i < freightType.length; i++) {
-		plan[freightType[i]] = { boxes: 0 };
+	for (let i = 1; i < shipmentTypes.length; i++) {
+		plan[shipmentTypes[i]] = { boxes: 0 };
 	}
 
 	let freightPlan = {};
@@ -785,10 +789,9 @@ async function bestProducingsFreightPlanForAllDelivery(
 		freightPlan,
 		quantity.boxes,
 		0,
-		freightType,
+		shipmentTypes,
 		inbounds,
 		product,
-		sales,
 		result,
 		producing,
 		step,
@@ -796,21 +799,8 @@ async function bestProducingsFreightPlanForAllDelivery(
 	return await formatPlan(result.plan, product.unitsPerBox);
 }
 
-async function getProducingFreightPlan(producing, product, sales, inbounds) {
-	let freightType = ["airExpress", "seaExpress"];
-	if (product.airDelivery) {
-		freightType = ["airExpress", "airDelivery", "seaExpress"];
-	}
-	if (product.sea) {
-		freightType.push("sea");
-	}
-	return await bestProducingsFreightPlanForAllDelivery(
-		producing,
-		product,
-		sales,
-		freightType,
-		inbounds,
-	);
+async function getProducingFreightPlan(producing, product, inbounds) {
+	return await bestProducingsFreightPlanForAllDelivery(producing, product, inbounds);
 }
 
 async function prepareProducings(product, validProducings) {
@@ -851,70 +841,18 @@ async function findFreightByType(type) {
 	let freights = await Freight.freightTypes();
 	return freights.find((freight) => freight.type === type);
 }
-async function getOrderDue() {
-	if (product.inTransitShipments) {
-		for (let inbound of product.inboundShippeds) {
-			let total = totalInventory;
-			for (let fasterInbound of product.inboundShippeds) {
-				if (moment(fasterInbound.deliveryDue).isBefore(inbound.deliveryDue)) {
-					total += inbound.quantity;
-				}
-			}
-			let delivery = moment(inbound.deliveryDue);
-			if (total > sales.minAvgSales * (delivery.diff(moment(), "days") + 1)) {
-				quantity += Number(inbound.quantity);
-			}
-		}
-	}
-
-	let purchase = await getProducingsQuantity(product.producings);
-	quantity += purchase;
-
-	await updateProduct(product, { purchase: purchase });
-
+async function getOrderDue(product) {
 	let orderDues = {};
-	for (let type of freightType) {
+	for (let type of product.shipmentTypes) {
 		let freight = await findFreightByType(type);
 		orderDues[type] = moment().add(
-			quantity / sales.minAvgSales - product.cycle - freight.period - GAP - product.minInventory,
+			quantity / product.ps - product.cycle - freight.period - GAP - product.minInventory,
 			"days",
 		);
 	}
 	return orderDues;
 }
 
-async function getQuantity(sales, totalInventory, product) {
-	let total = totalInventory;
-	if (product.inboundShippeds) {
-		for (let inboundShipped of product.inboundShippeds) {
-			let delivery = moment(inboundShipped.deliveryDue);
-			if (delivery.diff(moment(), "days") + 1 <= 90) {
-				total += Number(inboundShipped.quantity);
-			}
-		}
-	}
-	if (product.producings) {
-		for (let producing of product.producings) {
-			total += Number(producing.quantity);
-		}
-	}
-
-	if (product.unitsPerBox === 0) {
-		product.unitsPerBox = 30;
-	}
-	let boxes = Math.ceil((sales.minAvgSales * 90 - total) / product.unitsPerBox);
-
-	if (boxes > 0) {
-		let quantity = boxes * product.unitsPerBox;
-		return { boxes: boxes, quantity: quantity };
-	} else {
-		let days = total / sales.maxAvgSales;
-		return { boxes: boxes, days: days };
-	}
-}
-async function totalUnits(boxCount, unitsPerBox) {
-	return boxCount * unitsPerBox;
-}
 async function calculatePlanAmounts(freightPlan, product) {
 	let amount = 0;
 
@@ -995,41 +933,37 @@ async function calculatePlan(freightPlan, freightType, inbounds, product, sales,
 
 async function calculateProducingPlan(
 	freightPlan,
-	freightType,
+	shipmentTypes,
 	inbounds,
 	product,
-	sales,
 	result,
 	producing,
 ) {
 	let newPlan = await getNewProducingFreightPlan(
 		freightPlan,
-		freightType,
+		shipmentTypes,
 		product,
-		sales,
 		producing,
 		inbounds,
 	);
 
 	if (newPlan.minInventory >= product.minInventory && newPlan.gap == 0) {
-		result.plan = JSON.parse(JSON.stringify(newPlan));
+		result.plan = helper.deepClone(newPlan);
 		result.status = "done";
 		return;
 	} else {
 		if (result.plan.gap > 0) {
 			if (newPlan.gap < result.plan.gap) {
-				result.plan = JSON.parse(JSON.stringify(newPlan));
+				result.plan = helper.deepClone(newPlan);
 			} else if (newPlan.gap === result.plan.gap) {
 				if (result.plan.minInventory < product.minInventory) {
 					if (newPlan.minInventory > result.plan.minInventory) {
-						result.plan = JSON.parse(JSON.stringify(newPlan));
+						result.plan = helper.deepClone(newPlan);
 					}
 				}
 			}
 		}
 	}
-	logger.debug("result", result);
-	logger.debug("newPlan", newPlan);
 	return result;
 }
 
@@ -1089,10 +1023,9 @@ async function getFreightPlanByProducing(
 	freightPlan,
 	left,
 	index,
-	freightType,
+	shipmentTypes,
 	inbounds,
 	product,
-	sales,
 	result,
 	producing,
 	step,
@@ -1100,18 +1033,19 @@ async function getFreightPlanByProducing(
 	if (result.status === "done") {
 		return null;
 	}
-	if (index === freightType.length - 1) {
-		freightPlan[freightType[index]] = { boxes: left };
-		let freightPlanDup = JSON.parse(JSON.stringify(freightPlan));
+	if (index === shipmentTypes.length - 1) {
+		freightPlan[shipmentTypes[index]] = { boxes: left };
+		let freightPlanDup = helper.deepClone(freightPlan);
+
 		await calculateProducingPlan(
 			freightPlanDup,
-			freightType,
+			shipmentTypes,
 			inbounds,
 			product,
-			sales,
 			result,
 			producing,
 		);
+
 		if (result.status === "done") {
 			return null;
 		}
@@ -1123,10 +1057,9 @@ async function getFreightPlanByProducing(
 				freightPlan,
 				left - i,
 				index + 1,
-				freightType,
+				shipmentTypes,
 				inbounds,
 				product,
-				sales,
 				result,
 				producing,
 				step,
@@ -1198,9 +1131,8 @@ async function getNewFreightPlan(freightPlan, freightType, inbounds, product, sa
 
 async function getNewProducingFreightPlan(
 	freightPlan,
-	freightType,
+	shipmentTypes,
 	product,
-	sales,
 	producing,
 	inbounds,
 ) {
@@ -1210,6 +1142,7 @@ async function getNewProducingFreightPlan(
 		product,
 		producing,
 	);
+
 	newInbounds = await convertInboundsToSortedQueue(newInbounds);
 	let inboundQueue = await calculateInboundQueue(newInbounds, sales);
 	let status = await recalculateInboundQueue(inboundQueue, sales);

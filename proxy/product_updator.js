@@ -1,6 +1,7 @@
 const models = require("../models");
 const Product = models.Product;
 const DeliveryUpdator = require("./delivery_updator");
+const PurchaseUpdator = require("./purchase_updator");
 const moment = require("moment");
 const GAP = 6;
 const getPlwhsByProduct = require("../lib/getPlwhsByProduct");
@@ -32,6 +33,8 @@ class ProductUpdator {
 	}
 
 	async updateAll() {
+		await this.updateUndeliveredDeliveris();
+		await this.updateUnshippedPurchases();
 		const { fbaInventory, sales } = await this.getFbaInventoryAndSalesV3();
 		const { yisucangInventory, plwhsInventory } = await prepareWarehouseInvetories();
 		const unshippedQty = await this.getUnshippedQty();
@@ -40,8 +43,11 @@ class ProductUpdator {
 		const orderDues = await this.getOrderDues();
 		const producings = await this.getProducings();
 		const shipments = await this.getShipments();
+		const totalInventory = await this.getTotalInventory();
+		const quantityToPurchase = await this.getQuantityToPurchase();
 		this.product.set(
 			fbaInventory,
+			totalInventory,
 			sales,
 			yisucangInventory,
 			plwhsInventory,
@@ -51,10 +57,9 @@ class ProductUpdator {
 			orderDues,
 			producings,
 			shipments,
+			quantityToPurchase,
 		);
 		await this.product.save();
-
-		await this.updateUndeliveredDeliveris();
 	}
 
 	async getShipments() {
@@ -86,6 +91,27 @@ class ProductUpdator {
 			shipments.append(shipment);
 		}
 		return shipments;
+	}
+
+	async getQuantityToPurchase() {
+		if (this.product.unitsPerBox === 0) {
+			this.product.unitsPerBox = 30;
+		}
+
+		const boxes = Math.ceil(
+			(this.product.maxAvgSales * 90 - this.product.totalInventory) / this.product.unitsPerBox,
+		);
+
+		if (boxes > 0) {
+			const quantity = boxes * this.product.unitsPerBox;
+			return { boxes: boxes, quantity: quantity };
+		} else {
+			return { boxes: 0, quantity: 0 };
+		}
+	}
+
+	async getTotalInventory() {
+		return this.product.yisucangInventory + this.product.plwhsInventory + this.product.fbaInventory;
 	}
 
 	async getProducings() {
@@ -132,6 +158,14 @@ class ProductUpdator {
 		return this.undeliveredDeliveris.reduce((total, delivery) => {
 			return total + delivery.quantity;
 		}, 0);
+	}
+
+	async updateUnshippedPurchases() {
+		let purchases = await this.getUnshippedPurchases();
+		for (let purchase of purchases) {
+			const purchaseUpdator = new PurchaseUpdator(purchase);
+			await purchaseUpdator.updateRemainingDeliveryDays();
+		}
 	}
 
 	async updateUndeliveredDeliveris() {
