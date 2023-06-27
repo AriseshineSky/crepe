@@ -640,8 +640,30 @@ async function syncFreightTypes() {
 		}
 	}
 }
+const sortArrayByOrder = (array, order) => {
+	return array.sort((a, b) => {
+		const indexA = order.indexOf(a);
+		const indexB = order.indexOf(b);
+		return indexA - indexB;
+	});
+};
+
+// 示例用法
+const shipmentTypesOrder = ["airExpress", "airDelivery", "seaExpress", "sea"];
+
+const sortedArray = sortArrayByOrder(array, order);
+console.log(sortedArray);
+
+function sortByType(types) {
+	return types.sort((a, b) => {
+		return shipmentTypesOrder.indexOf(a) - shipmentTypesOrder.indexOf(b);
+	});
+}
 exports.TYPES = TYPES;
 exports.syncFreightTypes = syncFreightTypes;
 exports.freightTypes = freightTypes;
 exports.syncFreights = syncFreights;
 exports.getFreightsAndProductingsByProduct = getFreightsAndProductingsByProduct;
+module.exports = {
+	sortByType,
+};

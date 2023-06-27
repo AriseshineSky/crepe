@@ -5,6 +5,7 @@ const PurchaseUpdator = require("./purchase_updator");
 const moment = require("moment");
 const GAP = 6;
 const getPlwhsByProduct = require("../lib/getPlwhsByProduct");
+const ShipmentType = require("./shipment_type");
 const Listing = require("./listing");
 const Yisucang = require("./yisucang");
 const Purchase = require("./purchase");
@@ -32,6 +33,10 @@ class ProductUpdator {
 		}
 	}
 
+	getSortedShipmentTypes() {
+		return ShipmentType.sortByType(this.product.shipmentTypes);
+	}
+
 	async updateAll() {
 		await this.updateUndeliveredDeliveris();
 		await this.updateUnshippedPurchases();
@@ -45,7 +50,8 @@ class ProductUpdator {
 		const shipments = await this.getShipments();
 		const totalInventory = await this.getTotalInventory();
 		const quantityToPurchase = await this.getQuantityToPurchase();
-		this.product.set(
+		const shipmentTypes = await this.getSortedShipmentTypes();
+		const newProduct = {
 			fbaInventory,
 			totalInventory,
 			sales,
@@ -58,7 +64,10 @@ class ProductUpdator {
 			producings,
 			shipments,
 			quantityToPurchase,
-		);
+			shipmentTypes,
+		};
+
+		this.product.set(newProduct);
 		await this.product.save();
 	}
 
