@@ -1,14 +1,14 @@
-var sheetApi = require("./sheetApi");
-var larksuiteApi = require("../api/larksuite");
-var Purchase = require("./purchases");
-var Product = require("./product");
-var models = require("../models");
-var FreightType = models.Freight;
-var Freight = models.Freight;
+const sheetApi = require("./sheetApi");
+const larksuiteApi = require("../api/larksuite");
+const Purchase = require("./purchases");
+const Product = require("./product");
+const models = require("../models");
+const FreightType = models.Freight;
+const Freight = models.Freight;
 
-var moment = require("moment");
-var getStockByProduct = require("../lib/getStockByProduct");
-var logger = require("../common/logger");
+const moment = require("moment");
+const getStockByProduct = require("../lib/getStockByProduct");
+const logger = require("../common/logger");
 const HEADER = [
 	"pm",
 	"asin",
@@ -25,18 +25,18 @@ const HEADER = [
 const PRODUCT_ATTR = ["asin", "plwhsId", "yisucangId", "cycle", "maxAvgSales", "unitsPerBox"];
 const INBOUND_ATTR = ["deliveryDue", "quantity"];
 
-var syncFreights = async function () {
-	var freights = [];
-	// var rows = await larksuiteApi.listFreights();
-	var rows = await sheetApi.listFreights();
-	var header = rows.shift();
-	var shippedDateIndex = header.indexOf("出货日期");
-	var deliveryDueIndex = header.indexOf("预计到港时间");
-	var deliveryIndex = header.indexOf("状态");
-	var orderIndex = header.indexOf("系统订单");
-	var qtyIndex = header.indexOf("出货数量");
-	var boxIndex = header.indexOf("装箱信息");
-	var typeIndex = header.indexOf("PM要求");
+const syncshipmentTypes = async function () {
+	const shipmentTypes = [];
+	// const rows = await larksuiteApi.listshipmentTypes();
+	const rows = await sheetApi.listshipmentTypes();
+	const header = rows.shift();
+	const shippedDateIndex = header.indexOf("出货日期");
+	const deliveryDueIndex = header.indexOf("预计到港时间");
+	const deliveryIndex = header.indexOf("状态");
+	const orderIndex = header.indexOf("系统订单");
+	const qtyIndex = header.indexOf("出货数量");
+	const boxIndex = header.indexOf("装箱信息");
+	const typeIndex = header.indexOf("PM要求");
 
 	for (let row of rows) {
 		if (row[0] && row[1]) {
@@ -50,19 +50,22 @@ var syncFreights = async function () {
 				shippedDateIndex,
 				typeIndex,
 			);
-			freights.push(freight);
+			shipmentTypes.push(freight);
 		}
 	}
-	return freights;
+	return shipmentTypes;
 };
 
 async function getAllFreghts() {
-	const allFreights = await syncFreights();
-	allFreights.forEach(async (freight) => {
+	const allshipmentTypes = await syncshipmentTypes();
+	allshipmentTypes.forEach(async (freight) => {
 		await updateOrCreate(freight);
 	});
 }
 
+async function all() {
+	return await ShipmentType.find();
+}
 async function updateOrCreate(freight) {
 	let existFreight = await Freight.findOne({ id: freight.id });
 	if (existFreight) {
@@ -73,10 +76,10 @@ async function updateOrCreate(freight) {
 		await newFreight.save();
 	}
 }
-async function formatFreightsAndProductings(freightsAndProducings) {
-	var inboundShippeds = [];
-	var producings = [];
-	for (var freight of freightsAndProducings.freights) {
+async function formatshipmentTypesAndProductings(shipmentTypesAndProducings) {
+	const inboundShippeds = [];
+	const producings = [];
+	for (const freight of shipmentTypesAndProducings.shipmentTypes) {
 		inboundShippeds.push({
 			quantity: freight.qty,
 			orderId: freight.orderId,
@@ -86,7 +89,7 @@ async function formatFreightsAndProductings(freightsAndProducings) {
 			fba: freight.fba,
 		});
 	}
-	for (var producing of freightsAndProducings.producings) {
+	for (const producing of shipmentTypesAndProducings.producings) {
 		producings.push({
 			orderId: producing.orderId,
 			quantity: producing.qty,
@@ -106,31 +109,31 @@ function compare(type) {
 	};
 }
 
-async function sortFreightsByDelivery(freights) {
-	return freights.sort(compare("delivery"));
+async function sortshipmentTypesByDelivery(shipmentTypes) {
+	return shipmentTypes.sort(compare("delivery"));
 }
-var sumFreights = async function (freights) {
-	var sum = 0;
-	for (var freight of freights) {
+const sumshipmentTypes = async function (shipmentTypes) {
+	const sum = 0;
+	for (const freight of shipmentTypes) {
 		sum += Number(freight.qty);
 	}
 	return sum;
 };
 
-var checkFreights = async function (freights, pendingStorageNumber) {
-	freights = await sortFreightsByDelivery(freights);
+const checkshipmentTypes = async function (shipmentTypes, pendingStorageNumber) {
+	shipmentTypes = await sortshipmentTypesByDelivery(shipmentTypes);
 	while (
 		Number(pendingStorageNumber > 0) &&
-		(await sumFreights(freights)) > Number(pendingStorageNumber)
+		(await sumshipmentTypes(shipmentTypes)) > Number(pendingStorageNumber)
 	) {
-		freights.shift();
+		shipmentTypes.shift();
 	}
 };
 
 async function remvoeDuplicateYisucangInbounds(inbounds) {
 	return inbounds.filter((elem, index, self) => {
-		var count = 0;
-		for (var inbound of inbounds) {
+		const count = 0;
+		for (const inbound of inbounds) {
 			if (inbound.number === elem.number) {
 				count++;
 			}
@@ -141,18 +144,18 @@ async function remvoeDuplicateYisucangInbounds(inbounds) {
 
 exports.remvoeDuplicateYisucangInbounds = remvoeDuplicateYisucangInbounds;
 
-async function removeDeliveredFreights(freights, days, product) {
-	var freights = freights.filter((freight) => {
+async function removeDeliveredshipmentTypes(shipmentTypes, days, product) {
+	const shipmentTypes = shipmentTypes.filter((freight) => {
 		return moment(new Date()).diff(moment(freight.delivery), "days") < days;
 	});
 
 	const inboundShipped = await Product.getInboundShippedCount(product.asin);
-	while ((await sumFreights(freights)) > inboundShipped && freights.length > 0) {
-		if (await removeFreight(freights, true)) {
+	while ((await sumshipmentTypes(shipmentTypes)) > inboundShipped && shipmentTypes.length > 0) {
+		if (await removeFreight(shipmentTypes, true)) {
 			break;
 		}
 	}
-	return freights;
+	return shipmentTypes;
 }
 
 async function findYisucangInbounds(inbounds, freight) {
@@ -161,44 +164,44 @@ async function findYisucangInbounds(inbounds, freight) {
 	});
 }
 
-async function sortFreightsByDelivery(freights) {
-	return freights.sort(compare("delivery"));
+async function sortshipmentTypesByDelivery(shipmentTypes) {
+	return shipmentTypes.sort(compare("delivery"));
 }
-var countBoxes = async function (objects) {
-	var sum = 0;
-	for (var obj of objects) {
+const countBoxes = async function (objects) {
+	const sum = 0;
+	for (const obj of objects) {
 		sum += Number(obj.boxCount);
 	}
 	return sum;
 };
 
-async function removeFreight(freights, fba) {
-	var only = true;
-	for (var i = 0; i < freights.length; i++) {
+async function removeFreight(shipmentTypes, fba) {
+	const only = true;
+	for (const i = 0; i < shipmentTypes.length; i++) {
 		if (
-			freights[i].fba === fba &&
-			moment(freights[i].delivery).diff(moment(new Date()), "days") < 5
+			shipmentTypes[i].fba === fba &&
+			moment(shipmentTypes[i].delivery).diff(moment(new Date()), "days") < 5
 		) {
 			only = false;
-			freights.splice(i, 1);
+			shipmentTypes.splice(i, 1);
 			break;
 		}
 	}
 	return only;
 }
-async function checkFreightsV2(freights, inbounds, recieved) {
+async function checkshipmentTypesV2(shipmentTypes, inbounds, recieved) {
 	if (recieved) {
 		return [];
 	}
-	freights = await sortFreightsByDelivery(freights);
-	var originalBoxCount = await countBoxes(freights);
-	var leftBoxes = originalBoxCount - (await countBoxes(inbounds));
-	while ((await countBoxes(freights)) > leftBoxes && freights.length > 0) {
-		if (await removeFreight(freights, false)) {
+	shipmentTypes = await sortshipmentTypesByDelivery(shipmentTypes);
+	const originalBoxCount = await countBoxes(shipmentTypes);
+	const leftBoxes = originalBoxCount - (await countBoxes(inbounds));
+	while ((await countBoxes(shipmentTypes)) > leftBoxes && shipmentTypes.length > 0) {
+		if (await removeFreight(shipmentTypes, false)) {
 			break;
 		}
 	}
-	return freights;
+	return shipmentTypes;
 }
 
 async function syncBoxInfo(freight, product) {
@@ -223,8 +226,8 @@ async function checkFreightBox(freight) {
 		return false;
 	}
 }
-async function findFreightByType(freights, type) {
-	return freights.find(function (freight) {
+async function findFreightByType(shipmentTypes, type) {
+	return shipmentTypes.find(function (freight) {
 		return freight.type === type;
 	});
 }
@@ -235,38 +238,38 @@ async function matchFreightAndProducing(freight, producing) {
 
 async function addDefaultDeliveryToFreight(freight, types) {
 	if (freight.type) {
-		var freightType = await findFreightByType(types, freight.type);
+		const shipmentType = await findFreightByType(types, freight.type);
 	} else {
-		var freightType = await findFreightByType(types, "seaExpress");
+		const shipmentType = await findFreightByType(types, "seaExpress");
 	}
-	return moment(freight.shippedDate).add(freightType.period, "days");
+	return moment(freight.shippedDate).add(shipmentType.period, "days");
 }
-var getFreightsAndProductingsByProduct = async function (product, days) {
-	var freights = [];
-	var producings = [];
-	const types = await freightTypes();
+const getshipmentTypesAndProductingsByProduct = async function (product, days) {
+	const shipmentTypes = [];
+	const producings = [];
+	const types = await shipmentTypes();
 	const freightApi = await Freight.getInstance();
-	var allFreights = freightApi.freights;
-	console.log(`allFreights: ${allFreights.length}`);
+	const allshipmentTypes = freightApi.shipmentTypes;
+	console.log(`allshipmentTypes: ${allshipmentTypes.length}`);
 	const yisucangInbounds = await getYisucangInbounds();
-	var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
+	const purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
 	console.log(`purchases: ${purchases.length}`);
-	var syncBoxFlag = false;
-	for (var j = 0; j < purchases.length; j++) {
+	const syncBoxFlag = false;
+	for (const j = 0; j < purchases.length; j++) {
 		console.log(`checking: ${j + 1} purchase`);
-		var unShippedAmount = purchases[j].qty;
-		var producingFreights = [];
-		for (var i = 0; i < allFreights.length; i++) {
-			if (await matchFreightAndProducing(allFreights[i], purchases[j])) {
-				producingFreights.push(allFreights[i]);
-				if (!syncBoxFlag && (await checkFreightBox(allFreights[i]))) {
-					syncBoxFlag = await syncBoxInfo(allFreights[i], product);
+		const unShippedAmount = purchases[j].qty;
+		const producingshipmentTypes = [];
+		for (const i = 0; i < allshipmentTypes.length; i++) {
+			if (await matchFreightAndProducing(allshipmentTypes[i], purchases[j])) {
+				producingshipmentTypes.push(allshipmentTypes[i]);
+				if (!syncBoxFlag && (await checkFreightBox(allshipmentTypes[i]))) {
+					syncBoxFlag = await syncBoxInfo(allshipmentTypes[i], product);
 				}
-				unShippedAmount -= allFreights[i].qty;
-				if (!allFreights[i].delivery) {
+				unShippedAmount -= allshipmentTypes[i].qty;
+				if (!allshipmentTypes[i].delivery) {
 				}
-				if (moment(new Date()).diff(moment(allFreights[i].delivery), "days") < days) {
-					freights.push(allFreights[i]);
+				if (moment(new Date()).diff(moment(allshipmentTypes[i].delivery), "days") < days) {
+					shipmentTypes.push(allshipmentTypes[i]);
 				}
 			}
 		}
@@ -284,10 +287,10 @@ var getFreightsAndProductingsByProduct = async function (product, days) {
 		}
 	}
 
-	freights = await checkFreightsV2(freights, yisucangInbounds);
+	shipmentTypes = await checkshipmentTypesV2(shipmentTypes, yisucangInbounds);
 
-	return await formatFreightsAndProductings({
-		freights: freights,
+	return await formatshipmentTypesAndProductings({
+		shipmentTypes: shipmentTypes,
 		producings: producings,
 	});
 };
@@ -299,7 +302,7 @@ async function getYisucangInboundsByOrderId(inbounds, orderId) {
 }
 
 async function checkFreightRecived(recieveds, orderId) {
-	for (var recived of recieveds) {
+	for (const recived of recieveds) {
 		if (recived.orderId === orderId) {
 			return true;
 		}
@@ -307,19 +310,19 @@ async function checkFreightRecived(recieveds, orderId) {
 	return false;
 }
 
-var getFreightsAndProductingsByProductV2 = async function (
+const getshipmentTypesAndProductingsByProductV2 = async function (
 	product,
 	days,
 	types,
-	allFreights,
+	allshipmentTypes,
 	yisucangInbounds,
 	yisucangReciveds,
 ) {
-	var freights = [];
-	var producings = [];
+	const shipmentTypes = [];
+	const producings = [];
 
-	if (!allFreights) {
-		allFreights = await syncFreights();
+	if (!allshipmentTypes) {
+		allshipmentTypes = await syncshipmentTypes();
 	}
 
 	if (!yisucangInbounds) {
@@ -333,32 +336,35 @@ var getFreightsAndProductingsByProductV2 = async function (
 	}
 
 	if (!types) {
-		types = await freightTypes();
+		types = await shipmentTypes();
 	}
 
-	var purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
+	const purchases = await Purchase.getPurchasesByProductId(product.plwhsId);
 	console.log(`purchases: ${purchases.length}`);
-	for (var j = 0; j < purchases.length; j++) {
-		var unShippedAmount = purchases[j].qty;
-		var producingFreights = [];
-		for (var i = 0; i < allFreights.length; i++) {
-			if (await matchFreightAndProducing(allFreights[i], purchases[j])) {
-				producingFreights.push(allFreights[i]);
-				unShippedAmount -= allFreights[i].qty;
-				if (!allFreights[i].delivery) {
-					allFreights[i].delivery = await addDefaultDeliveryToFreight(allFreights[i], types);
+	for (const j = 0; j < purchases.length; j++) {
+		const unShippedAmount = purchases[j].qty;
+		const producingshipmentTypes = [];
+		for (const i = 0; i < allshipmentTypes.length; i++) {
+			if (await matchFreightAndProducing(allshipmentTypes[i], purchases[j])) {
+				producingshipmentTypes.push(allshipmentTypes[i]);
+				unShippedAmount -= allshipmentTypes[i].qty;
+				if (!allshipmentTypes[i].delivery) {
+					allshipmentTypes[i].delivery = await addDefaultDeliveryToFreight(
+						allshipmentTypes[i],
+						types,
+					);
 				}
 			}
 		}
 
-		producingFreights = await checkFreightsV2(
-			producingFreights,
+		producingshipmentTypes = await checkshipmentTypesV2(
+			producingshipmentTypes,
 			await getYisucangInboundsByOrderId(yisucangInbounds, purchases[j].orderId),
 			await checkFreightRecived(yisucangReciveds, purchases[j].orderId),
 		);
-		freights = freights.concat(producingFreights);
+		shipmentTypes = shipmentTypes.concat(producingshipmentTypes);
 
-		var shipped = false;
+		const shipped = false;
 		if (
 			unShippedAmount / purchases[j].qty < 0.2 ||
 			moment(new Date()).diff(moment(purchases[j].created), "days") > 60
@@ -370,23 +376,23 @@ var getFreightsAndProductingsByProductV2 = async function (
 				qty: unShippedAmount,
 				delivery: purchases[j].us_arrival_date,
 				created: purchases[j].created,
-				inboundShippeds: producingFreights,
+				inboundShippeds: producingshipmentTypes,
 				shipped: shipped,
 			});
 		}
 	}
 
-	return await formatFreightsAndProductings({
-		freights: await removeDeliveredFreights(freights, days, product),
+	return await formatshipmentTypesAndProductings({
+		shipmentTypes: await removeDeliveredshipmentTypes(shipmentTypes, days, product),
 		producings: producings,
 	});
 };
 
-exports.getFreightsAndProductingsByProductV2 = getFreightsAndProductingsByProductV2;
-var parseDate = async function (dateInfo) {
+exports.getshipmentTypesAndProductingsByProductV2 = getshipmentTypesAndProductingsByProductV2;
+const parseDate = async function (dateInfo) {
 	if (dateInfo) {
-		var re = /\d+月.*\d+号?/;
-		var date = dateInfo.match(re);
+		const re = /\d+月.*\d+号?/;
+		const date = dateInfo.match(re);
 		if (date) {
 			if (moment(date[0], "MM月DD号").isAfter(moment("2023-10-01"))) {
 				return moment(`2022-${date[0]}`, "YYYY-MM月DD号");
@@ -408,7 +414,7 @@ var parseDate = async function (dateInfo) {
 	}
 };
 
-var parseOrderId = async function (orderId) {
+const parseOrderId = async function (orderId) {
 	if (orderId) {
 		let re = /(OR|PO)\d*/;
 		orderId = orderId.match(re);
@@ -418,12 +424,12 @@ var parseOrderId = async function (orderId) {
 	}
 };
 
-var parseQuantity = async function (quantity, boxInfo) {
+const parseQuantity = async function (quantity, boxInfo) {
 	if (boxInfo) {
-		var boxQtyRe = /\d+箱.*?\d+\/箱/;
-		var diStr = boxInfo.match(boxQtyRe);
+		const boxQtyRe = /\d+箱.*?\d+\/箱/;
+		const diStr = boxInfo.match(boxQtyRe);
 		if (diStr[0]) {
-			var di = diStr[0].split(/[\*\×x]/);
+			const di = diStr[0].split(/[\*\×x]/);
 			box = {
 				length: Number(di[0]),
 				width: Number(di[1]),
@@ -433,8 +439,8 @@ var parseQuantity = async function (quantity, boxInfo) {
 	}
 };
 
-var parseBox = async function (boxInfo) {
-	var box = {
+const parseBox = async function (boxInfo) {
+	const box = {
 		length: 1,
 		width: 1,
 		height: 1,
@@ -442,10 +448,10 @@ var parseBox = async function (boxInfo) {
 		units: 1,
 	};
 	if (boxInfo) {
-		var diRe = /[\d\.]+(\*|\×|x)[\d\.]+(\*|\×|x)[\d\.]+/;
-		var diStr = boxInfo.match(diRe);
+		const diRe = /[\d\.]+(\*|\×|x)[\d\.]+(\*|\×|x)[\d\.]+/;
+		const diStr = boxInfo.match(diRe);
 		if (diStr) {
-			var di = diStr[0].split(/[\*\×x]/);
+			const di = diStr[0].split(/[\*\×x]/);
 			box = {
 				length: Number(di[0]),
 				width: Number(di[1]),
@@ -456,14 +462,14 @@ var parseBox = async function (boxInfo) {
 			logger.info(boxInfo);
 		}
 
-		var weightRe = /[\d\s\.]*(kg)/i;
+		const weightRe = /[\d\s\.]*(kg)/i;
 		diStr = boxInfo.match(weightRe);
 		if (diStr && diStr[0].match(/[\d\.]+/)) {
 			box.weight = Number(diStr[0].match(/[\d\.]+/)[0]);
 		} else {
 			weightRe = /[\d\s\.]+\/箱/gi;
-			var diStrs = boxInfo.matchAll(weightRe);
-			for (var diStr of diStrs) {
+			const diStrs = boxInfo.matchAll(weightRe);
+			for (const diStr of diStrs) {
 				if (Number(diStr[0].match(/[\d\.]+/)[0]) < 30) {
 					box.weight = Number(diStr[0].match(/[\d\.]+/)[0]);
 				}
@@ -475,14 +481,14 @@ var parseBox = async function (boxInfo) {
 			logger.error(boxInfo);
 		}
 
-		var unitsRe = /\d+(盒|瓶|套|付|PCS|个|件)?\/箱/;
-		var unitsStr = boxInfo.match(unitsRe);
+		const unitsRe = /\d+(盒|瓶|套|付|PCS|个|件)?\/箱/;
+		const unitsStr = boxInfo.match(unitsRe);
 		if (unitsStr) {
 			box.units = Number(unitsStr[0].match(/[\d]+/)[0]);
 		} else {
 			unitsRe = /[\d\s\.]+\/箱/gi;
-			var unitsStrs = boxInfo.matchAll(unitsRe);
-			for (var unitsStr of unitsStrs) {
+			const unitsStrs = boxInfo.matchAll(unitsRe);
+			for (const unitsStr of unitsStrs) {
 				if (Number(unitsStr[0].match(/[\d]+/)[0]) > 30) {
 					box.units = Number(unitsStr[0].match(/[\d]+/)[0]);
 				}
@@ -493,7 +499,7 @@ var parseBox = async function (boxInfo) {
 			logger.error(boxInfo);
 		}
 
-		for (var type in box) {
+		for (const type in box) {
 			if (isNaN(box[type])) {
 				logger.error("boxInfo");
 				logger.error(box);
@@ -504,11 +510,11 @@ var parseBox = async function (boxInfo) {
 	}
 };
 
-var parseBoxCount = async function (boxInfo) {
-	var boxCount = 0;
+const parseBoxCount = async function (boxInfo) {
+	const boxCount = 0;
 	if (boxInfo) {
-		var boxCountRe = /\d+箱/;
-		var boxCountStr = boxInfo.match(boxCountRe);
+		const boxCountRe = /\d+箱/;
+		const boxCountStr = boxInfo.match(boxCountRe);
 		if (boxCountStr) {
 			boxCount = Number(boxCountStr[0].match(/[\d]+/)[0]);
 		}
@@ -552,7 +558,7 @@ async function parseFba(type) {
 	return false;
 }
 
-var parseRow = async function (
+const parseRow = async function (
 	row,
 	orderIndex,
 	deliveryIndex,
@@ -562,19 +568,19 @@ var parseRow = async function (
 	shippedDateIndex,
 	typeIndex,
 ) {
-	var delivery = null;
+	const delivery = null;
 	if (row[deliveryIndex]) {
 		delivery = await parseDate(row[deliveryIndex]);
 	} else if (row[deliveryDueIndex]) {
 		delivery = await parseDate(row[deliveryDueIndex]);
 	}
-	var box = await parseBox(row[boxIndex]);
-	var boxCount = await parseBoxCount(row[boxIndex]);
-	var shippedDate = await parseShippedDate(row[shippedDateIndex]);
-	var orderId = await parseOrderId(row[orderIndex]);
+	const box = await parseBox(row[boxIndex]);
+	const boxCount = await parseBoxCount(row[boxIndex]);
+	const shippedDate = await parseShippedDate(row[shippedDateIndex]);
+	const orderId = await parseOrderId(row[orderIndex]);
 	logger.debug("shippedDate", shippedDate, row[shippedDateIndex], shippedDateIndex, row);
-	var type = await parseType(row[typeIndex]);
-	var fba = await parseFba(row[typeIndex]);
+	const type = await parseType(row[typeIndex]);
+	const fba = await parseFba(row[typeIndex]);
 
 	return {
 		orderId: orderId,
@@ -595,15 +601,11 @@ const TYPES = {
 	慢船: "sea",
 };
 
-async function freightTypes() {
-	return await FreightType.find({});
-}
-
 async function parseYisucangRow(row, HEADER) {
-	var number = row[HEADER.indexOf("入库单号")];
-	var orderId = await parseOrderId(row[HEADER.indexOf("物流追踪单号")]);
-	var quantity = row[HEADER.indexOf("入库数量")];
-	var date = row[HEADER.indexOf("入库时间")];
+	const number = row[HEADER.indexOf("入库单号")];
+	const orderId = await parseOrderId(row[HEADER.indexOf("物流追踪单号")]);
+	const quantity = row[HEADER.indexOf("入库数量")];
+	const date = row[HEADER.indexOf("入库时间")];
 	return {
 		number: number,
 		orderId: orderId,
@@ -613,10 +615,10 @@ async function parseYisucangRow(row, HEADER) {
 }
 
 async function getYisucangInbounds() {
-	var rows = await sheetApi.listInbounds();
+	const rows = await sheetApi.listInbounds();
 	const HEADER = rows.shift();
 	inbounds = [];
-	for (var row of rows) {
+	for (const row of rows) {
 		if (row[0]) {
 			inbounds.push(await parseYisucangRow(row, HEADER));
 		}
@@ -627,10 +629,10 @@ async function getYisucangInbounds() {
 exports.getYisucangInbounds = getYisucangInbounds;
 
 async function getYisucangReciveds() {
-	var rows = await sheetApi.listRecieveds();
+	const rows = await sheetApi.listRecieveds();
 	const HEADER = rows.shift();
 	recieveds = [];
-	for (var row of rows) {
+	for (const row of rows) {
 		if (row[0]) {
 			recieveds.push(await parseYisucangRow(row, HEADER));
 		}
@@ -640,12 +642,12 @@ async function getYisucangReciveds() {
 
 exports.getYisucangReciveds = getYisucangReciveds;
 
-async function syncFreightTypes() {
-	var rows = await sheetApi.listFreightTypes();
+async function syncShipmentTypes() {
+	const rows = await sheetApi.listShipmentTypes();
 	logger.debug(rows);
-	for (var row of rows) {
+	for (const row of rows) {
 		if (row[0] in TYPES) {
-			var freightTpye = await FreightType.findOne({ type: TYPES[row[0]] });
+			const freightTpye = await FreightType.findOne({ type: TYPES[row[0]] });
 			logger.debug(" freightTpye", freightTpye);
 
 			if (freightTpye) {
@@ -671,8 +673,12 @@ async function syncFreightTypes() {
 		}
 	}
 }
-exports.TYPES = TYPES;
-exports.syncFreightTypes = syncFreightTypes;
-exports.freightTypes = freightTypes;
-exports.syncFreights = syncFreights;
-exports.getFreightsAndProductingsByProduct = getFreightsAndProductingsByProduct;
+
+module.exports = {
+	all,
+	syncShipmentTypes,
+	shipmentTypes,
+	syncshipmentTypes,
+	getshipmentTypesAndProductingsByProduct,
+	TYPES,
+};

@@ -15,6 +15,13 @@ class ProductUpdator {
 		this.product = product;
 	}
 
+	static ORDER = {
+		airExpress: 1,
+		airDelivery: 2,
+		seaExpress: 3,
+		sea: 4,
+	};
+
 	async getUnshippedPurchases() {
 		return await Purchase.findUnshippedByProduct(this.product);
 	}
@@ -40,7 +47,11 @@ class ProductUpdator {
 		const orderDues = await this.getOrderDues();
 		const producings = await this.getProducings();
 		const shipments = await this.getShipments();
-		this.product.set(
+		const sortedShipmentTypes = this.product.shipmentTypes.sort(
+			(a, b) => ProductUpdator.order[a] - ProductUpdator.order[b],
+		);
+
+		const newProduct = {
 			fbaInventory,
 			sales,
 			yisucangInventory,
@@ -51,8 +62,10 @@ class ProductUpdator {
 			orderDues,
 			producings,
 			shipments,
-		);
-		await this.product.save();
+			shipmentTypes: sortedShipmentTypes,
+		};
+
+		this.product.set(newProduct, { new: true });
 
 		await this.updateUndeliveredDeliveris();
 	}

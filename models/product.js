@@ -48,8 +48,7 @@ var ProductSchema = new Schema({
 			fba: { type: Boolean, default: false },
 		},
 	],
-	purchases: [{ type: Schema.Types.ObjectId, ref: "Purchase" }],
-	producings: [
+	purchases: [
 		{
 			code: { type: String },
 			unIndoundQuantity: { type: Number, default: 0 },
