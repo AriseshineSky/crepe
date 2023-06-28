@@ -137,19 +137,19 @@ async function remvoeDuplicateYisucangInbounds(inbounds) {
 
 exports.remvoeDuplicateYisucangInbounds = remvoeDuplicateYisucangInbounds;
 
-async function removeDeliveredshipmentTypes(shipmentTypes, days, product) {
-	const shipmentTypes = shipmentTypes.filter((freight) => {
-		return moment(new Date()).diff(moment(freight.delivery), "days") < days;
-	});
-
-	const inboundShipped = await Product.getInboundShippedCount(product.asin);
-	while ((await sumshipmentTypes(shipmentTypes)) > inboundShipped && shipmentTypes.length > 0) {
-		if (await removeFreight(shipmentTypes, true)) {
-			break;
-		}
-	}
-	return shipmentTypes;
-}
+// async function removeDeliveredshipmentTypes(shipmentTypes, days, product) {
+// 	const shipmentTypes = shipmentTypes.filter((shipmentType) => {
+// 		return moment(new Date()).diff(moment(shipmentType.delivery), "days") < days;
+// 	});
+//
+// 	const inboundShipped = await Product.getInboundShippedCount(product.asin);
+// 	while ((await sumshipmentTypes(shipmentTypes)) > inboundShipped && shipmentTypes.length > 0) {
+// 		if (await removeFreight(shipmentTypes, true)) {
+// 			break;
+// 		}
+// 	}
+// 	return shipmentTypes;
+// }
 
 async function findYisucangInbounds(inbounds, freight) {
 	return inbounds.filter((elem) => {
@@ -670,7 +670,6 @@ async function syncShipmentTypes() {
 module.exports = {
 	all,
 	syncShipmentTypes,
-	shipmentTypes,
 	syncshipmentTypes,
 	getshipmentTypesAndProductingsByProduct,
 	TYPES,

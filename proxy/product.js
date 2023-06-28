@@ -6,7 +6,6 @@ const getPm = require("../api/getPM");
 const helper = require("../lib/util/helper");
 let moment = require("moment");
 const GAP = 6;
-let Shipment = require("./shipment");
 const ProductUpdator = require("./product_updator");
 let Listing = require("./listing");
 let Yisucang = require("./yisucang");
@@ -363,7 +362,6 @@ function addCurrentInventoryToInbounds(totalInventory, inbounds) {
 async function addShipmentPlanToInbounds(shipmentPlan, inbounds, product) {
 	let newInbounds = JSON.parse(JSON.stringify(inbounds));
 	for (let type in shipmentPlan) {
-		let shipment = await findShipmentByType(type);
 		let shipment = {
 			quantity: await totalUnits(shipmentPlan[type].boxes, product.unitsPerBox),
 			period: product.cycle + shipment.period + GAP,
@@ -571,7 +569,6 @@ async function getPlanV3(productId, purchaseCode) {
 			}
 		}
 	}
-	let shipments = await Shipment.shipmentTypes();
 	let purchase = {
 		plan: plan,
 		sales: sales,
@@ -1103,27 +1100,16 @@ async function remove(productId) {
 module.exports = {
 	findById: Product.findById.bind(Product),
 	find: Product.find.bind(Product),
-	updatepurchase,
-	deletepurchase,
-	updateInbound,
-	deleteInbound,
 	remove,
 	prepareFbaInventoryAndSalesV3,
-	updateProductpurchasestatus,
 	newAndSave,
 	createOrUpdate,
-	createNewProduct,
-	getProductByAsin,
 	getProductByPlwhsId,
 	getOrderDue,
-	getQuantity,
 	findShipmentByType,
 	getPurchaseShimpentPlan,
 	prepareOrderDues,
 	getPlanV3,
-	getSales,
-	removeDeliveredInbounds,
-	prepareFbaInventoryAndSalesV3,
 	findByUser,
 	updateAll,
 };
