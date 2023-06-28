@@ -12,6 +12,25 @@ const Purchase = require("./purchase");
 const Delivery = require("./delivery");
 const logger = require("../common/logger");
 
+const ShipmentTypesInfo = {
+	airExpress: {
+		price: 55,
+		period: 8,
+	},
+	airDelivery: {
+		price: 55,
+		period: 8,
+	},
+	seaExpress: {
+		price: 55,
+		period: 8,
+	},
+	sea: {
+		price: 55,
+		period: 8,
+	},
+};
+
 class ProductUpdator {
 	constructor(product) {
 		this.product = product;
@@ -41,19 +60,21 @@ class ProductUpdator {
 	}
 
 	getSortedShipmentTypes() {
-		return ShipmentType.sortByType(this.product.shipmentTypes);
+		// return ShipmentType.sort(this.product.shipmentTypes);
+		return ["airExpress", "airDelivery", "seaExpress", "sea"];
 	}
 
 	async updateAll() {
 		await this.updateUndeliveredDeliveris();
 		await this.updateUnshippedPurchases();
 		const { fbaInventory, sales } = await this.getFbaInventoryAndSalesV3();
-		const { yisucangInventory, plwhsInventory } = await prepareWarehouseInvetories();
+		const { yisucangInventory, plwhsInventory } = await this.prepareWarehouseInvetories();
 		const unshippedQty = await this.getUnshippedQty();
 		const undeliveredQty = await this.getUndeliveredQty();
 		const salesPeriod = await this.getSalesPeriod();
 		const orderDues = await this.getOrderDues();
 		const producings = await this.getProducings();
+		const purchases = await this.getUnshippedPurchases();
 		const shipments = await this.getShipments();
 		const totalInventory = await this.getTotalInventory();
 		const quantityToPurchase = await this.getQuantityToPurchase();
@@ -120,7 +141,7 @@ class ProductUpdator {
 
 		if (boxes > 0) {
 			const quantity = boxes * this.product.unitsPerBox;
-			return { boxes: boxes, quantity: quantity };
+			return { boxes, quantity };
 		} else {
 			return { boxes: 0, quantity: 0 };
 		}
@@ -136,7 +157,7 @@ class ProductUpdator {
 		for (const purchase of unshippedPurchases) {
 			const { unIndoundQuantity, code, expectDeliveryDate, createdAt } = purchase;
 			const producing = { unIndoundQuantity, code, expectDeliveryDate, createdAt };
-			producings.append(producing);
+			producings.push(producing);
 		}
 		return producings;
 	}
@@ -145,7 +166,7 @@ class ProductUpdator {
 		let orderDues = {};
 		const { salesPeriod, cycle, minInventory } = this.product;
 		for (const type of this.product.shipmentTypes) {
-			const shipmentType = await ShipmentType.findOne({ name: type });
+			const shipmentType = ShipmentTypesInfo[type];
 			orderDues[type] = moment().add(
 				salesPeriod - cycle - shipmentType.period - GAP - minInventory,
 				"days",
@@ -170,8 +191,8 @@ class ProductUpdator {
 	}
 
 	async getUndeliveredQty() {
-		await this.getUndeliveredDeliveris();
-		return this.undeliveredDeliveris.reduce((total, delivery) => {
+		const undeliveredDeliveris = await this.getUndeliveredDeliveris();
+		return undeliveredDeliveris.reduce((total, delivery) => {
 			return total + delivery.quantity;
 		}, 0);
 	}
@@ -205,10 +226,10 @@ class ProductUpdator {
 	}
 
 	async getUnshippedQty() {
-		await this.getUnshippedPurchases();
-		return (unshippedQty = this.unshippedPurchases.reduce((total, purchase) => {
+		const unshippedPurchases = await this.getUnshippedPurchases();
+		return unshippedPurchases.reduce((total, purchase) => {
 			return total + purchase.quantity;
-		}, 0));
+		}, 0);
 	}
 
 	async updateUnshippedQty() {
@@ -252,14 +273,20 @@ class ProductUpdator {
 	}
 
 	async prepareWarehouseInvetories() {
-		const yisucangInventory = await getYisucangInventory();
-		const plwhsInventory = await getPlwhsByProduct();
+		const yisucangInventory = await this.getYisucangInventory();
+		const plwhsInventory = await this.getPlwhsInventory();
 		return { yisucangInventory, plwhsInventory };
 	}
 
-	async getYisucangInventory() {
+	async getPlwhsInventory() {
+		// TODO;
 		let inventory = 0;
-		for (const yisucangId of this.product.yisucangIds) {
+		return inventory;
+	}
+	async getYisucangInventory() {
+		return 0;
+		let inventory = 0;
+		for (const yisucangId of this.product.yisucangId) {
 			const yisucang = await Yisucang.findYisucangById(yisucangId);
 			if (yisucang) {
 				inventory += yisucang.stock;

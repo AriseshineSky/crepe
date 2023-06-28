@@ -25,8 +25,6 @@
         <th>采购中数量</th>
         <th>采购计划</th>
         <th>货期</th>
-        <th>需要空派</th>
-        <th>需要慢船</th>
         <th>设置平均销量</th>
         <th>Actions</th>
         <th>箱规</th>
@@ -47,8 +45,8 @@
           <td><%= product.ps %></td>
           <td><%= product.maxAvgSales %></td>
           <td><%= product.fbaInventory %></td>
-          <td data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= product.stock %> | Plwhs:<%= product.plwhs %>">
-            <%= product.stock + product.plwhs %>
+          <td data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= product.yisucangInventory %> | Plwhs:<%= product.plwhsInventory %>">
+            <%= product.yisucangInventory + product.plwhsInventory %>
           </td>
           <td><%= product.purchase %></td>
           <td>
@@ -65,20 +63,6 @@
           </td>
           <td>
             <%= product.cycle %>
-          </td>
-          <td>
-            <% if (product.airDelivery) { %>
-              需要
-            <% } else { %>
-              不需要
-            <% } %>
-          </td>
-          <td>
-            <% if (product.sea) { %>
-              需要
-            <% } else { %>
-              不需要
-            <% } %>
           </td>
           <td>
             <% if (product.avgSales > 0) {%>

@@ -17,7 +17,10 @@ var ProductSchema = new Schema({
 	avgSales: { type: Number },
 	ps: { type: Number, default: 0 },
 	totalInventory: { type: Number, default: 0 },
-	quantityToPurchase: { type: Number, default: 0 },
+	quantityToPurchase: {
+		boxes: { type: Number, default: 0 },
+		quantity: { type: Number, default: 0 },
+	},
 	yisucangInventory: { type: Number, default: 0 },
 	fbaInventory: { type: Number, default: 0 },
 	plwhsInventory: { type: Number, default: 0 },

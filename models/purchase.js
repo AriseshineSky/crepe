@@ -6,10 +6,6 @@ let PurchaseSchema = new Schema({
 		type: String,
 		required: true,
 	},
-	productId: {
-		type: Schema.Types.ObjectId,
-		ref: "Product",
-	},
 	product: { type: String },
 	productName: { type: String },
 	sellerSku: { type: String },

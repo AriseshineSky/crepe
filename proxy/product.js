@@ -106,7 +106,7 @@ exports.syncShipment = syncShipment;
 exports.getShipment = getShipment;
 
 async function checkStatus(inbound, units, sales) {
-	return units - inbound.period * sales.minAvgSales;
+	return units - inbound.period * sales;
 }
 
 async function getDatabaseConnection() {
@@ -267,9 +267,10 @@ async function calculateOutOfStockPeriod(status) {
 	return period;
 }
 
-async function calculateMinInventory(shipmentTypes, status, sales, product, gap) {
+async function calculateMinInventory(product, status, sales, gap) {
 	let period = 0;
 	let minInventory = 100000;
+	const shipmentTypes = product.shipmentTypes;
 	let shipmentType = ShipmentTypesInfo[shipmentTypes[0]];
 	// 如果存在断货，检查第一批到货之后的最小库存
 	// 如果不存在断货，检查所有时刻最小库存
@@ -294,13 +295,14 @@ async function calculateMinInventory(shipmentTypes, status, sales, product, gap)
 }
 
 async function calculatePurchaseMinInventory(shipmentTypes, status, sales, purchase) {
+	// 查看第一种发货方式到货之后的最低库存
+	//TODO 到货之前有断货和没有断货
 	let period;
 	let minInventory = 100000;
-	let days = await getPurchasePeriod(product, purchase);
 	let type = shipmentTypes[0];
 	let shipmentType = ShipmentTypesInfo[type];
 	for (let i = 0; i < status.length; i++) {
-		if (status[i].period > shipmentType.period + days + GAP) {
+		if (status[i].period > shipmentType.period + purchase.expectDeliveryDays + GAP) {
 			period = Math.floor(status[i].before / sales);
 			if (period < minInventory) {
 				minInventory = period;
@@ -315,7 +317,7 @@ async function recalculateInboundQueue(inboundQueue, sales) {
 	let newInboundQueue = helper.deepClone(inboundQueue);
 	for (let i = 0; i < newInboundQueue.length; i++) {
 		if (newInboundQueue[i].inventory.before < 0) {
-			let period = Math.ceil(-newInboundQueue[i].inventory.before / sales.minAvgSales);
+			let period = Math.ceil(-newInboundQueue[i].inventory.before / sales);
 			states.push({
 				period: newInboundQueue[i].period - period,
 				before: 0,
@@ -349,8 +351,6 @@ async function convertInboundShippedsDeliveryDueToPeroid(inboundShippeds) {
 	}
 	return inbounds;
 }
-exports.convertInboundShippedsDeliveryDueToPeroid = convertInboundShippedsDeliveryDueToPeroid;
-exports.addCurrentInventoryToInbounds = addCurrentInventoryToInbounds;
 
 function addCurrentInventoryToInbounds(totalInventory, inbounds) {
 	inbounds.push({
@@ -359,12 +359,22 @@ function addCurrentInventoryToInbounds(totalInventory, inbounds) {
 	});
 }
 
+async function addShipmentToInbounds(shipment, inbounds) {
+	let newInbounds = helper.deepClone(inbounds);
+
+	newInbounds.push({
+		quantity: shipment.quantity,
+		period: shipment.period,
+	});
+	return newInbounds;
+}
+
 async function addShipmentPlanToInbounds(shipmentPlan, inbounds, product) {
-	let newInbounds = JSON.parse(JSON.stringify(inbounds));
+	let newInbounds = helper.deepClone(inbounds);
 	for (let type in shipmentPlan) {
 		let shipment = {
-			quantity: await totalUnits(shipmentPlan[type].boxes, product.unitsPerBox),
-			period: product.cycle + shipment.period + GAP,
+			quantity: shipmentPlan[type].boxes * product.unitsPerBox,
+			period: product.cycle + ShipmentTypesInfo[type].period + GAP,
 		};
 		newInbounds = await addShipmentToInbounds(shipment, newInbounds);
 	}
@@ -385,7 +395,7 @@ async function addPurchaseShipmentPlanToInbounds(shipmentPlan, inbounds, product
 			period: shipment.period,
 		});
 	}
-	return newInbounds;
+	return await sortQueue(newInbounds);
 }
 
 async function updateProduct(product, attrs) {
@@ -410,7 +420,6 @@ async function getStockByProductV2(product) {
 			stock += yisucang.stock;
 		}
 	}
-	console.log("stock", stock);
 	return stock;
 }
 
@@ -492,14 +501,14 @@ async function getTotalInventory(product) {}
 async function updateAll() {
 	const products = await Product.find();
 	for (let product of products) {
-		const productUpdator = ProductUpdator(product);
+		const productUpdator = new ProductUpdator(product);
 		await productUpdator.updateAll();
 	}
 }
 
 async function getPlanV3(productId, purchaseCode) {
-	let product = await Product.findById(productId).populate("deliveries").exec();
-	const productUpdator = ProductUpdator(product);
+	let product = await Product.findById(productId);
+	const productUpdator = new ProductUpdator(product);
 	await productUpdator.updateAll();
 
 	const { totalInventory, shipments, maxAvgSales, ps } = product;
@@ -535,14 +544,12 @@ async function getPlanV3(productId, purchaseCode) {
 		let purchasesPlan = null;
 		pruchases = helper.deepClone(product.purchases);
 		purchasesPlan = await getPurchasesShipmentPlan(product, inbounds, pruchases);
-		logger.debug("purchasesPlan", purchasesPlan);
-		if (quantity.boxes > 0) {
-			await updateProduct(product, { orderQuantity: quantity.quantity });
+		if (product.quantityToPurchase.boxes > 0) {
 			if (purchasesPlan) {
-				plan = await bestPlanV4(quantity, product, purchasesPlan.inbounds || []);
+				plan = await bestPlanV4(product, purchasesPlan.inbounds || []);
 				plan.plans = purchasesPlan.plans;
 			} else {
-				plan = await bestPlanV4(quantity, product, inbounds);
+				plan = await bestPlanV4(product, inbounds);
 			}
 		} else {
 			console.log("Inventory is enough, do not need to purchase any more");
@@ -558,7 +565,6 @@ async function getPlanV3(productId, purchaseCode) {
 		purchase: await getpurchasesQuantity(product.purchases),
 		orderDues: await prepareOrderDues(orderDues),
 	});
-	await save(product);
 	logger.debug(plan);
 
 	let volumeWeightCheck = true;
@@ -571,20 +577,11 @@ async function getPlanV3(productId, purchaseCode) {
 	}
 	let purchase = {
 		plan: plan,
-		sales: sales,
-		quantity: quantity,
 		minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
 		maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
-		totalInventory: totalInventory,
-		fbaInventory: fbaInventorySales.inventory,
-		stock: stock,
-		shipments: shipments,
-		inboundShippeds: inboundShippeds,
 		volumeWeightCheck: volumeWeightCheck,
-		orderDues: orderDues,
 		product: product,
 	};
-	console.log(purchase);
 	return purchase;
 }
 
@@ -620,6 +617,7 @@ async function initShipmentPlan(purchase, product, inbounds) {
 
 	let step = Math.ceil(quantity.boxes ** shipmentType.length / 60000000);
 }
+
 async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 	let quantity = await convertPurchaseQtyIntoBox(purchase, product);
 
@@ -649,6 +647,7 @@ async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 	};
 
 	let step = Math.ceil(quantity.boxes ** shipmentTypes.length / 60000000);
+
 	await getShipmentPlanByPurchase(
 		shipmentPlan,
 		quantity.boxes, // the boxes that other shipment types need to ship
@@ -667,10 +666,12 @@ async function getPurchasesShipmentPlan(product, inbounds, purchases) {
 	let plan = { plans: [], inbounds };
 	for (let i = 0; i < purchases.length; i++) {
 		const shipmentPlan = await getPurchaseShimpentPlan(purchases[i], product, plan.inbounds);
-		shipmentPlan.deliveryDue = purchases[i].deliveryDue;
+		shipmentPlan.expectDeliveryDate = purchases[i].expectDeliveryDate;
+		shipmentPlan.expectDeliveryDays = purchases[i].expectDeliveryDays;
 		shipmentPlan.created = purchases[i].created;
-		shipmentPlan.deliveryPeriod = await getpurchasePeriod(product, purchases[i]);
 		shipmentPlan.orderId = purchases[i].orderId;
+		shipmentPlan.code = purchases[i].code;
+
 		plan.plans.push(shipmentPlan);
 		plan.gap = shipmentPlan.gap;
 		plan.inventoryStatus = shipmentPlan.inventoryStatus;
@@ -681,16 +682,16 @@ async function getPurchasesShipmentPlan(product, inbounds, purchases) {
 	return plan;
 }
 
-async function findShipmentByType(type) {
-	let shipments = await Shipment.shipmentTypes();
-	return shipments.find((shipment) => shipment.type === type);
-}
 async function getOrderDue(product) {
 	let orderDues = {};
 	for (let type of product.shipmentTypes) {
-		let shipment = await findShipmentByType(type);
+		let shipment = ShipmentTypesInfo[type];
 		orderDues[type] = moment().add(
-			quantity / product.ps - product.cycle - shipment.period - GAP - product.minInventory,
+			product.quantityToPurchase / product.ps -
+				product.cycle -
+				shipment.period -
+				GAP -
+				product.minInventory,
 			"days",
 		);
 	}
@@ -731,8 +732,9 @@ async function formatPlan(plan, unitsPerBox) {
 	return plan;
 }
 
-async function calculatePlan(shipmentPlan, shipmentType, inbounds, product, result) {
-	let newPlan = await getNewShipmentPlan(shipmentPlan, shipmentType, inbounds, product);
+async function calculatePlan(shipmentPlan, inbounds, product, result) {
+	let newPlan = await getNewShipmentPlan(shipmentPlan, product, inbounds);
+
 	// 更新策略
 	// 1. 存在断货:
 	//   1.1 最小库存不满足要求
@@ -775,21 +777,34 @@ async function calculatePlan(shipmentPlan, shipmentType, inbounds, product, resu
 	return result;
 }
 
-async function calculatePurchasePlan(
-	shipmentPlan,
-	shipmentTypes,
-	inbounds,
-	product,
-	result,
-	purchase,
-) {
-	let newPlan = await getNewpurchaseshipmentPlan(
-		shipmentPlan,
-		shipmentTypes,
-		product,
-		purchase,
-		inbounds,
-	);
+async function calculateInboundQueue(inbounds, sales) {
+	var inboundQueue = [];
+	inboundQueue[0] = {
+		period: inbounds[0].period,
+		inventory: {
+			before: inbounds[0].quantity,
+			after: inbounds[0].quantity,
+		},
+	};
+	for (var i = 1; i < inbounds.length; i++) {
+		var units = 0;
+		for (var j = 0; j < i; j++) {
+			units += inbounds[j].quantity;
+		}
+		var items = await checkStatus(inbounds[i], units, sales);
+		inboundQueue[i] = {
+			period: inbounds[i].period,
+			inventory: {
+				before: items,
+				after: items + inbounds[i].quantity,
+			},
+		};
+	}
+	return inboundQueue;
+}
+
+async function calculatePurchasePlan(shipmentPlan, inbounds, product, result, purchase) {
+	let newPlan = await getNewShipmentPlan(shipmentPlan, product, purchase, inbounds);
 
 	if (newPlan.minInventory >= product.minInventory && newPlan.gap == 0) {
 		result.plan = helper.deepClone(newPlan);
@@ -811,44 +826,26 @@ async function calculatePurchasePlan(
 	return result;
 }
 
-async function getShipmentPlan(
-	shipmentPlan,
-	left,
-	index,
-	shipmentType,
-	inbounds,
-	product,
-	result,
-	step,
-) {
+async function getShipmentPlan(shipmentPlan, left, index, inbounds, product, result, step) {
 	if (left < 0) {
 		return;
 	}
 	if (result.status === "done") {
 		return null;
 	}
-	if (index === shipmentType.length - 1) {
-		shipmentPlan[shipmentType[index]] = { boxes: left };
+	const shipmentTypes = product.shipmentTypes;
+	if (index >= shipmentTypes.length - 1) {
+		shipmentPlan[shipmentTypes[index]] = { boxes: left };
 		let shipmentPlanDup = helper.deepClone(shipmentPlan);
-		await calculatePlan(shipmentPlanDup, shipmentType, inbounds, product, sales, result);
+		await calculatePlan(shipmentPlanDup, inbounds, product, result);
 		if (result.status === "done") {
 			return null;
 		}
 	} else {
 		let i = 0;
 		while (i <= left) {
-			shipmentPlan[shipmentType[index]] = { boxes: i };
-			await getShipmentPlan(
-				shipmentPlan,
-				left - i,
-				index + 1,
-				shipmentType,
-				inbounds,
-				product,
-				sales,
-				result,
-				step,
-			);
+			shipmentPlan[shipmentTypes[index]] = { boxes: i };
+			await getShipmentPlan(shipmentPlan, left - i, index + 1, inbounds, product, result, step);
 			if (i + step <= left) {
 				i += step;
 			} else {
@@ -866,7 +863,6 @@ async function getShipmentPlanByPurchase(
 	shipmentPlan,
 	left,
 	index,
-	shipmentTypes,
 	inbounds,
 	product,
 	result,
@@ -876,18 +872,13 @@ async function getShipmentPlanByPurchase(
 	if (result.status === "done") {
 		return null;
 	}
-	if (index === shipmentTypes.length - 1) {
+
+	const shipmentTypes = product.shipmentTypes;
+	if (index >= shipmentTypes.length - 1) {
 		shipmentPlan[shipmentTypes[index]] = { boxes: left };
 		let shipmentPlanDup = helper.deepClone(shipmentPlan);
 
-		await calculatePurchasePlan(
-			shipmentPlanDup,
-			shipmentTypes,
-			inbounds,
-			product,
-			result,
-			purchase,
-		);
+		await calculatePurchasePlan(shipmentPlanDup, inbounds, product, result, purchase);
 
 		if (result.status === "done") {
 			return null;
@@ -900,7 +891,6 @@ async function getShipmentPlanByPurchase(
 				shipmentPlan,
 				left - i,
 				index + 1,
-				shipmentTypes,
 				inbounds,
 				product,
 				result,
@@ -920,7 +910,7 @@ async function getShipmentPlanByPurchase(
 	}
 }
 
-async function bestPlanV4(quantity, product, inbounds) {
+async function bestPlanV4(product, inbounds) {
 	if (product.shipmentTypes.length === 0) {
 		return;
 	}
@@ -929,11 +919,11 @@ async function bestPlanV4(quantity, product, inbounds) {
 	const shipmentType = ShipmentTypesInfo[firstShipmentType];
 	let plan = {
 		[firstShipmentType]: {
-			boxes: quantity.boxes,
+			boxes: product.quantityToPurchase.boxes,
 		},
 		gap: 100000,
 		minInventory: -100,
-		totalAmount: quantity.boxes * shipmentType.price * product.box.weight,
+		totalAmount: product.quantityToPurchase.boxes * shipmentType.price * product.box.weight,
 	};
 	for (let i = 1; i < shipmentType.length; i++) {
 		plan[shipmentType[i]] = { boxes: 0 };
@@ -944,12 +934,11 @@ async function bestPlanV4(quantity, product, inbounds) {
 		plan: plan,
 		status: "pending",
 	};
-	let step = Math.ceil(quantity.boxes ** shipmentType.length / 60000000);
+	let step = Math.ceil(product.quantityToPurchase.boxes ** shipmentType.length / 60000000);
 	await getShipmentPlan(
 		shipmentPlan,
-		quantity.boxes,
+		product.quantityToPurchase.boxes,
 		0,
-		shipmentType,
 		inbounds,
 		product,
 		result,
@@ -972,44 +961,9 @@ async function getNewPlan(shipmentPlan, product, status) {
 	return newPlan;
 }
 
-async function getNewPurchaseShipmentPlan(
-	freightPlan,
-	freightType,
-	product,
-	sales,
-	purchase,
-	inbounds,
-) {
-	let newInbounds = await addPurchaseShipmentPlanToInbounds(
-		freightPlan,
-		inbounds,
-		product,
-		purchase,
-	);
-	newInbounds = await convertInboundsToSortedQueue(newInbounds);
-	let inboundQueue = await calculateInboundQueue(newInbounds, sales);
-	let status = await recalculateInboundQueue(inboundQueue, sales);
-	let newPlan = await calculatePlanAmounts(freightPlan, product);
-	newPlan.gap = await calculateOutOfStockPeriod(status);
-	newPlan.minInventory = await calculatePurchaseMinInventory(
-		freightType,
-		status,
-		sales,
-		product,
-		purchase,
-	);
-	newPlan.inventoryStatus = status;
-	newPlan.inbounds = newInbounds;
-}
-
-async function getNewPurchaseShipmentPlan(
-	shipmentPlan,
-	shipmentTypes,
-	product,
-	inbounds,
-	purchase,
-) {
+async function getNewShipmentPlan(shipmentPlan, product, inbounds, purchase) {
 	let newInbounds = null;
+
 	if (purchase) {
 		newInbounds = await addPurchaseShipmentPlanToInbounds(
 			shipmentPlan,
@@ -1034,12 +988,7 @@ async function getNewPurchaseShipmentPlan(
 			purchase,
 		);
 	} else {
-		newPlan.minInventory = await calculateMinInventory(
-			shipmentType,
-			status,
-			product.ps,
-			newPlan.gap,
-		);
+		newPlan.minInventory = await calculateMinInventory(product, status, product.ps, newPlan.gap);
 	}
 
 	newPlan.inventoryStatus = status;
@@ -1072,27 +1021,6 @@ async function newAndSave(data) {
 	return await product.save();
 }
 
-let deleteInbound = async function (inboundId) {
-	let objId = mongoose.Types.ObjectId(inboundId);
-	await Product.update(
-		{ "inboundShippeds._id": objId },
-		{ $pull: { inboundShippeds: { _id: objId } } },
-	);
-};
-
-let updateInbound = async function (inboundId, deliveryDue, quantity) {
-	let objId = mongoose.Types.ObjectId(inboundId);
-	await Product.updateOne(
-		{ "inboundShippeds._id": objId },
-		{
-			$set: {
-				"inboundShippeds.$.deliveryDue": deliveryDue,
-				"inboundShippeds.$.quantity": quantity,
-			},
-		},
-	);
-};
-
 async function remove(productId) {
 	await Product.deleteOne({ _id: mongoose.Types.ObjectId(productId) });
 }
@@ -1106,7 +1034,6 @@ module.exports = {
 	createOrUpdate,
 	getProductByPlwhsId,
 	getOrderDue,
-	findShipmentByType,
 	getPurchaseShimpentPlan,
 	prepareOrderDues,
 	getPlanV3,

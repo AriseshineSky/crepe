@@ -15,7 +15,7 @@ exports.syncAllFreights = async function (req, res, next) {
 
 exports.show = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.findProductById(productId);
+	let product = await Product.findById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -34,7 +34,7 @@ exports.updateAllSalesAndInventories = async function (req, res, next) {
 exports.updatePlan = async function (req, res, next) {
 	let productId = req.params.productId;
 	let plan = req.body.plan;
-	let product = await Product.findProductById(productId);
+	let product = await Product.findById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -47,7 +47,7 @@ exports.updatePlan = async function (req, res, next) {
 
 exports.syncFreight = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.findProductById(productId);
+	let product = await Product.findById(productId);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -103,7 +103,7 @@ exports.plan = async function (req, res, next) {
 
 exports.showPlan = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.findProductById(productId);
+	let product = await Product.findById(productId);
 	if (product.plan) {
 		res.render("product/plan", { purchase: JSON.parse(product.plan) });
 	}
@@ -202,7 +202,7 @@ exports.save = async function (req, res, next) {
 	let airDelivery = req.body.airDelivery;
 	let sea = req.body.sea;
 	let avgSales = req.body.avgSales;
-	let product = await Product.findProductById(productId);
+	let product = await Product.findById(productId);
 	const countries = req.body.countries;
 	console.log(product);
 	if (!product) {
@@ -291,7 +291,7 @@ exports.addInbound = async function (req, res, next) {
 	let quantity = req.body.quantity;
 	let deliveryDue = req.body.deliveryDue;
 	console.log(quantity);
-	let product = await Product.findProductById(productId);
+	let product = await Product.findById(productId);
 	if (!product) {
 		return;
 	} else {
@@ -337,9 +337,10 @@ exports.updateInbound = async function (req, res, next) {
 	await Product.updateInbound(inboundId, deliveryDue, quantity);
 	res.redirect("/products/" + productId + "/inbounds");
 };
+
 exports.showInbounds = async function (req, res, next) {
 	let productId = req.params.productId;
-	let product = await Product.findProductById(productId);
+	let product = await Product.findById(productId);
 	console.log(product);
 	if (!product) {
 		return;

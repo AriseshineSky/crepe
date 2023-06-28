@@ -18,6 +18,7 @@
       <thead>
         <tr>
           <th data-editable="true" data-sortable="true">orderId:</th>
+          <th data-editable="true" data-sortable="true">code:</th>
           <th data-editable="true" data-sortable="true">数量:</th>
           <th data-editable="true" data-sortable="true">采购创建日期:</th>
           <th data-editable="true" data-sortable="true">预估出货日期:</th>
@@ -25,24 +26,21 @@
         </tr>
       </thead>
       <tbody>
-        <% product.producings.forEach(function(producing){ %>
-          <% if(!producing.deletedAt) { %>
+        <% product.shipments.forEach(function(purchase){ %>
             <tr>
-              <td><%= producing.orderId %></td>
-              <td><%= producing.quantity %></td>
-              <td><%= `${producing.created.getMonth() + 1}/${producing.created.getDate()}/${producing.created.getFullYear()}` %></td>
+              <td><%= purchase.orderId %></td>
+              <td><%= purchase.code %></td>
+              <td><%= purchase.quantity %></td>
               <td>
-                <% if (producing.deliveryDue) {%>
-                  <%= `${producing.deliveryDue.getMonth() + 1}/${producing.deliveryDue.getDate()}/${producing.deliveryDue.getFullYear()}` %>
+                <% if (purchase.expectDeliveryDate) {%>
+									<%= `${moment(purchase.expectDeliveryDate).format('YYYY-MM-DD HH:mm:ss')}` %>
                 <% } %>
               </td>
               <td style="text-align:center;">
-                <button class="btn btn-primary producing" data-bs-toggle="modal" data-bs-target="#editModal" data-producing-id="<%=producing._id%>" >Edit</button>
-                <a href="/products/<%= product.asin %>/producings/<%=producing._id%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
-                <button class="btn btn-danger producing" data-bs-toggle="modal" data-bs-target="#myModal" data-producing-id="<%=producing._id%>" >Delete</button>
+                <button class="btn btn-primary purchase" data-bs-toggle="modal" data-bs-target="#editModal" data-purchase-id="<%=purchase._id%>" >Edit</button>
+                <a href="/products/<%= product._id %>/purchases/<%=purchase.code%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
               </td>
             </tr>
-          <% } %>
         <% }) %>
       </tbody>
     </table>
@@ -63,6 +61,7 @@
       <thead>
         <tr>
           <th data-editable="true" data-sortable="true">orderId:</th>
+          <th data-editable="true" data-sortable="true">code:</th>
           <th data-editable="true" data-sortable="true">数量:</th>
           <th data-editable="true" data-sortable="true">出货日期:</th>
           <th data-editable="true" data-sortable="true">预估收货日期:</th>
@@ -72,24 +71,21 @@
         </tr>
       </thead>
       <tbody>
-        <% inbounds.forEach(function(inbound){ %>
+        <% product.shipments.forEach(function(inbound){ %>
           <tr>
             <td><%= inbound.orderId %></td>
+            <td><%= inbound.code %></td>
             <td><%= inbound.quantity %></td>
             <td>
-              <%= moment(inbound.shippedDate).format('YYYY-MM-DD') %>
+              <%= moment(inbound.shipmentDate).format('YYYY-MM-DD') %>
             </td>
             <td>
-              <% if (inbound.deliveryDue) {%>
-                <%= `${inbound.deliveryDue.getMonth() + 1}/${inbound.deliveryDue.getDate()}/${inbound.deliveryDue.getFullYear()}` %>
+              <% if (inbound.expectArrivalDate) {%>
+								<%= `${moment(inbound.expectArrivalDate).format('YYYY-MM-DD HH:mm:ss')}` %>
               <% } %>
             </td>
             <td>
-              <% if (inbound.deliveryDue) {%>
-                <% var date = new Date(inbound.deliveryDue) %>
-                <% date.setDate(date.getDate() + 7) %>
-                <%= `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}` %>
-              <% } %>
+							<%= moment(inbound.expectArrivalDate).add(7, 'days').format('YYYY-MM-DD HH:mm:ss') %>
             </td>
             <td>
               <% if (inbound.box) {%>
@@ -212,7 +208,7 @@
       $('.modal-body').html(modalBody);
     });
 
-    $(".producing[data-bs-target='#myModal']").click(function() {
+    $(".purchase[data-bs-target='#myModal']").click(function() {
       var columnHeadings = $("thead th").map(function() {
         return $(this).text();
       }).get();
@@ -221,11 +217,11 @@
         return $(this).text();
       }).get();     
       var modalBody = $('<div id="modalContent"></div>');
-      var producingId = $(this).data('producing-id')
-      var modalForm = $(`<form role="form" name="modalForm" id="update_producing_form" action="/products/<%= product.id %>/producing/${producingId}" method="post"> \
+      var purchaseId = $(this).data('purchase-id')
+      var modalForm = $(`<form role="form" name="modalForm" id="update_purchase_form" action="/products/<%= product.id %>/purchase/${purchaseId}" method="post"> \
                           <div class="card-body"> \
                             <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" > \
-                            <input class="form-control" name="inboundId" value="${producingId}" type="hidden" > \
+                            <input class="form-control" name="inboundId" value="${purchaseId}" type="hidden" > \
                             <div class="input-group input-group-static mb-4"> \
                               <label>数量:</label> \
                               <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \
@@ -246,7 +242,7 @@
       $('form[name="modalForm"]').submit();
     });
 
-    $(".producing[data-bs-target='#editModal']").click(function() {
+    $(".purchase[data-bs-target='#editModal']").click(function() {
       var columnHeadings = $("thead th").map(function() {
         return $(this).text();
       }).get();
@@ -254,12 +250,12 @@
       var columnValues = $(this).parent().siblings().map(function() {
         return $(this).text();
       }).get();     
-      var modalBody = $('<div id="editProducingContent"></div>');
-      var producingId = $(this).data('producing-id')
-      var modalForm = $(`<form role="form" name="modalForm" id="update_form" action="/products/<%= product.id %>/producing" method="post"> \
+      var modalBody = $('<div id="editpurchaseContent"></div>');
+      var purchaseId = $(this).data('purchase-id')
+      var modalForm = $(`<form role="form" name="modalForm" id="update_form" action="/products/<%= product.id %>/purchase" method="post"> \
                           <div class="card-body"> \
                             <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" > \
-                            <input class="form-control" name="producingId" value="${producingId}" type="hidden" > \
+                            <input class="form-control" name="purchaseId" value="${purchaseId}" type="hidden" > \
                             <div class="input-group input-group-static mb-4"> \
                               <label>数量:</label> \
                               <input type="number" class="form-control" name="quantity" value="${columnValues[1]}"> \

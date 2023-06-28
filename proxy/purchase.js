@@ -11,7 +11,7 @@ async function formatPurchase(purchase) {
 
 async function findUnshippedByProduct(product) {
 	// TODO
-	await Purchase.find({ productId: product._id });
+	return await Purchase.find({ product: product.gSku, deliveryStatus: null });
 }
 
 async function getPurchasesByProductId(productId) {

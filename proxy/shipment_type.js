@@ -3,7 +3,7 @@ const larksuiteApi = require("../api/larksuite");
 const Purchase = require("./purchases");
 const Product = require("./product");
 const models = require("../models");
-const FreightType = models.Freight;
+const ShipmentType = models.ShipmentType;
 const Freight = models.Freight;
 
 const moment = require("moment");
@@ -133,6 +133,9 @@ async function remvoeDuplicateYisucangInbounds(inbounds) {
 		}
 		return count === 1;
 	});
+}
+async function all() {
+	return await ShipmentType.find();
 }
 
 exports.remvoeDuplicateYisucangInbounds = remvoeDuplicateYisucangInbounds;

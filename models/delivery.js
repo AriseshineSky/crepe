@@ -72,7 +72,6 @@ const DeliverySchema = new Schema({
 	supplierCode: { type: String },
 	expectArrivalDate: { type: Date },
 	remainingArrivalDays: { type: Number },
-	expectShipmentDate: { type: Date },
 });
 
 DeliverySchema.plugin(BaseModel);

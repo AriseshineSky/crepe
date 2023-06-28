@@ -82,7 +82,7 @@ async function findByProductId(productId) {
 }
 async function findUndeliveredByProduct(product) {
 	// TODO;
-	return Delivery.find({ product: product.id });
+	return Delivery.find({ product: product.id, deliveryStatus: null });
 }
 
 module.exports = {
