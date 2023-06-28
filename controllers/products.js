@@ -92,8 +92,8 @@ exports.syncPmByProduct = async function (req, res, next) {
 };
 
 exports.plan = async function (req, res, next) {
-	let productId = req.params.productId;
-	let purchase = await Product.getPlanV3(productId);
+	const productId = req.params.productId;
+	const purchase = await Product.getPlanV3(productId);
 	if (purchase.plan) {
 		res.render("product/plan", { purchase: purchase });
 	} else {

@@ -17,6 +17,13 @@ class ProductUpdator {
 		this.product = product;
 	}
 
+	static ORDER = {
+		airExpress: 1,
+		airDelivery: 2,
+		seaExpress: 3,
+		sea: 4,
+	};
+
 	async getUnshippedPurchases() {
 		return await Purchase.findUnshippedByProduct(this.product);
 	}

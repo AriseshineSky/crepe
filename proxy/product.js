@@ -969,6 +969,36 @@ async function getNewPlan(shipmentPlan, product, status) {
 		shipmentType,
 		status,
 		product,
+		newPlan.gap,
+	);
+	newPlan.inventoryStatus = status;
+	return newPlan;
+}
+
+async function getNewPurchaseShipmentPlan(
+	freightPlan,
+	freightType,
+	product,
+	sales,
+	purchase,
+	inbounds,
+) {
+	let newInbounds = await addPurchaseShipmentPlanToInbounds(
+		freightPlan,
+		inbounds,
+		product,
+		purchase,
+	);
+	newInbounds = await convertInboundsToSortedQueue(newInbounds);
+	let inboundQueue = await calculateInboundQueue(newInbounds, sales);
+	let status = await recalculateInboundQueue(inboundQueue, sales);
+	let newPlan = await calculatePlanAmounts(freightPlan, product);
+	newPlan.gap = await calculateOutOfStockPeriod(status);
+	newPlan.minInventory = await calculatePurchaseMinInventory(
+		freightType,
+		status,
+		sales,
+		product,
 		purchase,
 	);
 	newPlan.inventoryStatus = status;
@@ -1043,12 +1073,6 @@ async function createOrUpdate(product) {
 async function newAndSave(data) {
 	let product = new Product(data);
 	return await product.save();
-}
-
-async function createNewProduct(data, callback) {
-	let product = new Product();
-	product.asin = data.asin;
-	product.save(callback);
 }
 
 let deleteInbound = async function (inboundId) {
