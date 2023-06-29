@@ -41,6 +41,17 @@ function getDeliveryCode(code) {
 	return code.split("-")[0];
 }
 
+async function addDeliveryPurchaseId() {
+	let deliveries = await Delivery.find({ purchase: { $exists: false } });
+	for (let delivery of deliveries) {
+		const purchase = await Purchase.findOne({ code: getDeliveryCode(delivery.memo) });
+		if (purchase) {
+			delivery.purchase = purchase._id;
+			await delivery.save();
+		}
+	}
+}
+
 async function updateDeliveryPurchaseId() {
 	let deliveries = await all();
 	for (let delivery of deliveries) {
@@ -87,6 +98,7 @@ async function findUndeliveredByProduct(product) {
 
 module.exports = {
 	all,
+	addDeliveryPurchaseId,
 	createOrUpdate,
 	updateDeliveryPurchaseId,
 	findByProductId,

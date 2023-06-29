@@ -15,6 +15,13 @@ class DeliveryUpdator {
 		this.delivery = delivery;
 	}
 
+	async updatePurchase() {
+		this.delivery.remainingArrivalDays = helper.convertDateToPeroid(
+			this.delivery.expectArrivalDate,
+		);
+		await this.delivery.save();
+	}
+
 	async updateRemainingArrivalDays() {
 		this.delivery.remainingArrivalDays = helper.convertDateToPeroid(
 			this.delivery.expectArrivalDate,

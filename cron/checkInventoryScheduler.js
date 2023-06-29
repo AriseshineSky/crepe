@@ -35,9 +35,9 @@ const scheduleCronstyle = () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();
 	});
-	schedule.scheduleJob("0 0 */1 * * *", () => {
+	schedule.scheduleJob("0 */5 * * * *", () => {
 		logger.info("start to sync product inventory");
-		syncPurchases.syncPurchaseProcures();
+		Delivery.addDeliveryPurchaseId();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to sync product inventory");

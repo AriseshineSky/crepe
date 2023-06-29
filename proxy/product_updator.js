@@ -60,8 +60,7 @@ class ProductUpdator {
 	}
 
 	getSortedShipmentTypes() {
-		// return ShipmentType.sort(this.product.shipmentTypes);
-		return ["airExpress", "airDelivery", "seaExpress", "sea"];
+		return ShipmentType.sortByType(this.product.shipmentTypes);
 	}
 
 	async updateAll() {
@@ -73,12 +72,11 @@ class ProductUpdator {
 		const undeliveredQty = await this.getUndeliveredQty();
 		const salesPeriod = await this.getSalesPeriod();
 		const orderDues = await this.getOrderDues();
-		const producings = await this.getProducings();
 		const purchases = await this.getUnshippedPurchases();
 		const shipments = await this.getShipments();
 		const totalInventory = await this.getTotalInventory();
 		const quantityToPurchase = await this.getQuantityToPurchase();
-		const shipmentTypes = await this.getSortedShipmentTypes();
+		const shipmentTypes = this.getSortedShipmentTypes();
 		const newProduct = {
 			fbaInventory,
 			totalInventory,
@@ -89,10 +87,10 @@ class ProductUpdator {
 			undeliveredQty,
 			salesPeriod,
 			orderDues,
-			producings,
 			shipments,
 			quantityToPurchase,
 			shipmentTypes,
+			purchases,
 		};
 
 		this.product.set(newProduct);
@@ -201,7 +199,7 @@ class ProductUpdator {
 		let purchases = await this.getUnshippedPurchases();
 		for (let purchase of purchases) {
 			const purchaseUpdator = new PurchaseUpdator(purchase);
-			await purchaseUpdator.updateRemainingDeliveryDays();
+			await purchaseUpdator.updateAll();
 		}
 	}
 

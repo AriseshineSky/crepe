@@ -638,6 +638,14 @@ async function getYisucangReciveds() {
 
 exports.getYisucangReciveds = getYisucangReciveds;
 
+function sortByType(shipmentTypes) {
+	const order = ["airExpress", "airDelivery", "seaExpress", "sea"];
+
+	return shipmentTypes.sort((a, b) => {
+		return order.indexOf(a) - order.indexOf(b);
+	});
+}
+
 async function syncShipmentTypes() {
 	const rows = await sheetApi.listShipmentTypes();
 	logger.debug(rows);
@@ -676,4 +684,5 @@ module.exports = {
 	syncshipmentTypes,
 	getshipmentTypesAndProductingsByProduct,
 	TYPES,
+	sortByType,
 };

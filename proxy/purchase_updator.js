@@ -5,8 +5,28 @@ class PurchaseUpdator {
 		this.purchase = purchase;
 	}
 
+	async updateDeliveries() {
+		const deliveries = await Delivery.find({ purchase: this.purchase._id });
+		this.purchase.deliveries = deliveries;
+		await this.purchase.save();
+	}
+
 	async updateRemainingDeliveryDays() {
 		this.purchase.expectArrivalDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
+		await this.purchase.save();
+	}
+
+	async updateAll() {
+		this.purchase.expectArrivalDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
+
+		const deliveries = await Delivery.find({ purchase: this.purchase._id });
+		this.purchase.deliveries = deliveries;
+		const shippedQuantity = deliveries.reduce(({ sum, delivery }) => {
+			return sum + delivery.quantity;
+		}, 0);
+
+		this.purchase.shippedQuantity = shippedQuantity;
+		this.purchase.unshippedQuantity = this.purchase.quantity - shippedQuantity;
 		await this.purchase.save();
 	}
 }
