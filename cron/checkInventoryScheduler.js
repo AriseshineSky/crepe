@@ -10,6 +10,7 @@ let syncLotPageList = require("../lib/syncLotPageList");
 let syncProcureItem = require("../lib/syncProcureItem");
 let syncPurchaseDetails = require("../lib/syncPurchasesDetail");
 let syncPurchaseOrders = require("../lib/syncPurchaseOrders");
+let syncYisucangInbounds = require("../lib/syncYisucangInbounds");
 let syncPurchases = require("../lib/syncPurchases");
 let syncSupplierSku = require("../lib/syncSupplierSku");
 let syncSupplier = require("../lib/syncSupplier");
@@ -35,9 +36,19 @@ const scheduleCronstyle = () => {
 		logger.info("start to check product inventory");
 		checkProductsInventory.checkProductsInventory();
 	});
-	schedule.scheduleJob("0 */5 * * * *", () => {
+
+	syncYisucangInbounds.syncYisucangInbounds();
+	schedule.scheduleJob("0 */3 * * * *", () => {
 		logger.info("start to sync product inventory");
-		Delivery.addDeliveryPurchaseId();
+		syncYisucangInbounds.syncYisucangInbounds();
+	});
+	schedule.scheduleJob("0 */3 * * * *", () => {
+		logger.info("start to sync product inventory");
+		Delivery.updateRemainingArrivalDays();
+	});
+	schedule.scheduleJob("0 */10 * * * *", () => {
+		logger.info("start to sync product inventory");
+		syncDeliveries.syncDeliveries();
 	});
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to sync product inventory");

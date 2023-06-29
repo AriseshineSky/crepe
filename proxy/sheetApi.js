@@ -121,7 +121,7 @@ async function listRecieveds() {
 	const sheets = google.sheets({ version: "v4", auth });
 	const res = await sheets.spreadsheets.values.get({
 		spreadsheetId: "1MB8djN1KHRywmw9_ZFjAD8BClowlucI-jz_x9MBfNvE",
-		range: "recieved!A1:M800",
+		range: "recieved!A1:M1800",
 	});
 	const rows = res.data.values;
 	if (!rows || rows.length === 0) {
@@ -150,4 +150,3 @@ async function listProducts() {
 exports.listProducts = listProducts;
 exports.listFreights = listFreights;
 exports.listFreightTypes = listFreightTypes;
-

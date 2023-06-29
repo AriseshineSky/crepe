@@ -1,6 +1,6 @@
 const models = require("../models");
 const Purchase = models.Purchase;
-const Delivery = models.Delivery;
+const YisucangInbound = models.YisucangInbound;
 
 const helper = require("../lib/util/helper");
 const batchSize = 200;
@@ -11,37 +11,6 @@ let FreightType = models.Freight;
 
 let moment = require("moment");
 let logger = require("../common/logger");
-
-async function syncFreights() {
-	let freights = [];
-	// let rows = await larksuiteApi.listFreights();
-	let rows = await sheetApi.listFreights();
-	let header = rows.shift();
-	let shippedDateIndex = header.indexOf("出货日期");
-	let deliveryDueIndex = header.indexOf("预计到港时间");
-	let deliveryIndex = header.indexOf("状态");
-	let orderIndex = header.indexOf("系统订单");
-	let qtyIndex = header.indexOf("出货数量");
-	let boxIndex = header.indexOf("装箱信息");
-	let typeIndex = header.indexOf("PM要求");
-
-	for (let row of rows) {
-		if (row[0] && row[1]) {
-			let freight = await parseRow(
-				row,
-				orderIndex,
-				deliveryIndex,
-				deliveryDueIndex,
-				qtyIndex,
-				boxIndex,
-				shippedDateIndex,
-				typeIndex,
-			);
-			freights.push(freight);
-		}
-	}
-	return freights;
-}
 
 async function formatFreightsAndProductings(freightsAndProducings) {
 	let inboundShippeds = [];
@@ -696,56 +665,21 @@ async function updateDeliveryPurchaseId() {
 	}
 }
 
-async function all() {
-	return await Delivery.find({});
-}
-
-async function findDeliveryById(deliveryId) {
-	return await Delivery.findOne({ deliveryId: deliveryId });
-}
-exports.findDeliveryById = findDeliveryById;
-
-async function createOrUpdate(delivery) {
-	const purchase = await Purchase.findOne({ code: getPurchaseCode(delivery.memo) });
-
-	if (purchase) {
-		delivery.purchase = purchase._id;
-		delivery.purchaseCode = purchase.code;
-	}
-	let existDelivery = await Delivery.findOne({ code: delivery.code });
-
-	if (existDelivery) {
-		Object.assign(existDelivery, delivery);
-		await existDelivery.save();
-	} else {
-		const newDelivery = new Delivery(delivery);
-		await newDelivery.save();
-	}
-}
-
-async function findByProductId(productId) {
-	return Delivery.find({ product: productId }).populate("product").exec();
-}
-async function findUndeliveredByProduct(product) {
-	// TODO;
-	return Delivery.find({ product: product.id, deliveryStatus: null });
-}
-
-async function updateRemainingArrivalDays() {
-	let deliveries = await all();
-	deliveries.forEach(async (delivery) => {
-		delivery.remainingArrivalDays = helper.convertDateToPeroid(delivery.expectArrivalDate);
-		await delivery.save();
+async function createOrUpdate(inbound) {
+	console.log(inbound);
+	const existInbound = await YisucangInbound.findOne({
+		number: inbound.number,
 	});
+
+	if (existInbound) {
+		Object.assign(existInbound, inbound);
+		await existInbound.save();
+	} else {
+		const newInbound = new YisucangInbound(inbound);
+		await newInbound.save();
+	}
 }
 
 module.exports = {
-	all,
-	addDeliveryPurchaseId,
 	createOrUpdate,
-	updateDeliveryPurchaseId,
-	findByProductId,
-	findUndeliveredByProduct,
-	updateRemainingArrivalDays,
-	updateDeliveryReciveds,
 };

@@ -10,3 +10,4 @@ exports.Yisucang = require("./yisucang");
 exports.Delivery = require("./delivery");
 exports.Lot = require("./lot");
 exports.Supplier = require("./supplier");
+exports.YisucangInbound = require("./yisucang_inbound");
