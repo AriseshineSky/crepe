@@ -666,7 +666,6 @@ async function updateDeliveryPurchaseId() {
 }
 
 async function createOrUpdate(inbound) {
-	console.log(inbound);
 	const existInbound = await YisucangInbound.findOne({
 		number: inbound.number,
 	});
