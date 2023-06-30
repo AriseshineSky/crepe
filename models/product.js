@@ -42,6 +42,7 @@ var ProductSchema = new Schema({
 	},
 	shipments: [
 		{
+			purchaseCode: { type: String },
 			code: { type: String },
 			expectArrivalDate: { type: Date },
 			createdAt: { type: Date },
@@ -57,7 +58,10 @@ var ProductSchema = new Schema({
 	purchases: [
 		{
 			code: { type: String },
+			shippedQuantity: { type: Number, default: 0 },
+			unshippedQuantity: { type: Number, default: 0 },
 			unIndoundQuantity: { type: Number, default: 0 },
+			totalQuantity: { type: Number, default: 0 },
 			expectDeliveryDate: { type: Date },
 			expectDeliveryDays: { type: Date },
 			createdAt: { type: Date },
@@ -73,9 +77,6 @@ var ProductSchema = new Schema({
 	yisucangId: { type: [String] },
 	plan: { type: String },
 	tempPlan: { type: String },
-	createAt: { type: Date, default: Date.now },
-	updateAt: { type: Date, default: Date.now },
-	deletedAt: { type: Date },
 });
 
 ProductSchema.plugin(BaseModel);

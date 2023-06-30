@@ -31,10 +31,4 @@ let SupplierSchema = new Schema({
 	buyerManager: { type: String },
 });
 SupplierSchema.plugin(BaseModel);
-SupplierSchema.pre("save", function (next) {
-	let now = new Date();
-	this.updateAt = now;
-	next();
-});
-
 mongoose.model("Supplier", SupplierSchema);

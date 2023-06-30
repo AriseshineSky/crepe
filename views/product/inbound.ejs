@@ -19,21 +19,30 @@
         <tr>
           <th data-editable="true" data-sortable="true">orderId:</th>
           <th data-editable="true" data-sortable="true">code:</th>
-          <th data-editable="true" data-sortable="true">数量:</th>
+          <th data-editable="true" data-sortable="true">下单数量:</th>
+          <th data-editable="true" data-sortable="true">已出货数量:</th>
+          <th data-editable="true" data-sortable="true">未出货数量:</th>
           <th data-editable="true" data-sortable="true">采购创建日期:</th>
           <th data-editable="true" data-sortable="true">预估出货日期:</th>
           <th class="">Action</th>
         </tr>
       </thead>
       <tbody>
-        <% product.shipments.forEach(function(purchase){ %>
+        <% product.purchases.forEach(function(purchase){ %>
             <tr>
               <td><%= purchase.orderId %></td>
               <td><%= purchase.code %></td>
-              <td><%= purchase.quantity %></td>
+              <td><%= purchase.totalQuantity %></td>
+              <td><%= purchase.shippedQuantity %></td>
+              <td><%= purchase.unshippedQuantity %></td>
+              <td>
+                <% if (purchase.createdAt) {%>
+									<%= `${moment(purchase.createdAt).format('YYYY-MM-DD')}` %>
+                <% } %>
+              </td>
               <td>
                 <% if (purchase.expectDeliveryDate) {%>
-									<%= `${moment(purchase.expectDeliveryDate).format('YYYY-MM-DD HH:mm:ss')}` %>
+									<%= `${moment(purchase.expectDeliveryDate).format('YYYY-MM-DD')}` %>
                 <% } %>
               </td>
               <td style="text-align:center;">
@@ -61,12 +70,14 @@
       <thead>
         <tr>
           <th data-editable="true" data-sortable="true">orderId:</th>
-          <th data-editable="true" data-sortable="true">code:</th>
+          <th data-editable="true" data-sortable="true">purchase code:</th>
+          <th data-editable="true" data-sortable="true">shipment code:</th>
           <th data-editable="true" data-sortable="true">数量:</th>
           <th data-editable="true" data-sortable="true">出货日期:</th>
           <th data-editable="true" data-sortable="true">预估收货日期:</th>
           <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
           <th data-editable="true" data-sortable="true">装箱信息:</th>
+          <th data-editable="true" data-sortable="true">Memo:</th>
           <th class="">Action</th>
         </tr>
       </thead>
@@ -74,6 +85,7 @@
         <% product.shipments.forEach(function(inbound){ %>
           <tr>
             <td><%= inbound.orderId %></td>
+            <td><%= inbound.purchaseCode %></td>
             <td><%= inbound.code %></td>
             <td><%= inbound.quantity %></td>
             <td>
@@ -91,6 +103,9 @@
               <% if (inbound.box) {%>
                 <%= inbound.box.length %>*<%= inbound.box.width %>*<%= inbound.box.height %>cm
               <% } %>
+            </td>
+            <td>
+                <%= inbound.memo %>
             </td>
             <td style="text-align:center;">
               <button class="btn btn-primary inbound" data-bs-toggle="modal" data-bs-target="#editModal" data-inbound-id="<%=inbound._id%>" >Edit</button>

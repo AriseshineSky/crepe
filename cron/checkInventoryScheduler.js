@@ -73,10 +73,10 @@ const scheduleCronstyle = () => {
 	// });
 	schedule.scheduleJob("0 */5 * * * *", () => {
 		logger.info("start to update lisings");
-		syncAllListings.syncListings();
+		// syncAllListings.syncListings();
 	});
 
-	Product.updateAll();
+	// Product.updateAll();
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product stocks");
 		Product.updateAll();

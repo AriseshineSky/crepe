@@ -30,9 +30,6 @@ var FreightSchema = new Schema({
 	},
 	quantity: { type: Number },
 	deliveryStatus: { type: String },
-	createAt: { type: Date, default: Date.now() },
-	updateAt: { type: Date, default: Date.now() },
-	deletedAt: { type: Date },
 });
 
 FreightSchema.plugin(BaseModel);

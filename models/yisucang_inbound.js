@@ -8,17 +8,9 @@ const YisucangInboundSchema = new Schema({
 	quantity: { type: Number, default: 0 },
 	unitsPerBox: { type: Number, default: 0 },
 	date: { type: Date, default: Date.now },
-	createAt: { type: Date, default: Date.now },
-	updateAt: { type: Date, default: Date.now },
-	deletedAt: { type: Date },
 	logisticsTrackingNumber: { type: String },
 });
 
 YisucangInboundSchema.plugin(BaseModel);
-YisucangInboundSchema.pre("save", function (next) {
-	const now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("YisucangInbound", YisucangInboundSchema);

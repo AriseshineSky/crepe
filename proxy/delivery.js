@@ -679,8 +679,12 @@ async function findByProductId(productId) {
 }
 
 async function findUndeliveredByProduct(product) {
-	// TODO;
-	return Delivery.find({ product: product.id, deliveryStatus: null });
+	const purchaseCodes = product.purchases.map((purchase) => purchase.code);
+	return Delivery.find({
+		purchaseCode: { $in: purchaseCodes },
+		deliveryStatus: null,
+		status: { $ne: "cancelled" },
+	});
 }
 
 async function updateRemainingArrivalDays() {

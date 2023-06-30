@@ -17,10 +17,5 @@ const UserSchema = new Schema({
 	plwhsId: { type: Number },
 });
 UserSchema.plugin(BaseModel);
-UserSchema.pre("save", function (next) {
-	const now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("User", UserSchema);

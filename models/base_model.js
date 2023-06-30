@@ -5,6 +5,11 @@
 const tools = require("../common/tools");
 
 module.exports = function (schema) {
+	schema.add({
+		createAt: { type: Date, default: Date.now() },
+		updateAt: { type: Date, default: Date.now() },
+		deletedAt: { type: Date },
+	});
 	schema.methods.create_at_ago = function () {
 		return tools.formatDate(this.create_at, true);
 	};

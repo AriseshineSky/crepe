@@ -125,7 +125,7 @@ class ProductUpdator {
 				tracking,
 				remainingArrivalDays,
 			};
-			shipments.append(shipment);
+			shipments.push(shipment);
 		}
 		return shipments;
 	}

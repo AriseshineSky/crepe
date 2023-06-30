@@ -11,12 +11,8 @@ var ListingSchema = new Schema({
 	reservedFCProcessing: { type: Number, default: 0 },
 	inboundShipped: { type: Number, default: 0 },
 	ps: { type: Number, default: 0 },
-	createAt: { type: Date, default: Date.now },
-	updateAt: { type: Date, default: Date.now },
-	deletedAt: { type: Date },
 });
 
 ListingSchema.plugin(BaseModel);
 
 mongoose.model("Listing", ListingSchema);
-
