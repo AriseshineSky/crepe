@@ -6,7 +6,6 @@ const helper = require("../lib/util/helper");
 const batchSize = 200;
 
 let sheetApi = require("./sheetApi");
-let Product = require("./product");
 let FreightType = models.Freight;
 
 let moment = require("moment");
@@ -76,9 +75,6 @@ function compare(type) {
 	};
 }
 
-async function sortFreightsByDelivery(freights) {
-	return freights.sort(compare("delivery"));
-}
 let sumFreights = async function (freights) {
 	let sum = 0;
 	for (let freight of freights) {
@@ -87,37 +83,6 @@ let sumFreights = async function (freights) {
 	return sum;
 };
 
-let checkFreights = async function (freights, pendingStorageNumber) {
-	freights = await sortFreightsByDelivery(freights);
-	while (
-		Number(pendingStorageNumber > 0) &&
-		(await sumFreights(freights)) > Number(pendingStorageNumber)
-	) {
-		freights.shift();
-	}
-};
-
-async function remvoeDuplicateYisucangInbounds(inbounds) {
-	return inbounds.filter((elem, index, self) => {
-		let count = 0;
-		for (let inbound of inbounds) {
-			if (inbound.number === elem.number) {
-				count++;
-			}
-		}
-		return count === 1;
-	});
-}
-
-async function findYisucangInbounds(inbounds, freight) {
-	return inbounds.filter((elem) => {
-		return elem.orderId === freight.orderId;
-	});
-}
-
-async function sortFreightsByDelivery(freights) {
-	return freights.sort(compare("delivery"));
-}
 let countBoxes = async function (objects) {
 	let sum = 0;
 	for (let obj of objects) {
@@ -654,19 +619,6 @@ exports.syncDelivery = async function () {
 	}
 };
 
-async function getDeliveriesByBatch() {
-	try {
-		const totalCount = await Delivery.countDocuments({});
-		const totalPage = Math.ceil(totalCount / batchSize);
-		for (let page = 1; page <= totalPage; page++) {
-			const deliveries = await Delivery.find({}, { deliveryCode: 1 })
-				.skip((page - 1) * batchSize)
-				.limit(batchSize);
-			const deliveryCodes = deliveries.map((delivery) => delivery.deliveryCode);
-		}
-	} catch (error) {}
-}
-
 function getPurchaseCode(code) {
 	if (!code) {
 		return null;
@@ -700,11 +652,6 @@ async function all() {
 	return await Delivery.find({});
 }
 
-async function findDeliveryById(deliveryId) {
-	return await Delivery.findOne({ deliveryId: deliveryId });
-}
-exports.findDeliveryById = findDeliveryById;
-
 async function createOrUpdate(delivery) {
 	const purchase = await Purchase.findOne({ code: getPurchaseCode(delivery.memo) });
 
@@ -726,6 +673,7 @@ async function createOrUpdate(delivery) {
 async function findByProductId(productId) {
 	return Delivery.find({ product: productId }).populate("product").exec();
 }
+
 async function findUndeliveredByProduct(product) {
 	// TODO;
 	return Delivery.find({ product: product.id, deliveryStatus: null });

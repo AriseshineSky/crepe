@@ -8,3 +8,35 @@ exports.index = async function (req, res, next) {
 		deliveries: deliveries,
 	});
 };
+
+exports.create = async (req, res, next) => {
+	const {
+		memo,
+		box,
+		totalBoxes,
+		quantity,
+		shipmentDate,
+		estimateArrivePortDate,
+		expectArrivalDate,
+		remainingArrivalDays,
+		product,
+	} = req.body;
+
+	const newDelivery = {
+		memo,
+		box,
+		totalBoxes,
+		quantity,
+		code,
+		status,
+		orderId,
+		shipmentDate,
+		estimateArrivePortDate,
+		expectArrivalDate,
+		remainingArrivalDays,
+		product,
+	};
+
+	const delivery = await Delivery.createOrUpdate(newDelivery);
+	res.redirect("/deliveries" + delivery._id);
+};

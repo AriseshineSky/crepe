@@ -42,9 +42,17 @@ const scheduleCronstyle = () => {
 		logger.info("start to sync product inventory");
 		syncYisucangInbounds.syncYisucangInbounds();
 	});
+	schedule.scheduleJob("0 */5 * * * *", () => {
+		logger.info("start to sync product inventory");
+		Delivery.updateDeliveryReciveds();
+	});
 	schedule.scheduleJob("0 */3 * * * *", () => {
 		logger.info("start to sync product inventory");
 		Delivery.updateRemainingArrivalDays();
+	});
+	schedule.scheduleJob("0 */10 * * * *", () => {
+		logger.info("start to sync product inventory");
+		syncPurchaseOrders.syncPurchaseOrders();
 	});
 	schedule.scheduleJob("0 */10 * * * *", () => {
 		logger.info("start to sync product inventory");

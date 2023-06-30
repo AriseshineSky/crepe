@@ -122,19 +122,31 @@
   </div>
   <div class="col-sm-6">
     <div class="card">
-      <form id='create_product_inbound_form' action='/products/<%- product.id %>/inbounds' method='post'>
+      <form id='create_product_inbound_form' action='/products/<%- product._id %>/inbounds' method='post'>
         <div class="card-header">
           <h4>添加运输中货物</h4>
         </div>
         <div class="card-body">
-          <input class="form-control" name="productId" value="<%= product.id %>" type="hidden" >
+          <input class="form-control" name="product" value="<%= product._id %>" type="hidden" >
+          <div class="input-group input-group-static mb-4">
+            <label>purchase code:</label>
+            <input type="text" class="form-control" name="memo">
+          </div>
           <div class="input-group input-group-static mb-4">
             <label>数量:</label>
             <input type="number" class="form-control" name="quantity">
           </div>
           <div class="input-group input-group-static mb-4">
+            <label>箱数:</label>
+            <input type="number" class="form-control" name="totalBoxes">
+          </div>
+          <div class="input-group input-group-static mb-4">
+            <label>发货日期:</label>
+            <input type="text" class="form-control" name="shipmentDate" data-provide="datepicker">
+          </div>
+          <div class="input-group input-group-static mb-4">
             <label>预估收货日期:</label>
-            <input type="text" class="form-control" name="deliveryDue" data-provide="datepicker">
+            <input type="text" class="form-control" name="expectArrivalDate" data-provide="datepicker">
           </div>
         </div>
         <div class="card-footer text-muted">

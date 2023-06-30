@@ -51,6 +51,7 @@ const DeliverySchema = new Schema({
 	deletedAt: { type: Date },
 	packingCodeList: { type: String },
 	channelId: { type: String },
+	logisticsTrackingNumber: { type: String },
 	chargeUnitPrice: { type: String },
 	chargeWeight: { type: String },
 	spiltTrackings: { type: String },

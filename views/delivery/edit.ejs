@@ -2,140 +2,38 @@
 <div id='content'>
   <div class='panel'>
     <div class='inner post'>
-      <% if(typeof(edit_error) !== 'undefined' && edit_error){ %>
-        <div class="alert alert-error">
-          <a class="close" data-dismiss="alert" href="#">&times;</a>
-          <strong><%= edit_error %></strong>
-        </div>
-      <% } %>
-      <% if(typeof(error) !== 'undefined' && error){ %>
-        <div class="alert alert-error">
-          <strong><%= error %></strong>
-        </div>
-      <% }else{ %>
-        <% if (typeof(action) !== 'undefined' && action === 'edit') { %>
-          <form id='edit_product_form' action='/products/<%= product.id %>/edit' method='post'>
-            <% } else { %>
-            <form id='create_product_form' action='/products/<%= product.id %>/save' method='post'>
-              <% } %>
-            <div class="card p-4">
-              <div class="card-header">
-                Product
-              </div>
-                <input type="hidden" name="id" value="<%= product.id %>"/>
-                <div class="input-group input-group-static mb-4">
-                  <label>ASIN：</label>
-                  <input type="text" class="form-control" name="asin" value="<%= product.asin %>"/>
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>生产周期(天):</label>
-                  <input class="form-control" name="cycle" value="<%= product.cycle %>">
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>最小库存保有量(天):</label>    
-                  <input class="form-control" name="minInventory" value="<%= product.minInventory %>">
-                </div>  
-								<div class="form-group"> 
-                  <label>卖场:</label>   
-										<label><input type="checkbox" name="countries"  value="US" <% if (product.countries.includes('US')) { %>checked<% }%> >US</label>
-										<label><input type="checkbox" name="countries"  value="CA" <% if (product.countries.includes('CA')) { %>checked<% }%> >CA</label>
-										<label><input type="checkbox" name="countries"  value="MX" <% if (product.countries.includes('MX')) { %>checked<% }%> >MX</label>
-										<label><input type="checkbox" name="countries"  value="UK" <% if (product.countries.includes('UK')) { %>checked<% }%> >UK</label>
-										<label><input type="checkbox" name="countries"  value="DE" <% if (product.countries.includes('DE')) { %>checked<% }%> >DE</label>
-										<label><input type="checkbox" name="countries"  value="FR" <% if (product.countries.includes('FR')) { %>checked<% }%> >FR</label>
-										<label><input type="checkbox" name="countries"  value="IT" <% if (product.countries.includes('IT')) { %>checked<% }%> >IT</label>
-										<label><input type="checkbox" name="countries"  value="SP" <% if (product.countries.includes('SP')) { %>checked<% }%> >SP</label>
-										<label><input type="checkbox" name="countries"  value="AU" <% if (product.countries.includes('AU')) { %>checked<% }%> >AU</label>
-										<label><input type="checkbox" name="countries"  value="JP" <% if (product.countries.includes('JP')) { %>checked<% }%> >JP</label>
-								</div>
-                <div class="input-group input-group-static mb-4">
-                  <label>运输类型(默认有空运和海运快船):</label>
-                  <div class="form-check">
-                    <% if (product.airDelivery) { %>
-                      <input class="form-check-input" type="checkbox" name="airDelivery" value="true" checked id="defaultCheck1">
-                    <% } else { %>
-                      <input class="form-check-input" type="checkbox" name="airDelivery" value="true" id="defaultCheck1">
-                    <% } %>
-                    <label class="form-check-label" for="defaultCheck1">
-                      需要空派
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <% if (product.sea) { %>
-                      <input class="form-check-input" type="checkbox" name="sea" value="true" checked id="defaultCheck1">
-                    <% } else { %>
-                      <input class="form-check-input" type="checkbox" name="sea" value="true" id="defaultCheck1">
-                    <% } %>
-                    <label class="form-check-label" for="defaultCheck1">
-                      需要慢船
-                    </label>
-                  </div>
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>预估最大销量:</label>
-                  <input class="form-control" name="maxAvgSales" value="<%= product.maxAvgSales %>">
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>设置平均销量:</label>
-                  <input class="form-control" name="avgSales" value="<%= product.avgSales %>">
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>亚马逊7天平均销量:</label>
-                  <input class="form-control" name="ps" readonly value="<%= product.ps %>">
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>plwhs产品id:</label>
-                  <input type="number" class="form-control" name="plwhsId" value="<%= product.plwhsId %>">
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>yisucang产品id:</label>
-										<input type="number" class="form-control" name="yisucangId" value="<%= product.yisucangId[0] %>">
-										<input type="number" class="form-control" name="yisucangId" value="<%= product.yisucangId[1] %>">
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>装箱尺寸：</label>
-                  <div class="input-group input-group-static mb-4">
-                    <label>长(cm)：</label>
-                    <input class="form-control" name="box.length" value="<%= product.box.length %>">
-                  </div>
-                  <div class="input-group input-group-static mb-4">
-                    <label>宽(cm)：</label>
-                    <input class="form-control" name="box.width" value="<%= product.box.width %>">
-                  </div>
-                  <div class="input-group input-group-static mb-4">
-                    <label>高(cm)：</label>
-                    <input class="form-control" name="box.height" value="<%= product.box.height %>">
-                  </div>
-                  <div class="input-group input-group-static mb-4">
-                    <label>重(kg)：</label>
-                    <input class="form-control" name="box.weight" value="<%= product.box.weight %>">
-                  </div>
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>每箱数量(个)：</label>
-                  <input class="form-control" name="unitsPerBox" value="<%= product.unitsPerBox %>">
-                </div>
-                <div class="form-check">
-                  <% if (product.discontinue) { %>
-                    <input class="form-check-input" type="checkbox" name="discontinue" value="true" checked id="defaultDiscontinue">
-                  <% } else { %>
-                    <input class="form-check-input" type="checkbox" name="discontinue" value="true" id="defaultDiscontinue">
-                  <% } %>
-                  <label class="form-check-label" for="defaultDiscontinue">
-                    放弃
-                  </label>
-                </div>
+      <form id='edit_delivery_form' action='/deliveries/<%= delivery._id %>/edit' method='post'>
+        <input type="hidden" name="id" value="<%= delivery._id %>"/>
+				<div class="card p-4">
+					<div class="card-header">
+						delivery
+					</div>
+					<div class="input-group input-group-static mb-4">
+						<label>Purchase：</label>
+						<input type="text" class="form-control" name="memo" value="<%= delivery.memo %>"/>
+					</div>
+					<div class="input-group input-group-static mb-4">
+						<label>数量:</label>
+						<input class="form-control" name="quantity" value="<%= delivery.quantity %>">
+					</div>
+					<div class="input-group input-group-static mb-4">
+						<label>箱数:</label>
+						<input class="form-control" name="boxCount" value="<%= delivery.boxCount %>">
+					</div>
 
-            <% if (product.pm) { %>
-              <%= product.pm.name %>
-            <% } else { %>
-              Unknowun
-            <% } %>
-              <div class="card-footer text-muted">
-                <button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
-              </div>
-            </div>
-        </div>
-    <% } %>
+					<div class="input-group input-group-static mb-4">
+						<label>发货日期:</label>
+						<input type="text" class="form-control" name="shipmentDate" data-provide="datepicker" value="<%= delivery.shipmentDate %>">
+					</div>
+					<div class="input-group input-group-static mb-4">
+						<label>预估收货日期:</label>
+						<input type="text" class="form-control" name="expectArrivalDate" data-provide="datepicker" value="<%= delivery.expectArrivalDate %>">
+					</div>
+					<div class="card-footer text-muted">
+						<button type="submit" class="btn btn-primary btn-lg" role="button" aria-disabled="true">Save</button>
+					</div>
+				</div>
+			</form>
+		</div>
   </div>
 </div>

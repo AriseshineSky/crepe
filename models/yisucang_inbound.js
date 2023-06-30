@@ -10,6 +10,7 @@ const YisucangInboundSchema = new Schema({
 	createAt: { type: Date, default: Date.now },
 	updateAt: { type: Date, default: Date.now },
 	deletedAt: { type: Date },
+	logisticsTrackingNumber: { type: String },
 });
 
 YisucangInboundSchema.plugin(BaseModel);
