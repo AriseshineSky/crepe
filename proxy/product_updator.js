@@ -68,6 +68,7 @@ class ProductUpdator {
 		await this.updateUnshippedPurchases();
 		const { fbaInventory, sales } = await this.getFbaInventoryAndSalesV3();
 		const { yisucangInventory, plwhsInventory } = await this.prepareWarehouseInvetories();
+		console.log(yisucangInventory);
 		const unshippedQty = await this.getUnshippedQty();
 		const undeliveredQty = await this.getUndeliveredQty();
 		const salesPeriod = await this.getSalesPeriod();
@@ -80,7 +81,7 @@ class ProductUpdator {
 		const newProduct = {
 			fbaInventory,
 			totalInventory,
-			sales,
+			ps: sales,
 			yisucangInventory,
 			plwhsInventory,
 			unshippedQty,
@@ -93,6 +94,7 @@ class ProductUpdator {
 			purchases,
 		};
 
+		console.log(newProduct);
 		this.product.set(newProduct);
 		await this.product.save();
 	}
@@ -129,10 +131,11 @@ class ProductUpdator {
 	}
 
 	async getQuantityToPurchase() {
-		if (this.product.unitsPerBox === 0) {
+		if (!this.product.unitsPerBox || this.product.unitsPerBox === 0) {
 			this.product.unitsPerBox = 30;
 		}
 
+		console.log("unitsPerBox", this.product.unitsPerBox);
 		const boxes = Math.ceil(
 			(this.product.maxAvgSales * 90 - this.product.totalInventory) / this.product.unitsPerBox,
 		);
@@ -281,15 +284,23 @@ class ProductUpdator {
 		let inventory = 0;
 		return inventory;
 	}
+
 	async getYisucangInventory() {
-		return 0;
 		let inventory = 0;
+
+		console.log("inventory", inventory);
 		for (const yisucangId of this.product.yisucangId) {
+			console.log("yisucangId", yisucangId);
 			const yisucang = await Yisucang.findYisucangById(yisucangId);
 			if (yisucang) {
-				inventory += yisucang.stock;
+				console.log(inventory);
+				console.log(yisucang.inventory);
+				inventory = inventory + yisucang.inventory;
+				console.log(inventory);
 			}
 		}
+
+		console.log(inventory);
 		return inventory;
 	}
 }

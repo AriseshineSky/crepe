@@ -653,21 +653,25 @@ async function all() {
 }
 
 async function createOrUpdate(delivery) {
-	const purchase = await Purchase.findOne({ code: getPurchaseCode(delivery.memo) });
-
-	if (purchase) {
-		delivery.purchase = purchase._id;
-		delivery.purchaseCode = purchase.code;
+	if (delivery.memo) {
+		const purchase = await Purchase.findOne({ code: getPurchaseCode(delivery.memo) });
+		if (purchase) {
+			delivery.purchase = purchase._id;
+			delivery.purchaseCode = purchase.code;
+		}
 	}
-	let existDelivery = await Delivery.findOne({ code: delivery.code });
 
-	if (existDelivery) {
-		Object.assign(existDelivery, delivery);
-		await existDelivery.save();
-	} else {
-		const newDelivery = new Delivery(delivery);
-		await newDelivery.save();
+	if (delivery.code) {
+		let existDelivery = await Delivery.findOne({ code: delivery.code });
+		if (existDelivery) {
+			Object.assign(existDelivery, delivery);
+			await existDelivery.save();
+			return;
+		}
 	}
+
+	const newDelivery = new Delivery(delivery);
+	await newDelivery.save();
 }
 
 async function findByProductId(productId) {
@@ -688,6 +692,7 @@ async function updateRemainingArrivalDays() {
 }
 
 module.exports = {
+	find: Delivery.find.bind(Delivery),
 	all,
 	addDeliveryPurchaseId,
 	createOrUpdate,

@@ -200,15 +200,16 @@ async function syncPm() {
 	// 	}
 	// });
 	let products = await Product.find();
+	console.log(products.length);
 	for (let product of products) {
 		for (let country of product.countries) {
 			let user = await getPm(product.asin, country.toUpperCase());
+			console.log(user);
 			if (user) {
 				let pm = await User.findOrCreate(user);
 				User.updateUser(user);
 				product.pm = pm;
 				await product.save();
-				return;
 			}
 		}
 	}
@@ -498,11 +499,17 @@ async function getValidpurchases(product) {
 
 async function getTotalInventory(product) {}
 
-async function updateAll() {
-	const products = await Product.find();
-	for (let product of products) {
+async function updateAll(productId) {
+	if (productId) {
+		const product = await Product.findById(productId);
 		const productUpdator = new ProductUpdator(product);
 		await productUpdator.updateAll();
+	} else {
+		const products = await Product.find();
+		for (let product of products) {
+			const productUpdator = new ProductUpdator(product);
+			await productUpdator.updateAll();
+		}
 	}
 }
 
@@ -575,20 +582,20 @@ async function getPlanV3(productId, purchaseCode) {
 			}
 		}
 	}
-	let purchase = {
+	const purchase = {
 		plan: plan,
+		product: product,
 		minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
 		maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
 		volumeWeightCheck: volumeWeightCheck,
-		product: product,
 	};
 	return purchase;
 }
 
-async function convertpurchaseQtyIntoBox(purchase, product) {
+async function convertPurchaseQtyIntoBox(purchase, product) {
 	return {
-		quantity: quantity,
-		boxes: Math.ceil(purchase.quantity / product.unitsPerBox),
+		quantity: purchase.totalQuantity,
+		boxes: Math.ceil(purchase.totalQuantity / product.unitsPerBox),
 	};
 }
 
@@ -652,7 +659,6 @@ async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 		shipmentPlan,
 		quantity.boxes, // the boxes that other shipment types need to ship
 		0, // the index of shipment type
-		shipmentTypes,
 		inbounds,
 		product,
 		result,
@@ -725,7 +731,7 @@ async function checkVolumeWeight(box, shipmentType) {
 
 async function formatPlan(plan, unitsPerBox) {
 	for (let type in plan) {
-		if (plan[type].boxes) {
+		if (plan[type] && plan[type].boxes) {
 			plan[type].units = plan[type].boxes * unitsPerBox;
 		}
 	}
@@ -1004,6 +1010,19 @@ const getProductByPlwhsId = async function (plwhsId) {
 		});
 };
 
+async function createOrUpdateByPlwhsId(product) {
+	let existProduct = await Product.findOne({ plwhsId: product.plwhsId });
+	if (existProduct) {
+		Object.assign(existProduct, product);
+		await existProduct.save();
+	} else {
+		console.log(product);
+		const newProduct = new Product(product);
+		console.log(newProduct);
+		await newProduct.save();
+	}
+}
+
 async function createOrUpdate(product) {
 	let existProduct = await Product.findById(product.productId);
 
@@ -1039,4 +1058,6 @@ module.exports = {
 	getPlanV3,
 	findByUser,
 	updateAll,
+	createOrUpdateByPlwhsId,
+	syncPm,
 };

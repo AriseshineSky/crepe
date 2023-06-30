@@ -11,10 +11,5 @@ var YisucangSchema = new Schema({
 });
 
 YisucangSchema.plugin(BaseModel);
-YisucangSchema.pre("save", function (next) {
-	var now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("Yisucang", YisucangSchema);

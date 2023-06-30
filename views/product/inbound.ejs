@@ -6,7 +6,7 @@
   <div class="card-body">
     <div class="toolbar">
       <a href="/products/<%= product.id %>/plan" target="_blank" type="button" class="btn btn-primary">生成采购计划</a>
-      <a href="/products/<%= product.id %>/syncFreight" target="_blank" type="button" class="btn btn-info">同步采购和运输中货物</a>
+      <a href="/products/<%= product.id %>/update_all" target="_blank" type="button" class="btn btn-info">更新产品信息</a>
     </div>
    
     <br/>
@@ -107,14 +107,26 @@
   <div class="col-sm-6">
     <div class="card">
       <div class="card-header">
-        <h4>仓库库存</h4>
+        <h4>产品信息</h4>
       </div>
       <div class="card-body">
         <input class="form-control" name="asin" value="<%= product.asin %>" type="hidden" >
         <div class="input-group input-group-static mb-4">
-          <label>数量:</label>
-          <span data-bs-toggle="tooltip" class="form-control" data-bs-placement="top" title="Yisucang: <%= product.stock %> | Plwhs:<%= product.plwhs %>">
-            <%= product.stock + product.plwhs %>
+          <label>7天平均销量:</label>
+          <span data-bs-toggle="tooltip" class="form-control" >
+            <%= product.ps %>
+          </span>
+        </div>
+        <div class="input-group input-group-static mb-4">
+          <label>仓库数量:</label>
+          <span data-bs-toggle="tooltip" class="form-control" data-bs-placement="top" title="Yisucang: <%= product.yisucangInventory %> | Plwhs:<%= product.plwhsInventory %>">
+            <%= product.yisucangInventory + product.plwhsInventory %>
+          </span>
+        </div>
+        <div class="input-group input-group-static mb-4">
+          <label>FBA数量:</label>
+          <span data-bs-toggle="tooltip" class="form-control">
+            <%= product.fbaInventory  %>
           </span>
         </div>
       </div>

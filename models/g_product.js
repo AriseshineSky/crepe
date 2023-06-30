@@ -42,10 +42,4 @@ const GProductSchema = new Schema({
 
 GProductSchema.plugin(BaseModel);
 
-GProductSchema.pre("save", function (next) {
-	const now = new Date();
-	this.updateAt = now;
-	next();
-});
-
 mongoose.model("GProduct", GProductSchema);

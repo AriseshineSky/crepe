@@ -10,14 +10,14 @@ let PurchaseSchema = new Schema({
 	productName: { type: String },
 	sellerSku: { type: String },
 	memo: { type: String },
-	totalQuantity: { type: Number },
-	shippedQuantity: { type: Number },
-	unshippedQuantity: { type: Number },
-	unInboundQuantity: { type: Number },
+	totalQuantity: { type: Number, default: 0 },
+	shippedQuantity: { type: Number, default: 0 },
+	unshippedQuantity: { type: Number, default: 0 },
+	unInboundQuantity: { type: Number, default: 0 },
 	supervisorId: { type: Number },
 	supplierCode: { type: String },
 	customCode: { type: String },
-	orderTotalAmount: { type: Number },
+	orderTotalAmount: { type: Number, default: 0 },
 	updateTime: { type: Date },
 	createTime: { type: Date },
 	yisucangId: { type: String },
@@ -182,10 +182,5 @@ let PurchaseSchema = new Schema({
 });
 
 PurchaseSchema.plugin(BaseModel);
-PurchaseSchema.pre("save", function (next) {
-	let now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("Purchase", PurchaseSchema);

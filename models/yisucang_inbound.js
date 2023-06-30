@@ -5,6 +5,7 @@ const YisucangInboundSchema = new Schema({
 	number: { type: String },
 	orderId: { type: String },
 	boxCount: { type: Number, default: 0 },
+	quantity: { type: Number, default: 0 },
 	unitsPerBox: { type: Number, default: 0 },
 	date: { type: Date, default: Date.now },
 	createAt: { type: Date, default: Date.now },

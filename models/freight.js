@@ -36,10 +36,4 @@ var FreightSchema = new Schema({
 });
 
 FreightSchema.plugin(BaseModel);
-FreightSchema.pre("save", function (next) {
-	var now = new Date();
-	this.updateAt = now;
-	next();
-});
-
 mongoose.model("Freight", FreightSchema);

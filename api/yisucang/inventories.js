@@ -1,6 +1,6 @@
-var base = require("./base");
+let base = require("./base");
 const helper = require("../../lib/util/helper");
-var FormData = require("form-data");
+let FormData = require("form-data");
 const YISUCANG_ID_KEYS = [
 	{
 		PartnerID: "96648968",
@@ -82,21 +82,19 @@ const YISUCANG_ID_KEYS = [
 		PartnerKey: "c8820f87-b856-17ae-5307-d0d796c43de3",
 	},
 ];
-function inventories() {
-	return new Promise(async (resolve, reject) => {
-		var inventories = [];
-		for (var id_key of YISUCANG_ID_KEYS) {
-			const data = new FormData();
-			data.append("PartnerID", id_key.PartnerID);
-			data.append("PartnerKey", id_key.PartnerKey);
-			var res = await base(yisucangApis.inventory, data);
-			if (res.Data) {
-				inventories = inventories.concat(res.Data);
-			}
-			helper.wait(200);
+async function inventories() {
+	let inventories = [];
+	for (let id_key of YISUCANG_ID_KEYS) {
+		const data = new FormData();
+		data.append("PartnerID", id_key.PartnerID);
+		data.append("PartnerKey", id_key.PartnerKey);
+		const res = await base(yisucangApis.inventory, data);
+		if (res.Data) {
+			inventories = inventories.concat(res.Data);
 		}
-		resolve(inventories);
-	});
+		helper.wait(200);
+	}
+	return inventories;
 }
 
 exports.inventories = inventories;

@@ -6,7 +6,7 @@ const inventoriesApi = require("../api/yisucang/inventories");
 
 exports.syncYisucang = async function () {
 	let yiProducts = await productsApi.yisucangProducts();
-	let inventories = await inventoriesApi.inventories();
+	let inventories = await inventoriesApi.inventoies();
 
 	for (let yiProduct of yiProducts) {
 		let yiInventory = inventories.find(function (inventory) {
@@ -15,7 +15,7 @@ exports.syncYisucang = async function () {
 		if (yiInventory) {
 			let product = await findOrCreate(yiProduct.ID.toString());
 			console.log(yiInventory);
-			product.stock = yiInventory.SumNumber;
+			product.inventory = yiInventory.SumNumber;
 			product.save();
 		}
 	}

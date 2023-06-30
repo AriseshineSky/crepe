@@ -1,4 +1,5 @@
 const helper = require("../lib/util/helper");
+const Delivery = require("./delivery");
 
 class PurchaseUpdator {
 	constructor(purchase) {
@@ -18,15 +19,17 @@ class PurchaseUpdator {
 
 	async updateAll() {
 		this.purchase.expectArrivalDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
-
 		const deliveries = await Delivery.find({ purchase: this.purchase._id });
 		this.purchase.deliveries = deliveries;
 		const shippedQuantity = deliveries.reduce(({ sum, delivery }) => {
+			if (!delivery) {
+				console.log("delivery", deliveries, this.purchase._id);
+			}
 			return sum + delivery.quantity;
 		}, 0);
 
 		this.purchase.shippedQuantity = shippedQuantity;
-		this.purchase.unshippedQuantity = this.purchase.quantity - shippedQuantity;
+		this.purchase.unshippedQuantity = this.purchase.totalQuantity - shippedQuantity;
 		await this.purchase.save();
 	}
 }

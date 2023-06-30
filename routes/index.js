@@ -9,7 +9,7 @@ yisucangApis = {
 	inventory: "/OrderAPI/GetInventory",
 	product: "/OrderAPI/GetProductList",
 };
-
+gerpgo_api_prefix = "https://open.gerpgo.com/";
 open_apis = {
 	token: "/api_token",
 	sales: "/api/v2/finance/salesoperations/saleProfitDataGrid",
@@ -22,7 +22,7 @@ open_apis = {
 	fbaInventory: "/api/v2/warehouse/fbaInventory",
 	marketAnalyze: "/api/v2/finance/salesoperations/marketAnalyze",
 	purchaseProcure: "/api/v2/purchase/procure",
-	delivery: "/api/v2/purchase/delivery",
+	delivery: "/fulfillment/ship/delivery/page",
 	deliveryDetail: "/api/supply/tms/delivery/relevanceSkuInfoByCode",
 	procureItem: "/api/v2/purchase/procureItem/getProcureItemView",
 	purchase: "/purchase/srm/procure/page",

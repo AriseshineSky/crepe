@@ -9,6 +9,10 @@ exports.index = async function (req, res, next) {
 	});
 };
 
+exports.new = async function (req, res, next) {
+	res.render("delivery/new");
+};
+
 exports.create = async (req, res, next) => {
 	const {
 		memo,
@@ -27,9 +31,6 @@ exports.create = async (req, res, next) => {
 		box,
 		totalBoxes,
 		quantity,
-		code,
-		status,
-		orderId,
 		shipmentDate,
 		estimateArrivePortDate,
 		expectArrivalDate,
@@ -38,5 +39,5 @@ exports.create = async (req, res, next) => {
 	};
 
 	const delivery = await Delivery.createOrUpdate(newDelivery);
-	res.redirect("/deliveries" + delivery._id);
+	res.redirect("/deliveries/" + delivery._id);
 };

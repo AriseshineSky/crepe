@@ -30,7 +30,7 @@ async function createOrUpdate(listing) {
 	});
 
 	if (savedlisting) {
-		savedlisting = { ...savedlisting, ...listing };
+		Object.assign(savedlisting, listing);
 		return await savedlisting.save();
 	} else {
 		return await Listing.create({
@@ -38,6 +38,7 @@ async function createOrUpdate(listing) {
 			country,
 			fnsku,
 			account,
+			...listing,
 		});
 	}
 }

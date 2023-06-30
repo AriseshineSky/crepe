@@ -4,6 +4,10 @@ var router = express.Router();
 
 router.get("/new", products.new);
 
+router.post("/create", products.create);
+router.get("/sync", products.sync);
+router.get("/syncpm", products.syncpm);
+router.post("/delete", products.delete);
 router.get("/:productId/inbounds", products.showInbounds);
 router.post("/:productId/inbounds", products.addInbound);
 router.post("/:productId/inbound", products.updateInbound);
@@ -20,11 +24,8 @@ router.get("/:productId/syncFreight", products.syncFreight);
 router.get("/:productId/showPlan", products.showPlan);
 router.post("/:productId/plan", products.updatePlan);
 router.get("/:productId/syncpm", products.syncPmByProduct);
+router.get("/:productId/update_all", products.updateAll);
 router.get("/:productId", products.show);
-router.post("/create", products.create);
-router.get("/sync", products.sync);
-router.get("/syncpm", products.syncpm);
-router.post("/delete", products.delete);
 router.get("/", products.index);
 router.get("/:productId", products.show);
 // router.get("/:productId/syncProducings", products.syncProducings);

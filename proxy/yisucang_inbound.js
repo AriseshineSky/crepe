@@ -657,7 +657,7 @@ async function addDeliveryPurchaseId() {
 async function updateDeliveryPurchaseId() {
 	let deliveries = await all();
 	for (let delivery of deliveries) {
-		const purchase = await Purchase.findOne({ code: getPurchaseCode(delivery.memo) });
+		const purchase = await Purchase.findOne({ orderId: getPurchaseCode(delivery.memo) });
 		if (purchase) {
 			delivery.purchase = purchase._id;
 			await delivery.save();

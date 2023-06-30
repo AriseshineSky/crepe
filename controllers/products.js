@@ -91,14 +91,16 @@ exports.syncPmByProduct = async function (req, res, next) {
 	res.redirect("/products/" + productId);
 };
 
+exports.updateAll = async (req, res, next) => {
+	const productId = req.params.productId;
+	await Product.updateAll(productId);
+	res.redirect(`/products/${productId}/inbounds`);
+};
+
 exports.plan = async function (req, res, next) {
 	const productId = req.params.productId;
 	const purchase = await Product.getPlanV3(productId);
-	if (purchase.plan) {
-		res.render("product/plan", { purchase: purchase });
-	} else {
-		res.render("product/inventory");
-	}
+	res.render("product/plan", { purchase: purchase });
 };
 
 exports.showPlan = async function (req, res, next) {

@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 const BaseModel = require("./base_model");
 const Schema = mongoose.Schema;
 const DeliverySchema = new Schema({
-	id: {
-		type: String,
-		required: true,
-	},
 	product: {
 		type: Schema.Types.ObjectId,
 		ref: "Product",
@@ -15,6 +11,7 @@ const DeliverySchema = new Schema({
 		ref: "Purchase",
 	},
 	memo: { type: String },
+	purchaseCode: { type: String },
 	box: { type: Number },
 	totalBoxes: { type: Number },
 	unreceivedBoxes: { type: Number },
@@ -35,8 +32,6 @@ const DeliverySchema = new Schema({
 	volumeWeightCoefficient: { type: String },
 	orderId: { type: String },
 	shipmentDate: { type: String },
-	fromWarehouseNames: { type: String },
-	warehouseNames: { type: String },
 	confirmShipmentDate: { type: Date },
 	estimateArrivePortDate: { type: Date },
 	expectShipmentDate: { type: Date },
@@ -54,9 +49,8 @@ const DeliverySchema = new Schema({
 	logisticsTrackingNumber: { type: String },
 	chargeUnitPrice: { type: String },
 	chargeWeight: { type: String },
-	spiltTrackings: { type: String },
+	spiltTrackings: [{ type: String }],
 	chargeWeightUnit: { type: String },
-	relevanceCodeList: { type: String },
 	containerType: { type: String },
 	country: { type: String },
 	updateTime: { type: Date },
@@ -79,10 +73,5 @@ const DeliverySchema = new Schema({
 });
 
 DeliverySchema.plugin(BaseModel);
-DeliverySchema.pre("save", function (next) {
-	const now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("Delivery", DeliverySchema);
