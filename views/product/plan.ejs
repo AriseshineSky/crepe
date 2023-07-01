@@ -70,7 +70,7 @@ const freights = [
                 <% purchase.plan.plans.forEach(function(plan){ %>
                   <% for (var type of FREIGHT_TYPES) { %>
                     <% if (type in plan && plan[type]['units']) {%>
-                      <% var freight = purchase.freights.find(function(freight){ return freight.type === type}) %>
+                      <% var freight = freights.find(function(freight){ return freight.type === type}) %>
                       <tr>
                         <td><%= plan.orderId %></td>
                         <td><%= TYPES[type] %></td>
@@ -78,13 +78,9 @@ const freights = [
                         <td><%= plan[type]['units'] %></td>
                         <td><%= plan[type]['weight'] %></td>
                         <td><%= plan[type]['amount'] %></td>
-                        <td><%= moment(plan['created']).format('YYYY-MM-DD') %></td>
+                        <td><%= moment(plan['createdAt']).format('YYYY-MM-DD') %></td>
                         <td>
-                          <% if (plan.deliveryDue) {%>
-                            <%= moment(plan.expectDeliveryDays).format('YYYY-MM-DD') %>
-                          <% } else { %>
-                            <%= moment().add(plan['expectDeliveryDays'], 'days').format('YYYY-MM-DD') %>
-                          <% } %>
+                            <%= moment(plan.expectDeliveryDate).format('YYYY-MM-DD') %>
                         </td>
                         <td>
                           <%= moment().add(plan['expectDeliveryDays'] + freight.period, 'days').format('YYYY-MM-DD') %>
@@ -94,7 +90,7 @@ const freights = [
                           <%= moment().add(plan['expectDeliveryDays'] + freight.period + GAP, 'days').format('YYYY-MM-DD') %>
                         </td>
                         <td>
-                          <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['deliveryPeriod'] + freight.period + GAP}) %>
+                          <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['expectDeliveryDays'] + freight.period + GAP}) %>
                           <%= status.before %>
                         </td>
                       </tr>
