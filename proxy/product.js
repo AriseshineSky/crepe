@@ -532,7 +532,14 @@ async function getPlanV3(productId, purchaseCode) {
 	let orderDues = await getOrderDue(product);
 	logger.debug("orderDues", orderDues);
 
-	let newPurchasePlan = { orderedPurchaseShipmentPlans: [] };
+	let newPurchasePlan = {
+		orderedPurchaseShipmentPlans: [],
+		gap: "",
+		inventoryStatus: "",
+		minInventory: "",
+		totalAmount: "",
+		inbounds: "",
+	};
 
 	if (purchaseCode) {
 		const purchase = product.purchases.filter((purchase) => purchase.code === purchaseCode);
@@ -540,12 +547,6 @@ async function getPlanV3(productId, purchaseCode) {
 			return;
 		}
 		let purchasePlan = await getPurchaseShimpentPlan(purchase, product, inbounds);
-
-		purchasePlan.expectDeliveryDate = purchase.expectDeliveryDate;
-		purchasePlan.createdAt = purchase.createdAt;
-		purchasePlan.expectDeliveryDays = purchase.expectDeliveryDays;
-		purchasePlan.orderId = purchase.orderId;
-		purchasePlan.code = purchase.code;
 
 		newPurchasePlan.orderedPurchaseShipmentPlans.push(purchasePlan);
 		newPurchasePlan.gap = purchasePlan.gap;
@@ -673,7 +674,7 @@ async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 		purchase,
 		step,
 	);
-	return await formatPlan(result.plan, product.unitsPerBox);
+	return await formatPlan(result.plan, product.unitsPerBox, purchase);
 }
 
 async function getPurchasesShipmentPlan(product, inbounds, purchases) {
@@ -745,11 +746,19 @@ async function checkVolumeWeight(box, shipmentType) {
 	return volumeWeight < 1.2 * box.wt;
 }
 
-async function formatPlan(plan, unitsPerBox) {
+async function formatPlan(plan, unitsPerBox, purchase) {
 	for (let type in plan) {
 		if (plan[type] && plan[type].boxes) {
 			plan[type].units = plan[type].boxes * unitsPerBox;
 		}
+	}
+
+	if (purchase) {
+		plan.expectDeliveryDate = purchase.expectDeliveryDate;
+		plan.createdAt = purchase.createdAt;
+		plan.expectDeliveryDays = purchase.expectDeliveryDays;
+		plan.orderId = purchase.orderId;
+		plan.code = purchase.code;
 	}
 	return plan;
 }

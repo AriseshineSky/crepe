@@ -260,8 +260,8 @@ class ProductUpdator {
 		}
 
 		return {
-			fbaInventory,
-			sales,
+			fbaInventory: Math.round(fbaInventory),
+			sales: Math.round(sales),
 		};
 	}
 
