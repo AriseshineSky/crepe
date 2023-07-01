@@ -19,16 +19,16 @@ const ShipmentTypesInfo = {
 		period: 8,
 	},
 	airDelivery: {
-		price: 55,
-		period: 8,
+		price: 45,
+		period: 15,
 	},
 	seaExpress: {
-		price: 55,
-		period: 8,
+		price: 25,
+		period: 30,
 	},
 	sea: {
-		price: 55,
-		period: 8,
+		price: 15,
+		period: 45,
 	},
 };
 
@@ -592,6 +592,7 @@ async function getPlanV3(productId, purchaseCode) {
 		maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
 		volumeWeightCheck: volumeWeightCheck,
 	};
+	console.log(purchase);
 	return purchase;
 }
 
