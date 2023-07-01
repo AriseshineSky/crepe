@@ -19,8 +19,13 @@ async function findByProduct(product) {
 }
 
 async function createOrUpdate(listing) {
-	const [account, country] = listing.marketName.split(":");
-
+	let account, country;
+	if (listing.marketName) {
+		[account, country] = listing.marketName.split(":");
+	}
+	if (listing.warehouseName) {
+		[account, country] = listing.warehouseName.split(":");
+	}
 	const { asin, fnsku } = listing;
 	let savedlisting = await Listing.findOne({
 		asin,

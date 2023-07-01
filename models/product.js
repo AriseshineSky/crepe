@@ -58,6 +58,7 @@ var ProductSchema = new Schema({
 	purchases: [
 		{
 			code: { type: String },
+			orderId: { type: String },
 			shippedQuantity: { type: Number, default: 0 },
 			unshippedQuantity: { type: Number, default: 0 },
 			unIndoundQuantity: { type: Number, default: 0 },

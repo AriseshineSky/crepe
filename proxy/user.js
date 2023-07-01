@@ -57,6 +57,22 @@ exports.create = async function (user) {
 		password: user.password,
 	});
 };
+
+exports.checkAdmin = async function () {
+	let admin = await User.findOne({ name: "admin" });
+	if (!admin) {
+		await User.create({
+			name: "admin",
+			chatId: "",
+			realm: "",
+			password: "vine153!!",
+			plwhsId: "",
+		});
+	} else {
+		console.log(admin);
+	}
+};
+
 exports.findOrCreate = async function (user) {
 	if (!user) {
 		return null;

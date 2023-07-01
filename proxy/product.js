@@ -58,7 +58,7 @@ async function checkpurchases(product, shipmentsAndpurchases) {
 	}
 }
 
-async function getpurchasesQuantity(purchases) {
+async function getPurchasesQuantity(purchases) {
 	let quantity = 0;
 	if (purchases) {
 		for (let i = 0; i < purchases.length; i++) {
@@ -532,21 +532,24 @@ async function getPlanV3(productId, purchaseCode) {
 
 	let plan = { plans: [] };
 	if (purchaseCode) {
-		for (let purchase of product.purchases) {
-			if (purchase.code === purchaseCode) {
-				let purchasePlan = await getPurchaseShimpentPlan(purchase, product, inbounds);
-				purchasePlan.deliveryDue = purchase.deliveryDue;
-				purchasePlan.created = purchase.created;
-				purchasePlan.deliveryPeriod = await getpurchasePeriod(product, purchase);
-				purchasePlan.orderId = purchase.orderId;
-				plan.plans.push(purchasePlan);
-				plan.gap = purchasePlan.gap;
-				plan.inventoryStatus = purchasePlan.inventoryStatus;
-				plan.minInventory = purchasePlan.minInventory;
-				plan.totalAmount = purchasePlan.totalAmount;
-				plan.inbounds = purchasePlan.inbounds;
-			}
+		const purchase = product.purchases.filter((purchase) => purchase.code === purchaseCode);
+		if (!purchase) {
+			return;
 		}
+		let purchasePlan = await getPurchaseShimpentPlan(purchase, product, inbounds);
+
+		purchasePlan.expectDeliveryDate = purchase.expectDeliveryDate;
+		purchasePlan.createdAt = purchase.createdAt;
+		purchasePlan.expectDeliveryDays = purchase.expectDeliveryDays;
+		purchasePlan.orderId = purchase.orderId;
+		purchasePlan.code = purchase.code;
+
+		plan.plans.push(purchasePlan);
+		plan.gap = purchasePlan.gap;
+		plan.inventoryStatus = purchasePlan.inventoryStatus;
+		plan.minInventory = purchasePlan.minInventory;
+		plan.totalAmount = purchasePlan.totalAmount;
+		plan.inbounds = purchasePlan.inbounds;
 	} else {
 		let purchasesPlan = null;
 		pruchases = helper.deepClone(product.purchases);
@@ -568,11 +571,9 @@ async function getPlanV3(productId, purchaseCode) {
 			}
 		}
 	}
-	await updateProduct(product, {
-		purchase: await getpurchasesQuantity(product.purchases),
-		orderDues: await prepareOrderDues(orderDues),
-	});
-	logger.debug(plan);
+	product.purchase = await getPurchasesQuantity(product.purchases);
+	product.orderDues = await prepareOrderDues(orderDues);
+	await product.save();
 
 	let volumeWeightCheck = true;
 	for (let type in plan) {
@@ -585,6 +586,8 @@ async function getPlanV3(productId, purchaseCode) {
 	const purchase = {
 		plan: plan,
 		product: product,
+		freights: ShipmentTypesInfo,
+		inboundShippeds: product.shipments,
 		minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
 		maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
 		volumeWeightCheck: volumeWeightCheck,
@@ -628,7 +631,7 @@ async function initShipmentPlan(purchase, product, inbounds) {
 async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 	let quantity = await convertPurchaseQtyIntoBox(purchase, product);
 
-	const shipmentTypes = helper.deepClone(product.shipmentTypes);
+	const shipmentTypes = product.shipmentTypes;
 
 	let plan = {
 		[shipmentTypes[0]]: {
@@ -637,10 +640,11 @@ async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 		gap: 100000,
 		minInventory: -100,
 		totalAmount: quantity.boxes * ShipmentTypesInfo[shipmentTypes[0]].price * product.box.weight,
-		deliveryDue: purchase.deliveryDue,
-		created: purchase.created,
-		deliveryPeriod: purchase.expectDeliveryDays,
+		expectDeliveryDate: purchase.expectDeliveryDate,
+		createdAt: purchase.createdAt,
+		expectDeliveryDays: purchase.expectDeliveryDays,
 		orderId: purchase.orderId,
+		code: purchase.code,
 	};
 	for (let i = 1; i < shipmentTypes.length; i++) {
 		plan[shipmentTypes[i]] = { boxes: 0 };
@@ -674,7 +678,7 @@ async function getPurchasesShipmentPlan(product, inbounds, purchases) {
 		const shipmentPlan = await getPurchaseShimpentPlan(purchases[i], product, plan.inbounds);
 		shipmentPlan.expectDeliveryDate = purchases[i].expectDeliveryDate;
 		shipmentPlan.expectDeliveryDays = purchases[i].expectDeliveryDays;
-		shipmentPlan.created = purchases[i].created;
+		shipmentPlan.createdAt = purchases[i].createdAt;
 		shipmentPlan.orderId = purchases[i].orderId;
 		shipmentPlan.code = purchases[i].code;
 
@@ -693,7 +697,7 @@ async function getOrderDue(product) {
 	for (let type of product.shipmentTypes) {
 		let shipment = ShipmentTypesInfo[type];
 		orderDues[type] = moment().add(
-			product.quantityToPurchase / product.ps -
+			product.totalInventory / product.ps -
 				product.cycle -
 				shipment.period -
 				GAP -
@@ -880,11 +884,12 @@ async function getShipmentPlanByPurchase(
 	}
 
 	const shipmentTypes = product.shipmentTypes;
-	if (index >= shipmentTypes.length - 1) {
+
+	if (index === shipmentTypes.length - 1) {
 		shipmentPlan[shipmentTypes[index]] = { boxes: left };
 		let shipmentPlanDup = helper.deepClone(shipmentPlan);
 
-		await calculatePurchasePlan(shipmentPlanDup, inbounds, product, result, purchase);
+		await calculatePurchasePlan(shipmentPlan, inbounds, product, result, purchase);
 
 		if (result.status === "done") {
 			return null;
@@ -917,9 +922,6 @@ async function getShipmentPlanByPurchase(
 }
 
 async function bestPlanV4(product, inbounds) {
-	if (product.shipmentTypes.length === 0) {
-		return;
-	}
 	const firstShipmentType = product.shipmentTypes[0];
 
 	const shipmentType = ShipmentTypesInfo[firstShipmentType];
@@ -970,20 +972,22 @@ async function getNewPlan(shipmentPlan, product, status) {
 async function getNewShipmentPlan(shipmentPlan, product, inbounds, purchase) {
 	let newInbounds = null;
 
+	const shipmentPlanDup = helper.deepClone(shipmentPlan);
+
 	if (purchase) {
 		newInbounds = await addPurchaseShipmentPlanToInbounds(
-			shipmentPlan,
+			shipmentPlanDup,
 			inbounds,
 			product,
 			purchase,
 		);
 	} else {
-		newInbounds = await addShipmentPlanToInbounds(shipmentPlan, inbounds, product);
+		newInbounds = await addShipmentPlanToInbounds(shipmentPlanDup, inbounds, product);
 	}
 
 	let newSortedInbounds = await sortQueue(newInbounds);
 	let status = await getInventoryStatusQueue(newSortedInbounds, product.ps);
-	let newPlan = await calculatePlanAmounts(shipmentPlan, product);
+	let newPlan = await calculatePlanAmounts(shipmentPlanDup, product);
 	newPlan.gap = await calculateOutOfStockPeriod(status);
 
 	if (purchase) {

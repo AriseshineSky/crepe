@@ -66,6 +66,12 @@ class GerpgoClient {
 	}
 
 	options(method, data, sign, url) {
+		let newUrl = "";
+		if (this.domain.startsWith("prodopenflat")) {
+			newUrl = `https://${this.domain}/open-api${url}`;
+		} else {
+			newUrl = `https://${this.domain}/api/open${url}`;
+		}
 		return {
 			method: method,
 			headers: {
@@ -74,7 +80,7 @@ class GerpgoClient {
 				sign: sign,
 			},
 			data: data,
-			url: `https://${this.domain}/api/open${url}`,
+			url: newUrl,
 		};
 	}
 
@@ -86,10 +92,16 @@ class GerpgoClient {
 
 	async fetchToken() {
 		try {
-			const url = `https://${this.domain}/api/open/api_token`;
+			let url = "";
+			if (this.domain.startsWith("prodopenflat")) {
+				url = `https://${this.domain}/open-api/api_token`;
+			} else {
+				url = `https://${this.domain}/api/open/api_token`;
+			}
 			const auth = { appId: this.appId, appKey: this.appKey };
 			const res = await axios.post(url, auth);
 
+			console.log(res.data);
 			this.token = {
 				accessToken: res.data.data.accessToken,
 				expiresIn: Date.now() / 1000 + res.data.data.expiresIn,

@@ -3,6 +3,7 @@ let checkProductsInventory = require("../lib/checkProductsInventory");
 let Product = require("../proxy").Product;
 let Yisucang = require("../proxy").Yisucang;
 let Delivery = require("../proxy").Delivery;
+let User = require("../proxy").User;
 let Role = require("../proxy").Role;
 let syncAllListings = require("../lib/syncAllListings");
 let lotDetail = require("../lib/lotDetail");
@@ -76,6 +77,7 @@ const scheduleCronstyle = () => {
 		// syncAllListings.syncListings();
 	});
 
+	syncAllListings.syncListings();
 	// Product.updateAll();
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product stocks");

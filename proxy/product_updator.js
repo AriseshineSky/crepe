@@ -135,7 +135,6 @@ class ProductUpdator {
 			this.product.unitsPerBox = 30;
 		}
 
-		console.log("unitsPerBox", this.product.unitsPerBox);
 		const boxes = Math.ceil(
 			(this.product.maxAvgSales * 90 - this.product.totalInventory) / this.product.unitsPerBox,
 		);

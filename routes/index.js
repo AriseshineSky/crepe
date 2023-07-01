@@ -9,7 +9,7 @@ yisucangApis = {
 	inventory: "/OrderAPI/GetInventory",
 	product: "/OrderAPI/GetProductList",
 };
-gerpgo_api_prefix = "https://open.gerpgo.com/";
+gerpgo_api_prefix = "https://prodopenflat.apist.gerpgo.com/open-api";
 open_apis = {
 	token: "/api_token",
 	sales: "/api/v2/finance/salesoperations/saleProfitDataGrid",

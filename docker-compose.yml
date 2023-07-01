@@ -20,19 +20,8 @@ services:
     environment: 
       MONGO_INITDB_DATABASE: crepe_test
     ports:
-      - "27016:27017"
+      - "27015:27017"
     volumes:
-      - 'mongodbdata2:/data/db'
-  # mysql:
-  #   image: mysql
-  #   environment: 
-  #     MYSQL_DATABASE: pl_warehouse
-  #     MYSQL_ROOT_PASSWORD: root
-  #   ports:
-  #     - "33211:3306"
-  #   volumes:
-  #     - 'pl_db3:/var/lib/mysql'
-  #   command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', "--innodb_use_native_aio=0", "--default-authentication-plugin=caching_sha2_password"]
+      - 'mongodb:/data/db'
 volumes:
-  # pl_db3:
-  mongodbdata2:
+  mongodb:

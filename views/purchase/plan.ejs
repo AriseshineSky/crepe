@@ -57,21 +57,17 @@
                         <td><%= plan[type]['amount'] %></td>
                         <td><%= moment(plan['created']).format('YYYY-MM-DD') %></td>
                         <td>
-                          <% if (plan.deliveryDue) {%>
-                            <%= moment(plan.deliveryDue).format('YYYY-MM-DD') %>
-                          <% } else { %>
-                            <%= moment().add(plan['deliveryPeriod'], 'days').format('YYYY-MM-DD') %>
-                          <% } %>
+                          <%= moment(plan.expectDeliveryDate).format('YYYY-MM-DD') %>
                         </td>
                         <td>
-                          <%= moment().add(plan['deliveryPeriod'] + freight.period, 'days').format('YYYY-MM-DD') %>
+                          <%= moment().add(plan['expectDeliveryDays'] + freight.period, 'days').format('YYYY-MM-DD') %>
                         </td>
                         <td><%= freight.period %></td>
                         <td>
-                          <%= moment().add(plan['deliveryPeriod'] + freight.period + GAP, 'days').format('YYYY-MM-DD') %>
+                          <%= moment().add(plan['expectDeliveryDays'] + freight.period + GAP, 'days').format('YYYY-MM-DD') %>
                         </td>
                         <td>
-                          <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['deliveryPeriod'] + freight.period + GAP}) %>
+                          <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['expectDeliveryDays'] + freight.period + GAP}) %>
                           <%= status.before %>
                         </td>
                       </tr>

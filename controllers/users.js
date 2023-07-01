@@ -26,7 +26,7 @@ exports.login = async function (req, res, next) {
 			password: req.body.password,
 		});
 		console.log(token);
-		res.cookie("token", token, { maxAge: 900000, httpOnly: true });
+		res.cookie("token", token, { maxAge: 9000000, httpOnly: true });
 		req.flash("success", "Login Successfully");
 		res.redirect("/products");
 	} catch (error) {

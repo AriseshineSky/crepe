@@ -11,6 +11,7 @@ var ListingSchema = new Schema({
 	reservedFCProcessing: { type: Number, default: 0 },
 	inboundShipped: { type: Number, default: 0 },
 	ps: { type: Number, default: 0 },
+	avgSevenPs: { type: Number, default: 0 },
 });
 
 ListingSchema.plugin(BaseModel);

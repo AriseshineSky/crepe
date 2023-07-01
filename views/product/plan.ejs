@@ -57,17 +57,17 @@
                         <td><%= moment(plan['created']).format('YYYY-MM-DD') %></td>
                         <td>
                           <% if (plan.deliveryDue) {%>
-                            <%= moment(plan.deliveryDue).format('YYYY-MM-DD') %>
+                            <%= moment(plan.expectDeliveryDays).format('YYYY-MM-DD') %>
                           <% } else { %>
-                            <%= moment().add(plan['deliveryPeriod'], 'days').format('YYYY-MM-DD') %>
+                            <%= moment().add(plan['expectDeliveryDays'], 'days').format('YYYY-MM-DD') %>
                           <% } %>
                         </td>
                         <td>
-                          <%= moment().add(plan['deliveryPeriod'] + freight.period, 'days').format('YYYY-MM-DD') %>
+                          <%= moment().add(plan['expectDeliveryDays'] + freight.period, 'days').format('YYYY-MM-DD') %>
                         </td>
                         <td><%= freight.period %></td>
                         <td>
-                          <%= moment().add(plan['deliveryPeriod'] + freight.period + GAP, 'days').format('YYYY-MM-DD') %>
+                          <%= moment().add(plan['expectDeliveryDays'] + freight.period + GAP, 'days').format('YYYY-MM-DD') %>
                         </td>
                         <td>
                           <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['deliveryPeriod'] + freight.period + GAP}) %>
@@ -178,15 +178,15 @@
                     <td><%= inbound.orderId %></td>
                     <td><%= inbound.quantity %></td>
                     <td>
-                      <% if (inbound.deliveryDue) {%>
-                        <%= moment(inbound.deliveryDue).format("YYYY-MM-DD") %>
+                      <% if (inbound.expectArrivalDate) {%>
+                        <%= moment(inbound.expectArrivalDate).format("YYYY-MM-DD") %>
                       <% } %>
                     </td>
                     <td>
                       <% var inboundStatus = null %>
-                      <% if (inbound.deliveryDue) { 
+                      <% if (inbound.expectArrivalDate) { 
                         for (var status of purchase.plan.inventoryStatus) {
-                          if (Math.abs(status.period - GAP - moment(inbound.deliveryDue).diff(moment(), "days")) <= 1 && status.after - status.before === inbound.quantity) {
+                          if (Math.abs(status.period - GAP - deliveryDue) <= 1 && status.after - status.before === inbound.quantity) {
                             inboundStatus = status;
                           }                    
                         }
@@ -227,11 +227,11 @@
               </div>
               <div class="input-group input-group-static mb-4">
                 <label>亚马逊库存:</label>
-                <span class="form-control" ><%- purchase.fbaInventory %></span>
+                <span class="form-control" ><%- purchase.product.fbaInventory %></span>
               </div>
               <div class="input-group input-group-static mb-4">
                 <label>仓库库存:</label>
-                <span class="form-control" ><%- purchase.stock %></span>
+                <span class="form-control" ><%- purchase.product.totalInventory %></span>
               </div>
               <% if (purchase.plan && purchase.plan.airExpress) {%>
                 <div class="input-group input-group-static mb-4">
@@ -275,7 +275,7 @@
               </div>
               <div class="input-group input-group-static mb-4">
                 <label>计算使用的平均销量:</label>
-                <span class="form-control" ><%- purchase.sales.minAvgSales %></span>
+                <span class="form-control" ><%- purchase.product.ps %></span>
               </div>   
               <div class="input-group input-group-static mb-4">
                 <label>维持最小库存量(天):</label>

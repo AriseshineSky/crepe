@@ -6,7 +6,7 @@ const inventoriesApi = require("../api/yisucang/inventories");
 
 exports.syncYisucang = async function () {
 	let yiProducts = await productsApi.yisucangProducts();
-	let inventories = await inventoriesApi.inventoies();
+	let inventories = await inventoriesApi.inventories();
 
 	for (let yiProduct of yiProducts) {
 		let yiInventory = inventories.find(function (inventory) {

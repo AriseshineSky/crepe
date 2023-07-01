@@ -5,11 +5,16 @@ async function getToken(url, auth) {
 		axios
 			.post(url, auth)
 			.then(function (res) {
-				var token = {
-					accessToken: res.data.data.accessToken,
-					expiresIn: Date.now() / 1000 + res.data.data.expiresIn,
-				};
-				resolve(token);
+				console.log(res.data);
+				if (res.data.data) {
+					var token = {
+						accessToken: res.data.data.accessToken,
+						expiresIn: Date.now() / 1000 + res.data.data.expiresIn,
+					};
+					resolve(token);
+				} else {
+					resolve(null);
+				}
 			})
 			.catch(function (error) {
 				console.log(error);
