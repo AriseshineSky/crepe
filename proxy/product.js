@@ -203,12 +203,14 @@ async function syncPm() {
 	for (let product of products) {
 		for (let country of product.countries) {
 			let user = await getPm(product.asin, country.toUpperCase());
-			console.log(user);
-			if (user) {
+			if (user !== "unknown") {
+				console.log("user", user);
 				let pm = await User.findOrCreate(user);
-				User.updateUser(user);
+				console.log("pm", pm);
 				product.pm = pm;
 				await product.save();
+				User.updateUser(user);
+				break;
 			}
 		}
 	}

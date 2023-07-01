@@ -77,10 +77,10 @@ exports.findOrCreate = async function (user) {
 	if (!user) {
 		return null;
 	}
-	var savedUser = await User.findOne({ name: user.username });
+	var savedUser = await User.findOne({ name: user.name });
 	if (savedUser) {
 		await savedUser.update({
-			name: user.username,
+			name: user.name,
 			chatId: user.chat_id,
 			realm: user.realm,
 			password: "vine153!!",
@@ -89,7 +89,7 @@ exports.findOrCreate = async function (user) {
 		return savedUser;
 	} else {
 		return await User.create({
-			name: user.username,
+			name: user.name,
 			chatId: user.chat_id,
 			realm: user.realm,
 			password: "vine153!!",

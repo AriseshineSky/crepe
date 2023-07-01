@@ -27,6 +27,5 @@ router.get("/:productId/syncpm", products.syncPmByProduct);
 router.get("/:productId/update_all", products.updateAll);
 router.get("/:productId", products.show);
 router.get("/", products.index);
-router.get("/:productId", products.show);
 // router.get("/:productId/syncProducings", products.syncProducings);
 module.exports = router;

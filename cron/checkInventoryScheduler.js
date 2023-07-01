@@ -6,15 +6,15 @@ let Delivery = require("../proxy").Delivery;
 let User = require("../proxy").User;
 let Role = require("../proxy").Role;
 let syncAllListings = require("../lib/syncAllListings");
-let lotDetail = require("../lib/lotDetail");
-let syncLotPageList = require("../lib/syncLotPageList");
+// let lotDetail = require("../lib/lotDetail");
+// let syncLotPageList = require("../lib/syncLotPageList");
 let syncProcureItem = require("../lib/syncProcureItem");
 let syncPurchaseDetails = require("../lib/syncPurchasesDetail");
-let syncPurchaseOrders = require("../lib/syncPurchaseOrders");
+// let syncPurchaseOrders = require("../lib/syncPurchaseOrders");
 let syncYisucangInbounds = require("../lib/syncYisucangInbounds");
 let syncPurchases = require("../lib/syncPurchases");
-let syncSupplierSku = require("../lib/syncSupplierSku");
-let syncSupplier = require("../lib/syncSupplier");
+// let syncSupplierSku = require("../lib/syncSupplierSku");
+// let syncSupplier = require("../lib/syncSupplier");
 let syncDeliveries = require("../lib/syncDeliveries");
 const syncProductInfo = require("../lib/syncProductInfo");
 const logger = require("../common/logger");
@@ -22,17 +22,13 @@ let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
 	User.checkAdmin();
+
 	// syncPurchaseDetails.syncPurchasesDetail();
-	// syncSupplierSku.syncProductInfo();
-	// syncSupplier.syncSuppliers();
 	// Delivery.updateDeliveryPurchaseId();
-	// syncPurchaseOrders.syncPurchaseOrders();
 	// syncDeliveries.syncDeliveries();
-	// lotDetail.syncLotNoDetails();
-	// syncLotPageList.syncPageList();
 	// syncProcureItem.syncProcureItems();
-	// syncAllListings.syncListings();
 	// syncPurchases.syncPurchaseProcures();
+
 	//
 	// schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 	// 	logger.info("start to check product inventory");
@@ -73,15 +69,19 @@ const scheduleCronstyle = () => {
 	// 	logger.info("start to update lisings");
 	// 	syncProducts.syncProducts();
 	// });
-	schedule.scheduleJob("0 */5 * * * *", () => {
+	//
+	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update lisings");
 		// syncAllListings.syncListings();
 	});
 
-	// Product.updateAll();
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product stocks");
 		Product.updateAll();
+	});
+	schedule.scheduleJob("0 0 */1 * * *", () => {
+		logger.info("start to update product stocks");
+		Product.syncPm();
 	});
 };
 
