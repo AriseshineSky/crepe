@@ -62,14 +62,13 @@ async function getPurchasesQuantity(purchases) {
 	let quantity = 0;
 	if (purchases) {
 		for (let i = 0; i < purchases.length; i++) {
-			quantity += purchases[i].quantity;
+			quantity += purchases[i].totalQuantity;
 		}
 	}
 	return quantity;
 }
 
 async function syncShipment(product, days) {
-	// let shipmentsAndpurchases = await Shipment.getShipmentsAndProductingsByProduct(product, days);
 	let shipmentsAndpurchases = await Shipment.getShipmentsAndProductingsByProductV2(product, days);
 	await checkpurchases(product, shipmentsAndpurchases);
 	product.inboundShippeds = shipmentsAndpurchases.inboundShippeds;
@@ -391,6 +390,7 @@ async function addPurchaseShipmentPlanToInbounds(shipmentPlan, inbounds, product
 			period: purchase.expectDeliveryDays + shipmentType.period + GAP,
 		};
 
+		console.log(newInbounds);
 		newInbounds.push({
 			quantity: shipment.quantity,
 			period: shipment.period,
@@ -814,7 +814,7 @@ async function calculateInboundQueue(inbounds, sales) {
 }
 
 async function calculatePurchasePlan(shipmentPlan, inbounds, product, result, purchase) {
-	let newPlan = await getNewShipmentPlan(shipmentPlan, product, purchase, inbounds);
+	let newPlan = await getNewShipmentPlan(shipmentPlan, product, inbounds, purchase);
 
 	if (newPlan.minInventory >= product.minInventory && newPlan.gap == 0) {
 		result.plan = helper.deepClone(newPlan);
@@ -897,7 +897,7 @@ async function getShipmentPlanByPurchase(
 	} else {
 		let i = 0;
 		while (i <= left) {
-			shipmentPlan[shipmentType[index]] = { boxes: i };
+			shipmentPlan[shipmentTypes[index]] = { boxes: i };
 			await getShipmentPlanByPurchase(
 				shipmentPlan,
 				left - i,
@@ -992,7 +992,7 @@ async function getNewShipmentPlan(shipmentPlan, product, inbounds, purchase) {
 
 	if (purchase) {
 		newPlan.minInventory = await calculatePurchaseMinInventory(
-			shipmentTypes,
+			product.shipmentTypes,
 			status,
 			product.ps,
 			purchase,

@@ -44,14 +44,14 @@ var ProductSchema = new Schema({
 		{
 			purchaseCode: { type: String },
 			code: { type: String },
-			expectArrivalDate: { type: Date },
-			createdAt: { type: Date },
+			expectArrivalDate: { type: Date, default: Date.now() },
+			createdAt: { type: Date, default: Date.now() },
 			memo: { type: String },
 			box: { type: String },
-			confirmShipmentDate: { type: Date },
+			confirmShipmentDate: { type: Date, default: Date.now() },
 			tracking: { type: String },
 			remainingArrivalDays: { type: Number },
-			quantity: { type: Number },
+			quantity: { type: Number, default: 0 },
 			fba: { type: Boolean, default: false },
 		},
 	],
@@ -63,9 +63,9 @@ var ProductSchema = new Schema({
 			unshippedQuantity: { type: Number, default: 0 },
 			unIndoundQuantity: { type: Number, default: 0 },
 			totalQuantity: { type: Number, default: 0 },
-			expectDeliveryDate: { type: Date },
-			expectDeliveryDays: { type: Date },
-			createdAt: { type: Date },
+			expectDeliveryDate: { type: Date, default: Date.now() },
+			expectDeliveryDays: { type: Number, default: 0 },
+			createdAt: { type: Date, default: Date.now() },
 		},
 	],
 	peak: {
@@ -81,11 +81,5 @@ var ProductSchema = new Schema({
 });
 
 ProductSchema.plugin(BaseModel);
-
-ProductSchema.pre("save", function (next) {
-	var now = new Date();
-	this.updateAt = now;
-	next();
-});
 
 mongoose.model("Product", ProductSchema);

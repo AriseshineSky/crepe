@@ -24,8 +24,10 @@ async function createOrUpdate(listing) {
 		[account, country] = listing.marketName.split(":");
 	}
 	if (listing.warehouseName) {
-		[account, country] = listing.warehouseName.split(":");
+		country = listing.warehouseName.split(":").pop().split("_")[0];
+		account = listing.warehouseName.split(":")[0];
 	}
+
 	const { asin, fnsku } = listing;
 	let savedlisting = await Listing.findOne({
 		asin,
