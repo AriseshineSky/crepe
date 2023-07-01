@@ -34,11 +34,11 @@ const freights = [
 <div id='content'>
   <div class='panel'>
     <div class='inner post'>
-      <div id="purchase" data-purchase="<%= JSON.stringify(purchase.product) %>"></div>
+      <div id="product" data-product="<%= JSON.stringify(purchase.product) %>"></div>
       <div id="inbounds" data-inbounds="<%= JSON.stringify(purchase.plan.inventoryStatus) %>"></div>
       <div id="chart"></div>
       <br/>
-      <% if (purchase.plan && purchase.plan.plans) {%>
+      <% if (purchase.plan && purchase.plan.orderedPurchaseShipmentPlans) {%>
         <div class="card text-center">
           <div class="card-header">
             <h4>采购中货物发货计划</h4>
@@ -252,7 +252,6 @@ const freights = [
               </div>
               <div class="input-group input-group-static mb-4">
                 <label>仓库库存:</label>
-
 								<span class="form-control" data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= purchase.product.yisucangInventory %> | Plwhs:<%= purchase.product.plwhsInventory %>">
 									<%= purchase.product.yisucangInventory + purchase.product.plwhsInventory %>
 								</span>
@@ -316,17 +315,18 @@ const freights = [
 <script type="text/javascript">
   $(document).ready(function() {
     const FREIGHT_TYPES = ['sea', 'seaExpress', 'airDelivery', 'airExpress'];
-    var purchase =$('#purchase').data('purchase');
+    var product =$('#product').data('product');
     var data = { 0: {
-                      before: purchase.totalInventory,
-                      after: purchase.totalInventory
+                      before: product.totalInventory,
+                      after: product.totalInventory
                     }
                 }
   
     var inboundsX = [0];
-    var inboundsY = [purchase.totalInventory];
+    var inboundsY = [product.totalInventory];
     var x = [0];
-    var y = [purchase.totalInventory];
+    var y = [product.totalInventory];
+
     var inboundsData =$('#inbounds').data('inbounds');
       
     for (var date in inboundsData) {
@@ -343,73 +343,45 @@ const freights = [
       }
     }
    
-    async function changeNumberToDate(x) {
-      return new Promise((resolve, reject) => {
-        var days = [];
-        var day = new Date();
-        days = x.map(function(n) {
-          return moment().add(Number(n), 'days').format('YYYY-MM-DD');
-        });
-        resolve(days);
-      })
-    }
-    if (purchase.plan) {
-      var status = purchase.plan.inventoryStatus;
-      for (var data of purchase.plan.inventoryStatus) {
-        if (data.before === data.after) {
-          x.push(data.period);
-          y.push(data.before);
-        } else {
-          x.push(data.period);
-          y.push(data.before);
-          x.push(Number(data.period)+1);
-          y.push(data.after);
-        }
-        
-      }
-      changeNumberToDate(x).then((days) => {
-        var chart = c3.generate({
-          data: {
-            x: 'x',
-            columns: [
-              ['x'].concat(days),
-              ['inventory'].concat(y)
-            ]
-          },
-          axis: {
-            x: {
-              type: 'timeseries',
-              tick: {
-                count: days.length,
-                format: '%Y-%m-%d'
-              }
-            }
-          },
-        });
-      })
-    } else {
-      changeNumberToDate(inboundsX).then((days) => {
-        var chart = c3.generate({
-          data: {
-            x: 'x',
-            columns: [
-              ['x'].concat(days),
-              ['inbound'].concat(inboundsY),
-            ]
-          },
-          axis: {
-            x: {
-              type: 'timeseries',
-              tick: {
-                count: days.length,
-                format: '%Y-%m-%d'
-              }
-            }
-          },
-        });
-      })
+    function changeNumberToDate(x) {
+			var dates = x.map(function(n) {
+				return moment().add(Number(n), 'days').format('YYYY-MM-DD');
+			});
+			return(dates);
     }
 
+		for (var data of inboundsData) {
+			if (data.before === data.after) {
+				x.push(data.period);
+				y.push(data.before);
+			} else {
+				x.push(data.period);
+				y.push(data.before);
+				x.push(Number(data.period)+1);
+				y.push(data.after);
+			}
+		}
+
+		var dates = changeNumberToDate(x)
+		var chart = c3.generate({
+			data: {
+				x: 'x',
+				columns: [
+					['x'].concat(dates),
+					['inventory'].concat(y)
+				]
+			},
+			axis: {
+				x: {
+					type: 'timeseries',
+					tick: {
+						count: dates.length,
+						format: '%Y-%m-%d'
+					}
+				}
+			},
+		})
+   
     if (window.location.href.split('/').pop() === 'showPlan') {
       $("#save_product").hide();
     }
