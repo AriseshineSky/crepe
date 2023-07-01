@@ -5,10 +5,10 @@ var config = {
 	debug: true,
 };
 
-config.if (process.env.NODE_ENV === "production") {
-  config.db = "mongodb://127.0.0.1:27017/crepe";
+if (process.env.NODE_ENV === "production") {
+	config.db = "mongodb://127.0.0.1:27017/crepe";
 } else {
-  config.db = "mongodb://mongodb:27017/crepe";
+	config.db = "mongodb://mongodb:27017/crepe";
 }
 SECRET = "fdfhfjdfdjfdjerwrereresaassa2dd@ddds";
 module.exports = config;
