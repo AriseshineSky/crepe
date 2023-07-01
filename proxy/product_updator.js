@@ -94,7 +94,6 @@ class ProductUpdator {
 			purchases,
 		};
 
-		console.log(newProduct);
 		this.product.set(newProduct);
 		await this.product.save();
 	}

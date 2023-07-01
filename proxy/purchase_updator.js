@@ -31,7 +31,6 @@ class PurchaseUpdator {
 
 		this.purchase.shippedQuantity = shippedQuantity;
 		this.purchase.unshippedQuantity = this.purchase.totalQuantity - shippedQuantity;
-		console.log(this.purchase.unshippedQuantity);
 		await this.purchase.save();
 	}
 }

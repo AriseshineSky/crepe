@@ -11,7 +11,11 @@ async function formatPurchase(purchase) {
 
 async function findUnshippedByProduct(product) {
 	// TODO
-	return await Purchase.find({ product: product.gSku, deliveryStatus: null });
+	return await Purchase.find({
+		product: product.gSku,
+		deliveryStatus: null,
+		unshippedQuantity: { $gt: 0 },
+	});
 }
 
 async function getPurchasesByProductId(productId) {

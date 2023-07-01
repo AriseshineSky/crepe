@@ -63,6 +63,7 @@ var ProductSchema = new Schema({
 			unshippedQuantity: { type: Number, default: 0 },
 			unIndoundQuantity: { type: Number, default: 0 },
 			totalQuantity: { type: Number, default: 0 },
+			boxes: { type: Number, default: 0 },
 			expectDeliveryDate: { type: Date, default: Date.now() },
 			expectDeliveryDays: { type: Number, default: 0 },
 			createdAt: { type: Date, default: Date.now() },

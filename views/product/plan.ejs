@@ -68,7 +68,7 @@ const freights = [
                 </tr>
               </thead>
               <tbody>
-                <% purchase.plan.plans.forEach(function(plan){ %>
+                <% purchase.plan.orderedPurchaseShipmentPlans.forEach(function(plan){ %>
                   <% for (var type of FREIGHT_TYPES) { %>
                     <% if (type in plan && plan[type]['units']) {%>
                       <% var freight = freights.find(function(freight){ return freight.type === type}) %>
@@ -252,7 +252,10 @@ const freights = [
               </div>
               <div class="input-group input-group-static mb-4">
                 <label>仓库库存:</label>
-                <span class="form-control" ><%- purchase.product.totalInventory %></span>
+
+								<span class="form-control" data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= purchase.product.yisucangInventory %> | Plwhs:<%= purchase.product.plwhsInventory %>">
+									<%= purchase.product.yisucangInventory + purchase.product.plwhsInventory %>
+								</span>
               </div>
               <% if (purchase.plan && purchase.plan.airExpress) {%>
                 <div class="input-group input-group-static mb-4">

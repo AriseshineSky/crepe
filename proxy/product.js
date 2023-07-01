@@ -532,7 +532,8 @@ async function getPlanV3(productId, purchaseCode) {
 	let orderDues = await getOrderDue(product);
 	logger.debug("orderDues", orderDues);
 
-	let plan = { plans: [] };
+	let newPurchasePlan = { orderedPurchaseShipmentPlans: [] };
+
 	if (purchaseCode) {
 		const purchase = product.purchases.filter((purchase) => purchase.code === purchaseCode);
 		if (!purchase) {
@@ -546,30 +547,30 @@ async function getPlanV3(productId, purchaseCode) {
 		purchasePlan.orderId = purchase.orderId;
 		purchasePlan.code = purchase.code;
 
-		plan.plans.push(purchasePlan);
-		plan.gap = purchasePlan.gap;
-		plan.inventoryStatus = purchasePlan.inventoryStatus;
-		plan.minInventory = purchasePlan.minInventory;
-		plan.totalAmount = purchasePlan.totalAmount;
-		plan.inbounds = purchasePlan.inbounds;
+		newPurchasePlan.orderedPurchaseShipmentPlans.push(purchasePlan);
+		newPurchasePlan.gap = purchasePlan.gap;
+		newPurchasePlan.inventoryStatus = purchasePlan.inventoryStatus;
+		newPurchasePlan.minInventory = purchasePlan.minInventory;
+		newPurchasePlan.totalAmount = purchasePlan.totalAmount;
+		newPurchasePlan.inbounds = purchasePlan.inbounds;
 	} else {
-		let purchasesPlan = null;
+		let orderedPurchaseShipmentPlans = null;
 		pruchases = helper.deepClone(product.purchases);
-		purchasesPlan = await getPurchasesShipmentPlan(product, inbounds, pruchases);
+		orderedPurchaseShipmentPlans = await getPurchasesShipmentPlan(product, inbounds, pruchases);
 		if (product.quantityToPurchase.boxes > 0) {
-			if (purchasesPlan) {
-				plan = await bestPlanV4(product, purchasesPlan.inbounds || []);
-				plan.plans = purchasesPlan.plans;
+			if (orderedPurchaseShipmentPlans) {
+				newPurchasePlan = await bestPlanV4(product, orderedPurchaseShipmentPlans.inbounds || []);
+				newPurchasePlan.orderedPurchaseShipmentPlans = orderedPurchaseShipmentPlans.plans;
 			} else {
-				plan = await bestPlanV4(product, inbounds);
+				newPurchasePlan = await bestPlanV4(product, inbounds);
 			}
 		} else {
 			console.log("Inventory is enough, do not need to purchase any more");
 			await updateProduct(product, { orderQuantity: 0 });
-			if (!purchasesPlan) {
+			if (!orderedPurchaseShipmentPlans) {
 				return quantity;
 			} else {
-				plan = purchasesPlan;
+				newPurchasePlan = orderedPurchaseShipmentPlans;
 			}
 		}
 	}
@@ -578,15 +579,15 @@ async function getPlanV3(productId, purchaseCode) {
 	await product.save();
 
 	let volumeWeightCheck = true;
-	for (let type in plan) {
-		if (plan[type].units && plan[type].units > 0) {
+	for (let type in newPurchasePlan) {
+		if (newPurchasePlan[type].units && newPurchasePlan[type].units > 0) {
 			if (!checkVolumeWeight(product.box, type)) {
 				volumeWeightCheck = false;
 			}
 		}
 	}
 	const purchase = {
-		plan: plan,
+		plan: newPurchasePlan,
 		product: product,
 		freights: ShipmentTypesInfo,
 		inboundShippeds: product.shipments,
@@ -632,17 +633,17 @@ async function initShipmentPlan(purchase, product, inbounds) {
 }
 
 async function getPurchaseShimpentPlan(purchase, product, inbounds) {
-	let quantity = await convertPurchaseQtyIntoBox(purchase, product);
+	let quantityAndBoxes = await convertPurchaseQtyIntoBox(purchase, product);
 
 	const shipmentTypes = product.shipmentTypes;
-
-	let plan = {
+	let shipmentPlan = {
 		[shipmentTypes[0]]: {
-			boxes: quantity.boxes,
+			boxes: quantityAndBoxes.boxes,
 		},
 		gap: 100000,
 		minInventory: -100,
-		totalAmount: quantity.boxes * ShipmentTypesInfo[shipmentTypes[0]].price * product.box.weight,
+		totalAmount:
+			quantityAndBoxes.boxes * ShipmentTypesInfo[shipmentTypes[0]].price * product.box.weight,
 		expectDeliveryDate: purchase.expectDeliveryDate,
 		createdAt: purchase.createdAt,
 		expectDeliveryDays: purchase.expectDeliveryDays,
@@ -650,21 +651,21 @@ async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 		code: purchase.code,
 	};
 	for (let i = 1; i < shipmentTypes.length; i++) {
-		plan[shipmentTypes[i]] = { boxes: 0 };
+		shipmentPlan[shipmentTypes[i]] = { boxes: 0 };
 	}
 
-	let shipmentPlan = {};
+	let tempPlan = {};
 
 	let result = {
-		plan: plan,
+		plan: shipmentPlan,
 		status: "pending",
 	};
 
-	let step = Math.ceil(quantity.boxes ** shipmentTypes.length / 60000000);
+	let step = Math.ceil(quantityAndBoxes.boxes ** shipmentTypes.length / 60000000);
 
 	await getShipmentPlanByPurchase(
-		shipmentPlan,
-		quantity.boxes, // the boxes that other shipment types need to ship
+		tempPlan,
+		quantityAndBoxes.boxes, // the boxes that other shipment types need to ship
 		0, // the index of shipment type
 		inbounds,
 		product,
@@ -676,23 +677,31 @@ async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 }
 
 async function getPurchasesShipmentPlan(product, inbounds, purchases) {
-	let plan = { plans: [], inbounds };
+	let orderedPurchaseShipmentPlansWithInbounds = {
+		plans: [],
+		inbounds,
+	};
 	for (let i = 0; i < purchases.length; i++) {
-		const shipmentPlan = await getPurchaseShimpentPlan(purchases[i], product, plan.inbounds);
+		const shipmentPlan = await getPurchaseShimpentPlan(
+			purchases[i],
+			product,
+			orderedPurchaseShipmentPlansWithInbounds.inbounds,
+		);
+
 		shipmentPlan.expectDeliveryDate = purchases[i].expectDeliveryDate;
 		shipmentPlan.expectDeliveryDays = purchases[i].expectDeliveryDays;
 		shipmentPlan.createdAt = purchases[i].createdAt;
 		shipmentPlan.orderId = purchases[i].orderId;
 		shipmentPlan.code = purchases[i].code;
 
-		plan.plans.push(shipmentPlan);
-		plan.gap = shipmentPlan.gap;
-		plan.inventoryStatus = shipmentPlan.inventoryStatus;
-		plan.minInventory = shipmentPlan.minInventory;
-		plan.totalAmount = shipmentPlan.totalAmount;
-		plan.inbounds = shipmentPlan.inbounds;
+		orderedPurchaseShipmentPlansWithInbounds.plans.push(shipmentPlan);
+		orderedPurchaseShipmentPlansWithInbounds.gap = shipmentPlan.gap;
+		orderedPurchaseShipmentPlansWithInbounds.inventoryStatus = shipmentPlan.inventoryStatus;
+		orderedPurchaseShipmentPlansWithInbounds.minInventory = shipmentPlan.minInventory;
+		orderedPurchaseShipmentPlansWithInbounds.totalAmount = shipmentPlan.totalAmount;
+		orderedPurchaseShipmentPlansWithInbounds.inbounds = shipmentPlan.inbounds;
 	}
-	return plan;
+	return orderedPurchaseShipmentPlansWithInbounds;
 }
 
 async function getOrderDue(product) {
@@ -890,7 +899,6 @@ async function getShipmentPlanByPurchase(
 
 	if (index === shipmentTypes.length - 1) {
 		shipmentPlan[shipmentTypes[index]] = { boxes: left };
-		let shipmentPlanDup = helper.deepClone(shipmentPlan);
 
 		await calculatePurchasePlan(shipmentPlan, inbounds, product, result, purchase);
 
