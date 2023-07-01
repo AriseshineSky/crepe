@@ -5,7 +5,27 @@
   'airDelivery': '空派',
   'seaExpress': '快船',
   'sea': '慢船'
-} %>
+}
+
+const freights = [
+	airExpress: {
+		price: 55,
+		period: 8,
+	},
+	airDelivery: {
+		price: 45,
+		period: 15,
+	},
+	seaExpress: {
+		price: 25,
+		period: 30,
+	},
+	sea: {
+		price: 15,
+		period: 45,
+	},
+] 
+%>
 
 <div id='content'>
   <div class='panel'>
@@ -82,7 +102,7 @@
           </div>
         </div>
       <% } %>
-      <% if (purchase.quantity && purchase.quantity.boxes > 0 && (purchase.plan.airExpress || purchase.plan.seaExpress)) {%>
+      <% if (purchase.product.quantityToPurchase.boxes && purchase.product.quantityToPurchase.boxes > 0) {%>
         <div class="card text-center">
           <div class="card-header">
             <h4>采购计划</h4>
@@ -129,7 +149,7 @@
                       <td><%= moment().format('YYYY-MM-DD') %></td>
                       <td><%= moment().add(purchase.product.cycle, 'days').format('YYYY-MM-DD') %></td>
                       <td>
-                        <% var freight = purchase.freights.find(function(freight){ return freight.type === type}) %>
+                        <% var freight = freights.find(function(freight){ return freight.type === type}) %>
                         <%= moment().add(purchase.product.cycle + freight.period, 'days').format('YYYY-MM-DD') %>
                       </td>
                       <td><%= freight.period %></td>
@@ -215,10 +235,10 @@
                 <label>ASIN：</label>
                 <span class="form-control" ><%- purchase.product.asin %></span>
               </div>
-              <% if (purchase.quantity && purchase.quantity.boxes > 0 && (purchase.plan.airExpress || purchase.plan.seaExpress)) {%>
+              <% if (purchase.product.quantityToPurchase.boxes && purchase.product.quantityToPurchase.boxes > 0 &) {%>
                 <div class="input-group input-group-static mb-4">
                   <label>采购数量(个)：</label>
-                  <span class="form-control" ><%- purchase.quantity.quantity || 0 %></span>
+                  <span class="form-control" ><%- purchase.product.quantityToPurchase.quantity || 0 %></span>
                 </div>
               <% }%>
               <div class="input-group input-group-static mb-4">
