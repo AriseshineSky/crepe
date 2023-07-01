@@ -79,7 +79,7 @@
           </div>
         </div>
       <% } %>
-      <% if (purchase.quantity && purchase.quantity.boxes > 0 && (purchase.plan.airExpress || purchase.plan.seaExpress)) {%>
+      <% if (purchase.product.quantityToPurchase.boxes && purchase.product.quantityToPurchase.boxes > 0) {%>
         <div class="card text-center">
           <div class="card-header">
             <h4>采购计划</h4>
@@ -147,63 +147,6 @@
           </div>
         </div>
       <% } %>
-      <% if (purchase.inboundShippeds && purchase.inboundShippeds.length > 0) {%>
-        <div class="card text-center">
-          <div class="card-header">
-            <h4>运输中货物</h4>
-          </div>
-          <div class="card-body">
-            <table
-            data-toggle="table"
-            data-pagination="true"
-            data-editable-emptytext="Default empty text."
-            data-sort-name="delivery"
-            data-sort-order="asc"
-            >
-              <thead>
-                <tr>
-                  <th data-editable="true" data-sortable="true">orderId:</th>
-                  <th data-editable="true" data-sortable="true">数量:</th>
-                  <th data-field="delivery" data-editable="true" data-sortable="true">预估收货日期:</th>
-                  <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
-                  <th data-editable="true" data-sortable="true">开卖前库存:</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% purchase.inboundShippeds.forEach(function(inbound){ %>
-                  <tr>
-                    <td><%= inbound.orderId %></td>
-                    <td><%= inbound.quantity %></td>
-                    <td>
-                      <% if (inbound.deliveryDue) {%>
-                        <%= moment(inbound.deliveryDue).format("YYYY-MM-DD") %>
-                      <% } %>
-                    </td>
-                    <td>
-                      <% var inboundStatus = null %>
-                      <% if (inbound.deliveryDue) { 
-                        for (var status of purchase.plan.inventoryStatus) {
-                          if (Math.abs(status.period - GAP - moment(inbound.deliveryDue).diff(moment(), "days")) <= 1 && status.after - status.before === inbound.quantity) {
-                            inboundStatus = status;
-                          }                    
-                        }
-                      } %>
-                      <% if (inboundStatus) { %>
-                        <%= moment().add(inboundStatus.period, 'days').format('YYYY-MM-DD') %>
-                      <% } %>
-                    </td>
-                    <td>
-                      <% if (inboundStatus) { %>
-                        <%= inboundStatus.before %>
-                      <% } %>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      <%}%>
       <div class="row">
         <div class="col-sm-6">
           <div class="card">
@@ -212,23 +155,13 @@
                 <label>ASIN：</label>
                 <span class="form-control" ><%- purchase.product.asin %></span>
               </div>
-              <% if (purchase.quantity && purchase.quantity.boxes > 0 && (purchase.plan.airExpress || purchase.plan.seaExpress)) {%>
-                <div class="input-group input-group-static mb-4">
-                  <label>采购数量(个)：</label>
-                  <span class="form-control" ><%- purchase.quantity.quantity || 0 %></span>
-                </div>
-              <% }%>
               <div class="input-group input-group-static mb-4">
                 <label>生产周期(天):</label>
                 <span class="form-control" ><%- purchase.product.cycle %></span>
               </div>
               <div class="input-group input-group-static mb-4">
                 <label>亚马逊库存:</label>
-                <span class="form-control" ><%- purchase.fbaInventory %></span>
-              </div>
-              <div class="input-group input-group-static mb-4">
-                <label>仓库库存:</label>
-                <span class="form-control" ><%- purchase.stock %></span>
+                <span class="form-control" ><%- purchase.product.fbaInventory %></span>
               </div>
               <% if (purchase.plan && purchase.plan.airExpress) {%>
                 <div class="input-group input-group-static mb-4">
