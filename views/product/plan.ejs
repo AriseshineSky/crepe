@@ -35,6 +35,7 @@ const freights = [
   <div class='panel'>
     <div class='inner post'>
       <div id="purchase" data-purchase="<%= JSON.stringify(purchase.product) %>"></div>
+      <div id="inbounds" data-inbounds="<%= JSON.stringify(purchase.plan.inventoryStatus) %>"></div>
       <div id="chart"></div>
       <br/>
       <% if (purchase.plan && purchase.plan.plans) {%>
@@ -72,7 +73,7 @@ const freights = [
                     <% if (type in plan && plan[type]['units']) {%>
                       <% var freight = freights.find(function(freight){ return freight.type === type}) %>
                       <tr>
-                        <td><%= plan.orderId %></td>
+                        <td><%= plan.orderId || plan.code %></td>
                         <td><%= TYPES[type] %></td>
                         <td><%= plan[type]['boxes'] %></td>
                         <td><%= plan[type]['units'] %></td>
