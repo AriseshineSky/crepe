@@ -21,6 +21,7 @@ const logger = require("../common/logger");
 let syncProducts = require("../lib/getInfoFromGoogleSheet");
 
 const scheduleCronstyle = () => {
+	User.checkAdmin();
 	// syncPurchaseDetails.syncPurchasesDetail();
 	// syncSupplierSku.syncProductInfo();
 	// syncSupplier.syncSuppliers();
