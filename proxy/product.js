@@ -546,6 +546,7 @@ async function getPlanV3(productId, purchaseCode) {
 		if (!purchase) {
 			return;
 		}
+
 		let purchasePlan = await getPurchaseShimpentPlan(purchase, product, inbounds);
 
 		newPurchasePlan.orderedPurchaseShipmentPlans.push(purchasePlan);
@@ -558,6 +559,7 @@ async function getPlanV3(productId, purchaseCode) {
 		let orderedPurchaseShipmentPlans = null;
 		pruchases = helper.deepClone(product.purchases);
 		orderedPurchaseShipmentPlans = await getPurchasesShipmentPlan(product, inbounds, pruchases);
+
 		if (product.quantityToPurchase.boxes > 0) {
 			if (orderedPurchaseShipmentPlans) {
 				newPurchasePlan = await bestPlanV4(product, orderedPurchaseShipmentPlans.inbounds || []);
@@ -567,7 +569,6 @@ async function getPlanV3(productId, purchaseCode) {
 			}
 		} else {
 			console.log("Inventory is enough, do not need to purchase any more");
-			await updateProduct(product, { orderQuantity: 0 });
 			if (!orderedPurchaseShipmentPlans) {
 				return quantity;
 			} else {
@@ -575,7 +576,6 @@ async function getPlanV3(productId, purchaseCode) {
 			}
 		}
 	}
-	product.purchase = await getPurchasesQuantity(product.purchases);
 	product.orderDues = await prepareOrderDues(orderDues);
 	await product.save();
 
@@ -679,7 +679,7 @@ async function getPurchaseShimpentPlan(purchase, product, inbounds) {
 
 async function getPurchasesShipmentPlan(product, inbounds, purchases) {
 	let orderedPurchaseShipmentPlansWithInbounds = {
-		plans: [],
+		orderedPurchaseShipmentPlans: [],
 		inbounds,
 	};
 	for (let i = 0; i < purchases.length; i++) {
@@ -695,7 +695,7 @@ async function getPurchasesShipmentPlan(product, inbounds, purchases) {
 		shipmentPlan.orderId = purchases[i].orderId;
 		shipmentPlan.code = purchases[i].code;
 
-		orderedPurchaseShipmentPlansWithInbounds.plans.push(shipmentPlan);
+		orderedPurchaseShipmentPlansWithInbounds.orderedPurchaseShipmentPlans.push(shipmentPlan);
 		orderedPurchaseShipmentPlansWithInbounds.gap = shipmentPlan.gap;
 		orderedPurchaseShipmentPlansWithInbounds.inventoryStatus = shipmentPlan.inventoryStatus;
 		orderedPurchaseShipmentPlansWithInbounds.minInventory = shipmentPlan.minInventory;
