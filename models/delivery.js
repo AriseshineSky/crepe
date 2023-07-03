@@ -14,10 +14,20 @@ const DeliverySchema = new Schema({
 	purchaseCode: { type: String },
 	box: { type: Number },
 	totalBoxes: { type: Number },
-	unreceivedQuantity: { type: Number, default: 0 },
+	unreceivedQuantity: {
+		type: Number,
+		default: function () {
+			return this.quantity;
+		},
+	},
 	receivedQuantity: { type: Number, default: 0 },
-	unreceivedBoxes: { type: Number },
-	receivedBoxes: { type: Number },
+	unreceivedBoxes: {
+		type: Number,
+		default: function () {
+			return this.box;
+		},
+	},
+	receivedBoxes: { type: Number, default: 0 },
 	chargeWeight: { type: Number },
 	estimatedAmount: { type: Number },
 	receiveRnQuantity: { type: Number },

@@ -29,11 +29,22 @@ const scheduleCronstyle = () => {
 	// });
 	//
 
-	schedule.scheduleJob("0 */3 * * * *", () => {
+	Delivery.updateRemainingArrivalDays();
+	syncDeliveries.syncDeliveries();
+	Delivery.updateDeliveryReciveds();
+	syncYisucangInbounds.syncYisucangInbounds();
+	syncAllListings.syncListings();
+	Product.syncPm();
+	Product.updateAll();
+	Yisucang.syncYisucang();
+	syncPurchaseDetails.syncPurchasesDetail();
+	syncPurchases.syncPurchaseProcures();
+
+	schedule.scheduleJob("0  0 */3  * * *", () => {
 		logger.info("start to sync product inventory");
 		syncYisucangInbounds.syncYisucangInbounds();
 	});
-	schedule.scheduleJob("0 */5 * * * *", () => {
+	schedule.scheduleJob("0 0  */5 *  * *", () => {
 		logger.info("start to sync product inventory");
 		Delivery.updateDeliveryReciveds();
 	});
@@ -41,7 +52,6 @@ const scheduleCronstyle = () => {
 		logger.info("start to sync product inventory");
 		Delivery.updateRemainingArrivalDays();
 	});
-
 	schedule.scheduleJob("0 */10 * * * *", () => {
 		logger.info("start to sync product inventory");
 		syncPurchases.syncPurchaseProcures();
@@ -54,7 +64,6 @@ const scheduleCronstyle = () => {
 		logger.info("start to sync product inventory");
 		syncPurchaseDetails.syncPurchasesDetail();
 	});
-
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to sync product inventory");
 		Yisucang.syncYisucang();

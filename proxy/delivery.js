@@ -1,6 +1,7 @@
 const models = require("../models");
 const Purchase = models.Purchase;
 const Delivery = models.Delivery;
+const YisucangInbound = models.YisucangInbound;
 
 const helper = require("../lib/util/helper");
 const batchSize = 200;
@@ -228,19 +229,44 @@ async function checkFreightRecived(recieveds, orderId) {
 }
 
 async function updateDeliveryReciveds() {
-	let yisucangReciveds = await getYisucangReciveds();
-	let deliveries = await Delivery.find();
-	for (let delivery of deliveries) {
-		const reciveds = yisucangReciveds.filter(
-			(recived) => recived.orderId === delivery.purchaseCode,
+	let yisucangInbounds = await YisucangInbound.find();
+	let deliveries = await Delivery.find({ memo: { $ne: null } });
+
+	for (let yisucangInbound of yisucangInbounds) {
+		let remainingBoxCount = yisucangInbound.boxCount;
+
+		const deliveriesByYisucang = deliveries.filter(
+			(delivery) => delivery.memo === yisucangInbound.logisticsTrackingNumber,
 		);
-		const recivedBoxes = reciveds.reduce(
-			(recivedBoxes, recived) => recivedBoxes + recived.boxCount,
-			0,
-		);
-		delivery.recivedBoxes = recivedBoxes;
-		delivery.unrecivedBoxes = delivery.totalBoxes - recivedBoxes;
-		await delivery.save();
+
+		let sortedDeliveries = deliveriesByYisucang.sort(function (a, b) {
+			return b.remainingArrivalDays - a.remainingArrivalDays;
+		});
+
+		while (remainingBoxCount > 0) {
+			let delivery = sortedDeliveries.pop();
+			if (delivery) {
+				if (remainingBoxCount >= delivery.box) {
+					delivery.receivedBoxes = delivery.box;
+					delivery.receivedQuantity = delivery.quantity;
+					delivery.unreceivedQuantity = 0;
+					delivery.unreceivedBoxes = 0;
+					remainingBoxCount -= delivery.box;
+				} else {
+					delivery.receivedBoxes = delivery.box - remainingBoxCount;
+					if (delivery.box > 0) {
+						delivery.receivedQuantity = (delivery.quantity * delivery.receivedBoxes) / delivery.box;
+					}
+					delivery.unreceivedQuantity = delivery.quantity - delivery.receivedQuantity;
+					delivery.unreceivedBoxes = delivery.box - delivery.receivedBoxes;
+					remainingBoxCount = 0;
+				}
+				await delivery.save();
+				console.log(delivery);
+			} else {
+				break;
+			}
+		}
 	}
 }
 
@@ -672,6 +698,7 @@ async function createOrUpdate(delivery) {
 		}
 	}
 
+	logger.debug(JSON.stringify(delivery) + "\n");
 	const newDelivery = new Delivery(delivery);
 	return await newDelivery.save();
 }
@@ -684,6 +711,7 @@ async function findUndeliveredByProduct(product) {
 	let purchases = await Purchase.find({ product: product.gSku });
 	const purchaseCodes = purchases.map((purchase) => purchase.code);
 	return Delivery.find({
+		unreceivedBoxes: { $gt: 0 },
 		purchaseCode: { $in: purchaseCodes },
 		deliveryStatus: null,
 		status: { $ne: "cancelled" },

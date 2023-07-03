@@ -215,6 +215,7 @@ class ProductUpdator {
 
 	async getUndeliveredQty() {
 		const undeliveredDeliveris = await this.getUndeliveredDeliveris();
+		console.log(undeliveredDeliveris);
 		return undeliveredDeliveris.reduce((total, delivery) => {
 			return total + delivery.quantity;
 		}, 0);

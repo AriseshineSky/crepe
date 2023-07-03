@@ -342,10 +342,15 @@ let parseDate = async function (dateInfo) {
 	}
 };
 
-let parseOrderId = async function (orderId) {
-	if (orderId) {
+let parseOrderId = async function (order) {
+	if (order) {
 		let re = /OR\d*/;
-		orderId = orderId.match(re);
+		let orderId = order.match(re);
+		if (orderId) {
+			return orderId[0];
+		}
+		re = /OR\d*/;
+		orderId = order.match(re);
 		if (orderId) {
 			return orderId[0];
 		}
@@ -535,14 +540,17 @@ async function freightTypes() {
 
 async function parseYisucangRow(row, HEADER) {
 	let number = row[HEADER.indexOf("入库单号")];
-	let orderId = await parseOrderId(row[HEADER.indexOf("物流追踪单号")]);
-	let quantity = row[HEADER.indexOf("入库数量")];
+	let orderId = row[HEADER.indexOf("物流追踪单号")];
+	let boxCount = Number(row[HEADER.indexOf("入库数量")]);
 	let date = row[HEADER.indexOf("入库时间")];
+	let unitsPerBox = Number(row[HEADER.indexOf("个数/箱")]);
 	return {
-		number: number,
-		orderId: orderId,
-		boxCount: Number(quantity),
-		date: date,
+		number,
+		orderId,
+		boxCount,
+		unitsPerBox,
+		quantity: boxCount * unitsPerBox,
+		date,
 	};
 }
 
@@ -681,4 +689,6 @@ async function createOrUpdate(inbound) {
 
 module.exports = {
 	createOrUpdate,
+	getYisucangInbounds,
+	getYisucangReciveds,
 };

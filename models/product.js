@@ -27,6 +27,7 @@ var ProductSchema = new Schema({
 	plwhsInventory: { type: Number, default: 0 },
 	purchase: { type: Number, default: 0 },
 	unshippedQty: { type: Number, default: 0 },
+	undeliveredQty: { type: Number, default: 0 },
 	minInventory: { type: Number, default: 7 },
 	orderQuantity: { type: Number },
 	orderDues: [
