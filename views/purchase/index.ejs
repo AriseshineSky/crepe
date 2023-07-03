@@ -16,8 +16,9 @@
   >
     <thead>
       <tr>
-        <th>Id</th>
         <th>Qty</th>
+        <th>unshippedQuantity</th>
+        <th>product</th>
         <th>unInboundQuantity</th>
         <th>supervisorId</th>
         <th>supplierCode</th>
@@ -29,7 +30,6 @@
 				<th>code</th>
 				<th>fnsku</th>
 				<th>inboundQuantity</th>
-				<th>product</th>
 				<th>sellerSku</th>
         <th>createTime</th>
         <th>stock</th>
@@ -42,8 +42,9 @@
     <tbody>
       <% purchases.forEach(function(purchase) { %>
         <tr>
-          <td><%= purchase.id %></td>
 					<td><%= purchase.totalQuantity %></td>
+					<td><%= purchase.unshippedQuantity %></td>
+					<td><%= purchase.product %></td>
 					<td><%= purchase.unInboundQuantity %></td>
 					<td><%= purchase.supervisorId %></td>
 					<td><%= purchase.supplierCode %></td>
@@ -55,7 +56,6 @@
 					<td><%= purchase.code %></td>
 					<td><%= purchase.fnsku %></td>
 					<td><%= purchase.inboundQuantity %></td>
-					<td><%= purchase.product %></td>
 					<td><%= purchase.sellerSku %></td>
 					<td><%= purchase.createTime %></td>
 					<td><%= purchase.stock %></td>

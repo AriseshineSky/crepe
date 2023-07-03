@@ -209,10 +209,13 @@ function compare(type) {
 }
 
 async function sortQueue(inboundQueue) {
-	if ("period" in inboundQueue) {
+	if (inboundQueue.length === 0) {
+		return inboundQueue;
+	}
+	if ("period" in inboundQueue[0]) {
 		return inboundQueue.sort(compare("period"));
 	}
-	if ("leadDays" in inboundQueue) {
+	if ("leadDays" in inboundQueue[0]) {
 		return inboundQueue.sort(compare("leadDays"));
 	}
 }
@@ -486,9 +489,7 @@ async function getPlanV3(productId, purchaseCode) {
 	const minTotalSalesPeriod = totalInventory / maxAvgSales;
 	const maxTotalSalesPeriod = totalInventory / ps;
 
-	product.orderDues = await getOrderDue(product);
-	await product.save();
-
+	console.log(product);
 	let newPurchaseShipmentPlan = {
 		orderedPurchaseShipmentPlans: [],
 		gap: 0,
@@ -513,9 +514,11 @@ async function getPlanV3(productId, purchaseCode) {
 		);
 	} else {
 		const pruchases = helper.deepClone(product.purchases);
+
 		let { orderedPurchaseShipmentPlansMetrics, orderedPurchaseShipmentPlans } =
 			await getPurchaseShipmentPlans(pruchases, product, inbounds);
 
+		console.log(inbounds);
 		if (product.quantityToPurchase.boxCount > 0) {
 			if (orderedPurchaseShipmentPlans.length > 0) {
 				newPurchaseShipmentPlan = await bestPlan(
@@ -529,7 +532,7 @@ async function getPlanV3(productId, purchaseCode) {
 		} else {
 			console.log("Inventory is enough, do not need to purchase any more");
 			if (orderedPurchaseShipmentPlans.length === 0) {
-				return quantity;
+				return;
 			} else {
 				newPurchaseShipmentPlan = {
 					orderedPurchaseShipmentPlans,
@@ -625,7 +628,7 @@ async function getOrderDue(product) {
 	for (let type of product.shipmentTypes) {
 		let shipment = ShipmentTypesInfo[type];
 		orderDues[type] = moment().add(
-			product.totalInventory / product.ps -
+			product.totalInventory / product.sales -
 				product.cycle -
 				shipment.period -
 				GAP -
@@ -877,8 +880,9 @@ async function bestPlan(product, inbounds) {
 
 async function getShipmentPlanMetrics(shipmentPlan, product, inbounds, purchase) {
 	let newInbounds = await addShipmentPlanToInbounds(shipmentPlan, inbounds, product, purchase);
-	let inventoryStatus = await getInventoryStatus(newInbounds, product.ps);
-
+	console.log("newInbounds", newInbounds);
+	console.log("inbounds", inbounds);
+	let inventoryStatus = await getInventoryStatus(newInbounds, product.sales);
 	const shipmentPlanDup = helper.deepClone(shipmentPlan);
 	await addCostToShipmentPlan(shipmentPlanDup, product);
 
@@ -888,15 +892,15 @@ async function getShipmentPlanMetrics(shipmentPlan, product, inbounds, purchase)
 		shipmentPlanDup.minInventory = await calculatePurchaseMinInventory(
 			product.shipmentTypes,
 			inventoryStatus,
-			product.ps,
+			product.sales,
 			purchase,
 		);
 	} else {
 		shipmentPlanDup.minInventory = await calculateMinInventory(
 			product,
 			inventoryStatus,
-			product.ps,
-			newPlan.gap,
+			product.sales,
+			shipmentPlanDup.gap,
 		);
 	}
 

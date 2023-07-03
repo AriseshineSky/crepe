@@ -19,7 +19,7 @@ var ProductSchema = new Schema({
 	ps: { type: Number, default: 0 },
 	totalInventory: { type: Number, default: 0 },
 	quantityToPurchase: {
-		boxes: { type: Number, default: 0 },
+		boxCount: { type: Number, default: 0 },
 		quantity: { type: Number, default: 0 },
 	},
 	yisucangInventory: { type: Number, default: 0 },

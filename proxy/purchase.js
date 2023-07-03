@@ -49,11 +49,8 @@ async function createOrUpdate(purchase) {
 	}
 }
 
-async function findOrUpdate() {}
-
 module.exports = {
 	createOrUpdate,
-	findOrUpdate,
 	all,
 	findUnshippedByProduct,
 };

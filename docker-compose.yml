@@ -18,7 +18,7 @@ services:
     image: 'mongo:latest'
     restart: always
     environment: 
-      MONGO_INITDB_DATABASE: crepe_test
+      MONGO_INITDB_DATABASE: crepe
     ports:
       - "27016:27017"
     volumes:

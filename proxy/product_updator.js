@@ -66,7 +66,7 @@ class ProductUpdator {
 	async updateAll() {
 		await this.updateUndeliveredDeliveris();
 		await this.updateUnshippedPurchases();
-		const { fbaInventory, sales } = await this.getFbaInventoryAndSalesV3();
+		const { fbaInventory, ps } = await this.getFbaInventoryAndSalesV3();
 		const { yisucangInventory, plwhsInventory } = await this.prepareWarehouseInvetories();
 		const unshippedQty = await this.getUnshippedQty();
 		const undeliveredQty = await this.getUndeliveredQty();
@@ -77,10 +77,12 @@ class ProductUpdator {
 		const totalInventory = await this.getTotalInventory();
 		const quantityToPurchase = await this.getQuantityToPurchase();
 		const shipmentTypes = this.getSortedShipmentTypes();
+
+		const sales = this.product.avgSales || ps;
 		const newProduct = {
 			fbaInventory,
 			totalInventory,
-			ps: sales,
+			ps,
 			yisucangInventory,
 			plwhsInventory,
 			unshippedQty,
@@ -91,6 +93,7 @@ class ProductUpdator {
 			quantityToPurchase,
 			shipmentTypes,
 			purchases,
+			sales,
 		};
 
 		this.product.set(newProduct);
@@ -133,15 +136,15 @@ class ProductUpdator {
 			this.product.unitsPerBox = 30;
 		}
 
-		const boxes = Math.ceil(
+		const boxCount = Math.ceil(
 			(this.product.maxAvgSales * 90 - this.product.totalInventory) / this.product.unitsPerBox,
 		);
 
-		if (boxes > 0) {
-			const quantity = boxes * this.product.unitsPerBox;
-			return { boxes, quantity };
+		if (boxCount > 0) {
+			const quantity = boxCount * this.product.unitsPerBox;
+			return { boxCount, quantity };
 		} else {
-			return { boxes: 0, quantity: 0 };
+			return { boxCount: 0, quantity: 0 };
 		}
 	}
 
@@ -170,7 +173,15 @@ class ProductUpdator {
 				"days",
 			);
 		}
-		return orderDues;
+
+		let dues = [];
+		for (let type in orderDues) {
+			dues.push({
+				type: type,
+				due: orderDues[type],
+			});
+		}
+		return dues;
 	}
 
 	async updateOrderDues() {
@@ -244,7 +255,7 @@ class ProductUpdator {
 
 	async getFbaInventoryAndSalesV3() {
 		let fbaInventory = 0;
-		let sales = 0;
+		let ps = 0;
 
 		const listings = await Listing.findByProduct(this.product);
 		for (const listing of listings) {
@@ -255,12 +266,12 @@ class ProductUpdator {
 				listing.inboundShipped +
 				listing.reservedFCProcessing;
 
-			sales = sales + listing.ps;
+			ps = ps + listing.ps;
 		}
 
 		return {
 			fbaInventory: Math.round(fbaInventory),
-			sales: Math.round(sales),
+			ps: Math.round(ps),
 		};
 	}
 
