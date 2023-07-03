@@ -1,4 +1,5 @@
 const helper = require("../lib/util/helper");
+const moment = require("moment");
 const Delivery = require("./delivery");
 
 class PurchaseUpdator {
@@ -18,7 +19,14 @@ class PurchaseUpdator {
 	}
 
 	async updateAll(product) {
+		const currentDate = moment();
+		const deliveryDate = moment(this.purchase.expectDeliveryDate);
+
+		if (deliveryDate.isBefore(currentDate)) {
+			this.purchase.expectDeliveryDate = moment(currentDate);
+		}
 		this.purchase.expectArrivalDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
+
 		const deliveries = await Delivery.find({
 			purchaseCode: this.purchase.code,
 			status: { $ne: "cancelled" },

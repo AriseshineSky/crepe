@@ -64,8 +64,8 @@ class ProductUpdator {
 	}
 
 	async updateAll() {
-		await this.updateUndeliveredDeliveris();
 		await this.updateUnshippedPurchases();
+		await this.updateUndeliveredDeliveris();
 		const { fbaInventory, ps } = await this.getFbaInventoryAndSalesV3();
 		const { yisucangInventory, plwhsInventory } = await this.prepareWarehouseInvetories();
 		const unshippedQty = await this.getUnshippedQty();
@@ -120,7 +120,7 @@ class ProductUpdator {
 				expectArrivalDate,
 				createdAt,
 				memo,
-				box,
+				boxCount: box,
 				quantity,
 				confirmShipmentDate,
 				tracking,
@@ -128,7 +128,10 @@ class ProductUpdator {
 			};
 			shipments.push(shipment);
 		}
-		return shipments;
+
+		return shipments.sort(function (m, n) {
+			return m["remainingArrivalDays"] - n["remainingArrivalDays"];
+		});
 	}
 
 	async getQuantityToPurchase() {
@@ -212,6 +215,21 @@ class ProductUpdator {
 		for (let purchase of purchases) {
 			const purchaseUpdator = new PurchaseUpdator(purchase);
 			await purchaseUpdator.updateAll(this.product);
+		}
+		return purchases;
+	}
+
+	async updateDeliveryByPurchases(purchases) {
+		const purchaseCodes = purchases.map((purchase) => purchase.code);
+		let deliveries = await Delivery.find({
+			purchaseCode: { $in: purchaseCodes },
+			deliveryStatus: null,
+			status: { $ne: "cancelled" },
+		});
+
+		for (let delivery of deliveries) {
+			const deliveryUpdator = new DeliveryUpdator(delivery);
+			await deliveryUpdator.updateRemainingArrivalDays();
 		}
 	}
 

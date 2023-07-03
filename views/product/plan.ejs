@@ -186,7 +186,7 @@ const freights = [
             >
               <thead>
                 <tr>
-                  <th data-editable="true" data-sortable="true">orderId:</th>
+                  <th data-editable="true" data-sortable="true">采购Code:</th>
                   <th data-editable="true" data-sortable="true">数量:</th>
                   <th data-field="delivery" data-editable="true" data-sortable="true">预估收货日期:</th>
                   <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
@@ -196,7 +196,7 @@ const freights = [
               <tbody>
                 <% purchase.inboundShippeds.forEach(function(inbound){ %>
                   <tr>
-                    <td><%= inbound.orderId %></td>
+                    <td><%= inbound.purchaseCode  %></td>
                     <td><%= inbound.quantity %></td>
                     <td>
                       <% if (inbound.expectArrivalDate) {%>
@@ -207,9 +207,9 @@ const freights = [
                       <% var inboundStatus = null %>
                       <% if (inbound.expectArrivalDate) { 
                         for (var status of purchase.plan.inventoryStatus) {
-                          if (Math.abs(status.period - GAP - deliveryDue) <= 1 && status.after - status.before === inbound.quantity) {
+                          if (Math.abs(status.period - GAP - inbound.remainingArrivalDays) <= 1 && status.after - status.before === inbound.quantity) {
                             inboundStatus = status;
-                          }                    
+                          }
                         }
                       } %>
                       <% if (inboundStatus) { %>

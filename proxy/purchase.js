@@ -38,14 +38,17 @@ async function all() {
 }
 
 async function createOrUpdate(purchase) {
+	console.log("purchase", purchase);
 	let existPurchase = await Purchase.findOne({ code: purchase.code });
 
 	if (existPurchase) {
 		Object.assign(existPurchase, purchase);
 		await existPurchase.save();
+		console.log("existPurchase", existPurchase);
 	} else {
 		const newPurchase = new Purchase(purchase);
 		await newPurchase.save();
+		console.log("newPurchase", newPurchase);
 	}
 }
 

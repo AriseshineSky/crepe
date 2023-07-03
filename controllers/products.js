@@ -113,8 +113,8 @@ exports.showPlan = async function (req, res, next) {
 
 exports.producingPlan = async function (req, res, next) {
 	let productId = req.params.productId;
-	let producingId = req.params.producingId;
-	let purchase = await Product.getPlanV3(productId, producingId);
+	let purchaseCode = req.params.purchaseCode;
+	let purchase = await Product.getPlanV3(productId, purchaseCode);
 	if (purchase.plan) {
 		res.render("product/plan", { purchase: purchase });
 	} else {

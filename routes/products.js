@@ -19,7 +19,7 @@ router.get("/:productId/edit", products.edit);
 router.get("/:productId/plan", products.plan);
 router.get("/:productId/producing-plan", products.producingPlan);
 router.get("/:productId/producings/plan", products.producingsPlan);
-router.get("/:productId/producings/:producingId/plan", products.producingPlan);
+router.get("/:productId/purchases/:purchaseCode/plan", products.producingPlan);
 router.get("/:productId/syncFreight", products.syncFreight);
 router.get("/:productId/showPlan", products.showPlan);
 router.post("/:productId/plan", products.updatePlan);

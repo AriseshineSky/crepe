@@ -34,7 +34,6 @@ let PurchaseSchema = new Schema({
 	relevancePoCodeList: [{ type: String }],
 	supplierCode: { type: String },
 	paymentType: { type: String },
-	customCode: { type: String },
 	products: [
 		{
 			productImageUrl: { type: String },
@@ -51,7 +50,6 @@ let PurchaseSchema = new Schema({
 	paymentAmount: { type: String },
 	increaseQuantity: { type: String },
 	paymentStatus: { type: String },
-	asin: { type: String },
 	expectDeliveryDate: { type: String },
 	expectDeliveryDays: { type: Number, default: 0 },
 	totalExcludeTaxAmount: { type: String },

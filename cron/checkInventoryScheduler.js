@@ -25,7 +25,7 @@ const scheduleCronstyle = () => {
 
 	// syncPurchaseDetails.syncPurchasesDetail();
 	// Delivery.updateDeliveryPurchaseId();
-	// syncDeliveries.syncDeliveries();
+	//	syncDeliveries.syncDeliveries();
 	// syncProcureItem.syncProcureItems();
 	//	syncPurchases.syncPurchaseProcures();
 
@@ -46,6 +46,8 @@ const scheduleCronstyle = () => {
 	// 	logger.info("start to sync product inventory");
 	// 	Delivery.updateRemainingArrivalDays();
 	// });
+	//
+	//
 	//
 	schedule.scheduleJob("0 */10 * * * *", () => {
 		logger.info("start to sync product inventory");
