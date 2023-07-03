@@ -7,6 +7,7 @@ router.get("/new", products.new);
 router.post("/create", products.create);
 router.get("/sync", products.sync);
 router.get("/syncpm", products.syncpm);
+router.get("/updateAll", products.updateAll);
 router.post("/delete", products.delete);
 router.get("/:productId/inbounds", products.showInbounds);
 router.post("/:productId/inbounds", products.addInbound);
