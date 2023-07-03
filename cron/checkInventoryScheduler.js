@@ -23,32 +23,32 @@ let syncProducts = require("../lib/getInfoFromGoogleSheet");
 const scheduleCronstyle = () => {
 	User.checkAdmin();
 
-	// syncPurchaseDetails.syncPurchasesDetail();
-	// Delivery.updateDeliveryPurchaseId();
-	//	syncDeliveries.syncDeliveries();
-	// syncProcureItem.syncProcureItems();
-	//	syncPurchases.syncPurchaseProcures();
-
 	// schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
 	// 	logger.info("start to check product inventory");
 	// 	checkProductsInventory.checkProductsInventory();
 	// });
-	//
+	syncPurchases.syncPurchaseProcures();
+	syncPurchaseDetails.syncPurchasesDetail();
+	syncYisucangInbounds.syncYisucangInbounds();
+	syncAllListings.syncListings();
+	syncDeliveries.syncDeliveries();
+	Delivery.updateRemainingArrivalDays();
+	Delivery.updateDeliveryReciveds();
+	Product.updateAll();
+	Product.syncPm();
 	schedule.scheduleJob("0 */3 * * * *", () => {
 		logger.info("start to sync product inventory");
 		syncYisucangInbounds.syncYisucangInbounds();
 	});
-	// schedule.scheduleJob("0 */5 * * * *", () => {
-	// 	logger.info("start to sync product inventory");
-	// 	Delivery.updateDeliveryReciveds();
-	// });
-	// schedule.scheduleJob("0 */3 * * * *", () => {
-	// 	logger.info("start to sync product inventory");
-	// 	Delivery.updateRemainingArrivalDays();
-	// });
-	//
-	//
-	//
+	schedule.scheduleJob("0 */5 * * * *", () => {
+		logger.info("start to sync product inventory");
+		Delivery.updateDeliveryReciveds();
+	});
+	schedule.scheduleJob("0 */3 * * * *", () => {
+		logger.info("start to sync product inventory");
+		Delivery.updateRemainingArrivalDays();
+	});
+
 	schedule.scheduleJob("0 */10 * * * *", () => {
 		logger.info("start to sync product inventory");
 		syncPurchases.syncPurchaseProcures();
@@ -66,14 +66,15 @@ const scheduleCronstyle = () => {
 		logger.info("start to sync product inventory");
 		Yisucang.syncYisucang();
 	});
-	// schedule.scheduleJob("0 0 */1 * * *", () => {
-	// 	logger.info("start to update lisings");
-	// 	syncProducts.syncProducts();
-	// });
-	//
+
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update lisings");
-		// syncAllListings.syncListings();
+		syncProducts.syncProducts();
+	});
+
+	schedule.scheduleJob("0 0 */1 * * *", () => {
+		logger.info("start to update lisings");
+		syncAllListings.syncListings();
 	});
 
 	schedule.scheduleJob("0 0 */1 * * *", () => {
