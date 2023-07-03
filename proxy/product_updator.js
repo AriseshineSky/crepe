@@ -264,7 +264,7 @@ class ProductUpdator {
 	async getUnshippedQty() {
 		const unshippedPurchases = await this.getUnshippedPurchases();
 		return unshippedPurchases.reduce((total, purchase) => {
-			return total + purchase.quantity;
+			return total + purchase.unshippedQuantity;
 		}, 0);
 	}
 

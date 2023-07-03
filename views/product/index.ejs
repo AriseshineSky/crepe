@@ -48,7 +48,7 @@
           <td data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= product.yisucangInventory %> | Plwhs:<%= product.plwhsInventory %>">
             <%= product.yisucangInventory + product.plwhsInventory %>
           </td>
-          <td><%= product.purchase %></td>
+          <td><%= product.unshippedQty %></td>
           <td>
             <% if (product.orderQuantity && product.orderQuantity > 0) {%>
               <%  orderDuesInfo = []
