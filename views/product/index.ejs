@@ -50,13 +50,13 @@
           </td>
           <td><%= product.unshippedQty %></td>
           <td>
-            <% if (product.orderQuantity && product.orderQuantity > 0) {%>
+            <% if (product.orderDues.length > 0) {%>
               <%  orderDuesInfo = []
                   product.orderDues.forEach(function(orderDue) {
                     orderDuesInfo.push(`${TYPES[orderDue.type]}: ${moment(orderDue.due).format('MM-DD-YYYY')}`)
                   })
               %>
-              <span data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="<%= orderDuesInfo.join('<br/>') %>"><%= product.orderQuantity %></span>
+              <span data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true" title="<%= orderDuesInfo.join('<br/>') %>"><%= product.quantityToPurchase.quantity %></span>
             <% } else { %>
               <span>不需要采购</span>
             <% } %>

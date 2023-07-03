@@ -668,13 +668,12 @@ async function createOrUpdate(delivery) {
 		let existDelivery = await Delivery.findOne({ code: delivery.code });
 		if (existDelivery) {
 			Object.assign(existDelivery, delivery);
-			await existDelivery.save();
-			return;
+			return await existDelivery.save();
 		}
 	}
 
 	const newDelivery = new Delivery(delivery);
-	await newDelivery.save();
+	return await newDelivery.save();
 }
 
 async function findByProductId(productId) {

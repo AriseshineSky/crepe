@@ -2,194 +2,33 @@
 <div id='content'>
   <div class='panel'>
     <div class='inner post'>
-      <% if(typeof(edit_error) !== 'undefined' && edit_error){ %>
-        <div class="alert alert-error">
-          <a class="close" data-dismiss="alert" href="#">&times;</a>
-          <strong><%= edit_error %></strong>
-        </div>
-      <% } %>
-      <% if(typeof(error) !== 'undefined' && error){ %>
-        <div class="alert alert-error">
-          <strong><%= error %></strong>
-        </div>
-      <% }else{ %>
-        <div class="card p-4">
-          <div class="card-header">
-            Product
-          </div>
+			<div class="card p-4">
+				<div class="card-header">
+					delivery
+				</div>
 
-            <div class="input-group input-group-static mb-4">
-              <label>ASIN：</label>
-              <span class="form-control" ><%- product.asin %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>生产周期(天):</label>
-              <span class="form-control" ><%- product.cycle %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>最小库存保有量(天):</label>
-              <span class="form-control" ><%- product.minInventory %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>运输类型(默认有空运和海运快船):</label>
-              <div class="form-check">
-                <% if (product.airDelivery) { %>
-                  <input class="form-check-input" type="checkbox" name="airDelivery" value="true" checked id="defaultCheck1">
-                <% } else { %>
-                  <input class="form-check-input" type="checkbox" name="airDelivery" value="true" id="defaultCheck1">
-                <% } %>
-                <label class="form-check-label" for="defaultCheck1">
-                  需要空派
-                </label>
-              </div>
-              <div class="form-check">
-                <% if (product.sea) { %>
-                  <input class="form-check-input" type="checkbox" name="sea" value="true" checked id="defaultCheck1">
-                <% } else { %>
-                  <input class="form-check-input" type="checkbox" name="sea" value="true" id="defaultCheck1">
-                <% } %>
-                <label class="form-check-label" for="defaultCheck1">
-                  需要慢船
-                </label>
-              </div>
-              </div>
-            <div class="input-group input-group-static mb-4">
-              <label>预估最大销量:</label>
-              <span class="form-control" ><%- product.maxAvgSales %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>预估平均销量:</label>
-              <span class="form-control" ><%- product.avgSales %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>亚马逊7天平均销量:</label>
-              <span class="form-control" ><%- product.ps %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>卖场:</label>
-              <span class="form-control" ><%- product.countries %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>plwhs产品id:</label>
-              <span class="form-control" ><%- product.plwhsId %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>yisucang产品id:</label>
-              <span class="form-control" ><%- product.yisucangId %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>装箱尺寸：</label>
-              <div class="input-group input-group-static mb-4">
-                <label>长(cm)：</label>
-                <span class="form-control" ><%- product.box.length %></span>
-              </div>
-              <div class="input-group input-group-static mb-4">
-                <label>宽(cm)：</label>
-                <span class="form-control" ><%- product.box.width %></span>
-              </div>
-              <div class="input-group input-group-static mb-4">
-                <label>高(cm)：</label>
-                <span class="form-control" ><%- product.box.height %></span>
-              </div>
-              <div class="input-group input-group-static mb-4">
-                <label>重(kg)：</label>
-                <span class="form-control" ><%- product.box.weight %></span>
-              </div>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>每箱数量(个)：</label>
-              <span class="form-control" ><%- product.unitsPerBox %></span>
-            </div>
-            <div class="input-group input-group-static mb-4">
-              <label>PM：</label>
-              <span class="form-control" >
-								<% if (product.pm) { %>
-									<%= product.pm.name %>
-								<% } else { %>
-									Unknowun
-								<% } %>
-							</span>
-            </div>
-            <div class="form-check">
-              <% if (product.discontinue) { %>
-                <input class="form-check-input" type="checkbox" name="discontinue" value="true" checked id="defaultDiscontinue">
-              <% } else { %>
-                <input class="form-check-input" type="checkbox" name="discontinue" value="true" id="defaultDiscontinue">
-              <% } %>
-              <label class="form-check-label" for="defaultDiscontinue">
-                放弃
-              </label>
-            </div>
+				<div class="input-group input-group-static mb-4">
+					<label>Delivery：</label>
+					<input type="text" class="form-control" name="memo" value="<%= delivery.memo %>"/>
+				</div>
+				<div class="input-group input-group-static mb-4">
+					<label>数量:</label>
+					<input class="form-control" name="quantity" value="<%= delivery.quantity %>">
+				</div>
+				<div class="input-group input-group-static mb-4">
+					<label>箱数:</label>
+					<input class="form-control" name="boxCount" value="<%= delivery.boxCount %>">
+				</div>
 
-          <div class="card-footer text-muted">
-            <a href="/products/<%= product.id %>/edit" target="_blank" type="button" class="btn btn-primary">Edit</a>
-            <a href="/products/<%= product.id %>/inbounds" target="_blank" type="button" class="btn btn-info">Inbound</a>
-            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-product-id="<%=product._id%>" >Delete</button>
-          </div>
-        </div>
-
-        <br/>
-        <div class="card">
-            <div class="card-header">
-              运输中货物
-            </div>
-            <% product.inboundShippeds.forEach(function(inboundShipped){ %>
-              <div class="card-body">
-                <div class="input-group input-group-static mb-4">
-                  <label>数量:</label>
-                  <span class="form-control" ><%- inboundShipped.quantity %></span>
-                </div>
-                <div class="input-group input-group-static mb-4">
-                  <label>预估收货日期:</label>
-                  <span class="form-control" ><%- inboundShipped.deliveryDue %></span>
-                </div>
-              </div>
-            <% }) %>
-        </div>
+				<div class="input-group input-group-static mb-4">
+					<label>发货日期:</label>
+					<input type="text" class="form-control" name="shipmentDate" data-provide="datepicker" value="<%= delivery.shipmentDate %>">
+				</div>
+				<div class="input-group input-group-static mb-4">
+					<label>预估收货日期:</label>
+					<input type="text" class="form-control" name="expectArrivalDate" data-provide="datepicker" value="<%= delivery.expectArrivalDate %>">
+				</div>
+			</div>
     </div>
-    <% } %>
   </div>
 </div>
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Are you sure to delete this product?</h4>
-          </div>
-          <div class="modal-body"></div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-danger">Delete</button>
-          </div>
-      </div>
-  </div>
-</div>
-
-<script>
-  $(document).ready(function() {
-    $("#myModal").on('shown.bs.modal', function(e) {
-      var modalBody = $('<div id="myModal"></div>');
-      var productId = $(e.relatedTarget).data('product-id');
-      var modalForm = $(`<div class="modal-dialog modal-confirm"> \
-                          <div class="modal-content">\
-                            <div class="modal-header flex-column">\
-                              <h4 class="modal-title w-100">Are you sure?</h4>\
-                            </div>\
-                            <div class="modal-body">\
-                              <p>Do you really want to delete this product? This process cannot be undone.</p>\
-                            </div>\
-                            <form role="form" name="modalForm" id="delete_product" action="/products/delete" method="post"> \
-                              <div class="modal-footer justify-content-center"> \
-                                <input class="form-control" name="productId" value="${productId}" type="hidden" > \
-                              </div> \
-                            </form>\
-	                        </div>\
-                        </div>`);
-      modalBody.append(modalForm);
-      $('.modal-body').html(modalBody);
-    });
-    $('.modal-footer .btn-danger').click(function() {
-      $('form[name="modalForm"]').submit();
-    });
-  });
-</script>

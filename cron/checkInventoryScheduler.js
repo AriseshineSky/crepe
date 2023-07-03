@@ -27,15 +27,8 @@ const scheduleCronstyle = () => {
 	// 	logger.info("start to check product inventory");
 	// 	checkProductsInventory.checkProductsInventory();
 	// });
-	syncPurchases.syncPurchaseProcures();
-	syncPurchaseDetails.syncPurchasesDetail();
-	syncYisucangInbounds.syncYisucangInbounds();
-	syncAllListings.syncListings();
-	syncDeliveries.syncDeliveries();
-	Delivery.updateRemainingArrivalDays();
-	Delivery.updateDeliveryReciveds();
-	Product.updateAll();
-	Product.syncPm();
+	//
+
 	schedule.scheduleJob("0 */3 * * * *", () => {
 		logger.info("start to sync product inventory");
 		syncYisucangInbounds.syncYisucangInbounds();
