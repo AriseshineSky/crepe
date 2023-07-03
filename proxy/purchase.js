@@ -33,6 +33,10 @@ async function getPurchasesByProductId(productId) {
 	return purchases;
 }
 
+async function findNoProduct() {
+	return await Purchase.find({ product: { $eq: null } });
+}
+
 async function all() {
 	return await Purchase.find();
 }
@@ -56,4 +60,5 @@ module.exports = {
 	createOrUpdate,
 	all,
 	findUnshippedByProduct,
+	findNoProduct,
 };
