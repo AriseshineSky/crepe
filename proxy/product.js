@@ -325,8 +325,8 @@ async function updateInboundQueueOutOfStockInfo(inboundQueue, sales) {
 
 			let gap = Math.abs(newInboundQueue[i].inventory.before);
 			for (let j = i; j < newInboundQueue.length; j++) {
-				newInboundQueue[j].inventory.before -= gap;
-				newInboundQueue[j].inventory.after -= gap;
+				newInboundQueue[j].inventory.before += gap;
+				newInboundQueue[j].inventory.after += gap;
 			}
 		}
 		states.push({
@@ -349,28 +349,32 @@ async function addShipmentPlanToInbounds(shipmentPlan, inbounds, product, purcha
 	if (purchase) {
 		let newInbounds = helper.deepClone(inbounds);
 		for (let type in shipmentPlan) {
-			let shipment = {
-				quantity: shipmentPlan[type].boxCount * product.unitsPerBox,
-				period: purchase.expectDeliveryDays + ShipmentTypesInfo[type].period + GAP,
-			};
+			if (shipmentPlan[type].boxCount > 0) {
+				let shipment = {
+					quantity: shipmentPlan[type].boxCount * product.unitsPerBox,
+					period: purchase.expectDeliveryDays + ShipmentTypesInfo[type].period + GAP,
+				};
 
-			newInbounds.push({
-				quantity: shipment.quantity,
-				period: shipment.period,
-			});
+				newInbounds.push({
+					quantity: shipment.quantity,
+					period: shipment.period,
+				});
+			}
 		}
 		return await sortQueue(newInbounds);
 	} else {
 		let newInbounds = helper.deepClone(inbounds);
 		for (let type in shipmentPlan) {
-			let shipment = {
-				quantity: shipmentPlan[type].boxCount * product.unitsPerBox,
-				period: product.cycle + ShipmentTypesInfo[type].period + GAP,
-			};
-			newInbounds.push({
-				quantity: shipment.quantity,
-				period: shipment.period,
-			});
+			if (shipmentPlan[type].boxCount > 0) {
+				let shipment = {
+					quantity: shipmentPlan[type].boxCount * product.unitsPerBox,
+					period: product.cycle + ShipmentTypesInfo[type].period + GAP,
+				};
+				newInbounds.push({
+					quantity: shipment.quantity,
+					period: shipment.period,
+				});
+			}
 		}
 		return await sortQueue(newInbounds);
 	}
@@ -518,7 +522,6 @@ async function getPlanV3(productId, purchaseCode) {
 		let { orderedPurchaseShipmentPlansMetrics, orderedPurchaseShipmentPlans } =
 			await getPurchaseShipmentPlans(pruchases, product, inbounds);
 
-		console.log(inbounds);
 		if (product.quantityToPurchase.boxCount > 0) {
 			if (orderedPurchaseShipmentPlans.length > 0) {
 				newPurchaseShipmentPlan = await bestPlan(
@@ -561,6 +564,7 @@ async function getPlanV3(productId, purchaseCode) {
 		volumeWeightCheck: volumeWeightCheck,
 	};
 
+	console.log(purchase);
 	return purchase;
 }
 
@@ -704,7 +708,7 @@ async function calculatePlan(shipmentPlan, inbounds, product, result) {
 	//   2.1 最小库存不满足要求
 	//     2.1.1 新计划不断货，而且最小库存更多
 	//   2.2 最小库存满足要求 (找到发货方案)
-	if (shipmentPlanMetrics.minInventory >= product.minInventory && newPlan.gap == 0) {
+	if (shipmentPlanMetrics.minInventory >= product.minInventory && shipmentPlanMetrics.gap == 0) {
 		// 最低库存已满足要求，并且没有断货，当前运输计划费用最低
 		result.plan = helper.deepClone(shipmentPlanMetrics);
 		result.status = "done";
@@ -732,6 +736,8 @@ async function calculatePlan(shipmentPlan, inbounds, product, result) {
 		}
 	}
 
+	console.log("shipmentPlanMetrics", shipmentPlanMetrics);
+	console.log("result", result);
 	return result;
 }
 
@@ -768,7 +774,9 @@ async function getShipmentPlan(shipmentPlan, left, index, inbounds, product, res
 	const shipmentTypes = product.shipmentTypes;
 	if (index >= shipmentTypes.length - 1) {
 		shipmentPlan[shipmentTypes[index]] = { boxCount: left };
+
 		await calculatePlan(shipmentPlan, inbounds, product, result);
+		console.log("result", result);
 		if (result.status === "done") {
 			return null;
 		}
@@ -863,8 +871,10 @@ async function bestPlan(product, inbounds) {
 		plan: plan,
 		status: "pending",
 	};
-	let step = Math.ceil(product.quantityToPurchase.boxCount ** shipmentType.length / 60000000);
-
+	let step = Math.ceil(
+		product.quantityToPurchase.boxCount ** product.shipmentTypes.length / 60000000,
+	);
+	console.log("step", step);
 	await getShipmentPlan(
 		shipmentPlan,
 		product.quantityToPurchase.boxCount,
@@ -883,6 +893,7 @@ async function getShipmentPlanMetrics(shipmentPlan, product, inbounds, purchase)
 	console.log("newInbounds", newInbounds);
 	console.log("inbounds", inbounds);
 	let inventoryStatus = await getInventoryStatus(newInbounds, product.sales);
+	console.log("inventoryStatus", inventoryStatus);
 	const shipmentPlanDup = helper.deepClone(shipmentPlan);
 	await addCostToShipmentPlan(shipmentPlanDup, product);
 

@@ -18,16 +18,16 @@ const ShipmentTypesInfo = {
 		period: 8,
 	},
 	airDelivery: {
-		price: 55,
-		period: 8,
+		price: 45,
+		period: 15,
 	},
 	seaExpress: {
-		price: 55,
-		period: 8,
+		price: 25,
+		period: 30,
 	},
 	sea: {
-		price: 55,
-		period: 8,
+		price: 15,
+		period: 45,
 	},
 };
 
@@ -165,11 +165,12 @@ class ProductUpdator {
 
 	async getOrderDues() {
 		let orderDues = {};
-		const { salesPeriod, cycle, minInventory } = this.product;
+
+		const { totalInventory, sales, cycle, minInventory } = this.product;
 		for (const type of this.product.shipmentTypes) {
 			const shipmentType = ShipmentTypesInfo[type];
 			orderDues[type] = moment().add(
-				salesPeriod - cycle - shipmentType.period - GAP - minInventory,
+				totalInventory / sales - cycle - shipmentType.period - GAP - minInventory,
 				"days",
 			);
 		}
