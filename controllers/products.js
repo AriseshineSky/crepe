@@ -94,7 +94,11 @@ exports.syncPmByProduct = async function (req, res, next) {
 exports.updateAll = async (req, res, next) => {
 	const productId = req.params.productId;
 	await Product.updateAll(productId);
-	res.redirect(`/products/${productId}/inbounds`);
+	if (productId) {
+		res.redirect(`/products/${productId}/inbounds`);
+	} else {
+		res.redirect(`/products`);
+	}
 };
 
 exports.plan = async function (req, res, next) {
