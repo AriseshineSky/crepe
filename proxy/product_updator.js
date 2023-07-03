@@ -168,8 +168,16 @@ class ProductUpdator {
 
 	async getOrderDues() {
 		let orderDues = {};
+		let sales = this.product.ps;
+		const { totalInventory, cycle, minInventory } = this.product;
+		if (this.product.avgSales && this.product.avgSales > 0) {
+			sales = this.product.avgSales;
+		}
 
-		const { totalInventory, sales, cycle, minInventory } = this.product;
+		if (!sales || sales < 1) {
+			return [];
+		}
+
 		for (const type of this.product.shipmentTypes) {
 			const shipmentType = ShipmentTypesInfo[type];
 			orderDues[type] = moment().add(
