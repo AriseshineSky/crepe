@@ -22,6 +22,12 @@ exports.show = async function (req, res, next) {
 	}
 };
 
+exports.delete = async function (req, res, next) {
+	let deliveryId = req.body.deliveryId;
+	await Delivery.remove(deliveryId);
+	res.redirect("/deliveries");
+};
+
 exports.new = async function (req, res, next) {
 	res.render("delivery/new");
 };

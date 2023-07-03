@@ -3,6 +3,7 @@ const Purchase = models.Purchase;
 const Delivery = models.Delivery;
 const YisucangInbound = models.YisucangInbound;
 
+const mongoose = require("mongoose");
 const helper = require("../lib/util/helper");
 const batchSize = 200;
 
@@ -726,8 +727,13 @@ async function updateRemainingArrivalDays() {
 	});
 }
 
+async function remove(deliveryId) {
+	await Delivery.deleteOne({ _id: mongoose.Types.ObjectId(deliveryId) });
+}
+
 module.exports = {
 	find: Delivery.find.bind(Delivery),
+	remove,
 	all,
 	addDeliveryPurchaseId,
 	createOrUpdate,

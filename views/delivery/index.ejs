@@ -12,8 +12,6 @@
       <tr>
 				<th>memo</th>
 				<th>box</th>
-				<th>chargeWeight</th>
-				<th>estimatedAmount</th>
 				<th>receiveRnQuantity</th>
 				<th>quantity</th>
 				<th>receiptQuantity</th>
@@ -28,6 +26,7 @@
 				<th>spiltTrackings</th>
 				<th>expectArrivalDate</th>
 				<th>expectShipmentDate</th>
+				<th>action</th>
       </tr>
     </thead>
     <tbody>
@@ -35,8 +34,6 @@
         <tr>
 					<td><%= delivery.memo %></td>
 					<td><%= delivery.box %></td>
-					<td><%= delivery.chargeWeight %></td>
-					<td><%= delivery.estimatedAmount %></td>
 					<td><%= delivery.receiveRnQuantity %></td>
 					<td><%= delivery.quantity %></td>
 					<td><%= delivery.receiptQuantity %></td>
@@ -51,6 +48,10 @@
 					<td><%= delivery.spiltTrackings %></td>
 					<td><%= delivery.expectArrivalDate ? delivery.expectArrivalDate.toLocaleDateString() : '' %></td>
 					<td><%= delivery.expectShipmentDate ? delivery.expectShipmentDate.toLocaleDateString() : '' %></td>
+
+          <td>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-delivery-id="<%=delivery._id%>" >Delete</button>
+          </td>
         </tr>
       <% }) %>
     </tbody>
@@ -87,7 +88,7 @@
                             <div class="modal-body">\
                               <p>Do you really want to delete this delivery? This process cannot be undone.</p>\
                             </div>\
-                            <form role="form" name="modalForm" id="delete_delivery" action="/deliverys/delete" method="post"> \
+                            <form role="form" name="modalForm" id="delete_delivery" action="/deliveries/delete" method="post"> \
                               <div class="modal-footer justify-content-center"> \
                                 <input class="form-control" name="deliveryId" value="${deliveryId}" type="hidden" > \
                               </div> \

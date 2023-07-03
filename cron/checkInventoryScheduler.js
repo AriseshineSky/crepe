@@ -29,17 +29,6 @@ const scheduleCronstyle = () => {
 	// });
 	//
 
-	Delivery.updateRemainingArrivalDays();
-	syncDeliveries.syncDeliveries();
-	Delivery.updateDeliveryReciveds();
-	syncYisucangInbounds.syncYisucangInbounds();
-	syncAllListings.syncListings();
-	Product.syncPm();
-	Product.updateAll();
-	Yisucang.syncYisucang();
-	syncPurchaseDetails.syncPurchasesDetail();
-	syncPurchases.syncPurchaseProcures();
-
 	schedule.scheduleJob("0  0 */3  * * *", () => {
 		logger.info("start to sync product inventory");
 		syncYisucangInbounds.syncYisucangInbounds();
