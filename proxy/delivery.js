@@ -532,13 +532,16 @@ async function freightTypes() {
 async function parseYisucangRow(row, HEADER) {
 	let number = row[HEADER.indexOf("入库单号")];
 	let orderId = await parseOrderId(row[HEADER.indexOf("物流追踪单号")]);
-	let quantity = row[HEADER.indexOf("入库数量")];
+	let boxCount = Number(row[HEADER.indexOf("入库数量")]);
+	let unitsPerBox = Number(row[HEADER.indexOf("个数/箱")]);
 	let date = row[HEADER.indexOf("入库时间")];
 	return {
-		number: number,
-		orderId: orderId,
-		boxCount: Number(quantity),
-		date: date,
+		number,
+		orderId,
+		boxCount,
+		unitsPerBox,
+		quantity: boxCount * unitsPerBox,
+		date,
 	};
 }
 
