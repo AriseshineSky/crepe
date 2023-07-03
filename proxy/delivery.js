@@ -709,6 +709,9 @@ async function findByProductId(productId) {
 }
 
 async function findUndeliveredByProduct(product) {
+	if (!product.gSku) {
+		return [];
+	}
 	let purchases = await Purchase.find({ product: product.gSku });
 	const purchaseCodes = purchases.map((purchase) => purchase.code);
 	return Delivery.find({
