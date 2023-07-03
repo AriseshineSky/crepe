@@ -34,6 +34,9 @@ const freights = [
 <div id='content'>
   <div class='panel'>
     <div class='inner post'>
+			<% if (!purchase) { %>
+				不需要采购
+			<%} else {%>
       <div id="product" data-product="<%= JSON.stringify(purchase.product) %>"></div>
       <div id="inbounds" data-inbounds="<%= JSON.stringify(purchase.plan.inventoryStatus) %>"></div>
       <div id="chart"></div>
@@ -251,6 +254,14 @@ const freights = [
                 <span class="form-control" ><%- purchase.product.fbaInventory %></span>
               </div>
               <div class="input-group input-group-static mb-4">
+                <label>采购中数量:</label>
+                <span class="form-control" ><%- purchase.product.unshippedQty %></span>
+              </div>
+              <div class="input-group input-group-static mb-4">
+                <label>运输中数量:</label>
+                <span class="form-control" ><%- purchase.product.undeliveredQty %></span>
+              </div>
+              <div class="input-group input-group-static mb-4">
                 <label>仓库库存:</label>
 								<span class="form-control" data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= purchase.product.yisucangInventory %> | Plwhs:<%= purchase.product.plwhsInventory %>">
 									<%= purchase.product.yisucangInventory + purchase.product.plwhsInventory %>
@@ -298,7 +309,7 @@ const freights = [
               </div>
               <div class="input-group input-group-static mb-4">
                 <label>计算使用的平均销量:</label>
-                <span class="form-control" ><%- purchase.product.ps %></span>
+                <span class="form-control" ><%- purchase.product.sales %></span>
               </div>   
               <div class="input-group input-group-static mb-4">
                 <label>维持最小库存量(天):</label>
@@ -309,6 +320,7 @@ const freights = [
           </div>
         </div>
       </div>
+			<%}%>
     </div>
   </div>
 </div>

@@ -23,6 +23,7 @@
         <th>亚马逊fba库存</th>
         <th>仓库库存</th>
         <th>采购中数量</th>
+        <th>运输中数量</th>
         <th>采购计划</th>
         <th>货期</th>
         <th>设置平均销量</th>
@@ -49,6 +50,7 @@
             <%= product.yisucangInventory + product.plwhsInventory %>
           </td>
           <td><%= product.unshippedQty %></td>
+          <td><%= product.undeliveredQty %></td>
           <td>
             <% if (product.orderDues.length > 0) {%>
               <%  orderDuesInfo = []
