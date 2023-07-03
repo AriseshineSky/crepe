@@ -11,6 +11,7 @@ let PurchaseSchema = new Schema({
 	sellerSku: { type: String },
 	memo: { type: String },
 	totalQuantity: { type: Number, default: 0 },
+	boxCound: { type: Number, default: 0 },
 	shippedQuantity: { type: Number, default: 0 },
 	unshippedQuantity: { type: Number, default: 0 },
 	unInboundQuantity: { type: Number, default: 0 },

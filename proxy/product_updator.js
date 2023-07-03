@@ -68,7 +68,6 @@ class ProductUpdator {
 		await this.updateUnshippedPurchases();
 		const { fbaInventory, sales } = await this.getFbaInventoryAndSalesV3();
 		const { yisucangInventory, plwhsInventory } = await this.prepareWarehouseInvetories();
-		console.log(yisucangInventory);
 		const unshippedQty = await this.getUnshippedQty();
 		const undeliveredQty = await this.getUndeliveredQty();
 		const salesPeriod = await this.getSalesPeriod();
@@ -200,7 +199,7 @@ class ProductUpdator {
 		let purchases = await this.getUnshippedPurchases();
 		for (let purchase of purchases) {
 			const purchaseUpdator = new PurchaseUpdator(purchase);
-			await purchaseUpdator.updateAll();
+			await purchaseUpdator.updateAll(this.product);
 		}
 	}
 

@@ -17,7 +17,7 @@ class PurchaseUpdator {
 		await this.purchase.save();
 	}
 
-	async updateAll() {
+	async updateAll(product) {
 		this.purchase.expectArrivalDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
 		const deliveries = await Delivery.find({
 			purchaseCode: this.purchase.code,
@@ -31,6 +31,7 @@ class PurchaseUpdator {
 
 		this.purchase.shippedQuantity = shippedQuantity;
 		this.purchase.unshippedQuantity = this.purchase.totalQuantity - shippedQuantity;
+		this.purchase.boxCount = (this.purchase.totalQuantity / product.unitsPerBox).toFixed(2);
 		await this.purchase.save();
 	}
 }
