@@ -13,10 +13,9 @@ exports.syncYisucang = async function () {
 			return inventory.UPC == yiProduct.UPC;
 		});
 		if (yiInventory) {
-			let product = await findOrCreate(yiProduct.ID.toString());
-			console.log(yiInventory);
-			product.inventory = yiInventory.SumNumber;
-			product.save();
+			const yisucangId = yiProduct.ID.toString();
+			const inventory = yiInventory.SumNumber;
+			await createOrUpdate({ yisucangId, inventory });
 		}
 	}
 };
@@ -30,6 +29,19 @@ async function findYisucangById(yisucangId) {
 }
 exports.findYisucangById = findYisucangById;
 
+async function createOrUpdate({ yisucangId, inventory }) {
+	let savedYisucang = await Yisucang.findOne({
+		yisucangId,
+	});
+	if (savedYisucang) {
+		savedYisucang.inventory = inventory;
+		return await savedYisucang.save();
+	} else {
+		const yisucang = new Yisucang({ yisucangId, inventory });
+		return await yisucang.save();
+	}
+}
+
 async function findOrCreate(yisucangId) {
 	console.log(yisucangId);
 	let savedYisucang = await Yisucang.findOne({
@@ -38,9 +50,9 @@ async function findOrCreate(yisucangId) {
 	if (savedYisucang) {
 		return savedYisucang;
 	} else {
-		yisucang = new Yisucang();
-		yisucang.yisucangId = yisucangId;
+		const yisucang = new Yisucang({ yisucangId });
 		return await yisucang.save();
 	}
 }
 exports.findOrCreate = findOrCreate;
+exports.createOrUpdate = createOrUpdate;
