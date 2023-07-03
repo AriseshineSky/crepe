@@ -639,9 +639,17 @@ async function getYisucangReciveds() {
 exports.getYisucangReciveds = getYisucangReciveds;
 
 function sortByType(shipmentTypes) {
+	let sanitizeTypes = [];
+
 	const order = ["airExpress", "airDelivery", "seaExpress", "sea"];
 
-	return shipmentTypes.sort((a, b) => {
+	for (let type of shipmentTypes) {
+		if (order.indexOf(type) > -1) {
+			sanitizeTypes.push(type);
+		}
+	}
+
+	return sanitizeTypes.sort((a, b) => {
 		return order.indexOf(a) - order.indexOf(b);
 	});
 }
