@@ -74,11 +74,18 @@ class ProductUpdator {
 		const orderDues = await this.getOrderDues();
 		const purchases = await this.getUnshippedPurchases();
 		const shipments = await this.getShipments();
-		const totalInventory = await this.getTotalInventory();
-		const quantityToPurchase = await this.getQuantityToPurchase();
+		const totalInventory = fbaInventory + plwhsInventory + yisucangInventory;
+		const quantityToPurchase = await this.getQuantityToPurchase({
+			totalInventory,
+			unshippedQty,
+			undeliveredQty,
+		});
 		const shipmentTypes = this.getSortedShipmentTypes();
 
-		const sales = this.product.avgSales || ps;
+		let sales = ps;
+		if (this.product.avgSales && this.product.avgSales > 0) {
+			sales = this.product.avgSales;
+		}
 		const newProduct = {
 			fbaInventory,
 			totalInventory,
@@ -136,13 +143,15 @@ class ProductUpdator {
 		});
 	}
 
-	async getQuantityToPurchase() {
+	async getQuantityToPurchase(argus) {
+		const { totalInventory, unshippedQty, undeliveredQty } = argus;
+		const totalStock = totalInventory + unshippedQty + undeliveredQty;
 		if (!this.product.unitsPerBox || this.product.unitsPerBox === 0) {
 			this.product.unitsPerBox = 30;
 		}
 
 		const boxCount = Math.ceil(
-			(this.product.maxAvgSales * 90 - this.product.totalInventory) / this.product.unitsPerBox,
+			(this.product.maxAvgSales * 90 - totalStock) / this.product.unitsPerBox,
 		);
 
 		if (boxCount > 0) {
