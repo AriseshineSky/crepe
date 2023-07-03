@@ -103,9 +103,7 @@ class ProductUpdator {
 			sales,
 		};
 
-		console.log(orderDues);
 		this.product.set(newProduct);
-		console.log(newProduct);
 		await this.product.save();
 	}
 
