@@ -72,6 +72,7 @@ class ProductUpdator {
 		}
 		return sales;
 	}
+
 	async updateAll() {
 		await this.updateUnshippedPurchases();
 		await this.updateUndeliveredDeliveris();
@@ -79,7 +80,6 @@ class ProductUpdator {
 		const { yisucangInventory, plwhsInventory } = await this.prepareWarehouseInvetories();
 		const unshippedQty = await this.getUnshippedQty();
 		const undeliveredQty = await this.getUndeliveredQty();
-		const salesPeriod = await this.getSalesPeriod();
 		const orderDues = await this.getOrderDues();
 		const purchases = await this.getUnshippedPurchases();
 		const shipments = await this.getShipments();
@@ -91,6 +91,9 @@ class ProductUpdator {
 		});
 		const shipmentTypes = this.getSortedShipmentTypes();
 
+		const { fbaSalesDays, wareHouseSalesDays, unshippedSalesDays, undeliveredSalesDays } =
+			this.getSalesPeriod();
+
 		const newProduct = {
 			fbaInventory,
 			totalInventory,
@@ -99,12 +102,15 @@ class ProductUpdator {
 			plwhsInventory,
 			unshippedQty,
 			undeliveredQty,
-			salesPeriod,
 			orderDues,
 			shipments,
 			quantityToPurchase,
 			shipmentTypes,
 			purchases,
+			fbaSalesDays,
+			wareHouseSalesDays,
+			unshippedSalesDays,
+			undeliveredSalesDays,
 			sales: this.getSales(),
 		};
 
@@ -216,13 +222,21 @@ class ProductUpdator {
 		await this.product.save();
 	}
 
-	async getSalesPeriod() {
-		if (this.product.ps === 0) {
-			return 1000000;
-		}
-		// const { fbaInventory, yisucangInventory, plwhsInventory, unshippedQty, undeliveredQty, ps } = this.product;
-		// const stock = fbaInventory + yisucangInventory + plwhsInventory + unshippedQty + undeliveredQty;
-		// return (stock / ps),
+	getSalesPeriod() {
+		let { fbaInventory, yisucangInventory, plwhsInventory, unshippedQty, undeliveredQty, sales } =
+			this.product;
+		sales = sales || 1;
+		const fbaSalesDays = Math.floor(fbaInventory / sales);
+		const wareHouseSalesDays = Math.floor((yisucangInventory + plwhsInventory) / sales);
+		const unshippedSalesDays = Math.floor(unshippedQty / sales);
+		const undeliveredSalesDays = Math.floor(undeliveredQty / sales);
+
+		return {
+			fbaSalesDays,
+			wareHouseSalesDays,
+			unshippedSalesDays,
+			undeliveredSalesDays,
+		};
 	}
 
 	async getUndeliveredQty() {

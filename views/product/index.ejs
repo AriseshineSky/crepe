@@ -45,12 +45,12 @@
           <td><%= product.asin %></td>
           <td><%= product.ps %></td>
           <td><%= product.maxAvgSales %></td>
-          <td><%= product.fbaInventory %></td>
-          <td data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= product.yisucangInventory %> | Plwhs:<%= product.plwhsInventory %>">
+          <td data-bs-toggle="tooltip" data-bs-placement="right" title="Sales Period: <%= product.fbaSalesDays %>"><%= product.fbaInventory %></td>
+          <td data-bs-toggle="tooltip" data-bs-placement="right" title="Yisucang: <%= product.yisucangInventory %> | Plwhs:<%= product.plwhsInventory %> | Sales Period <%- product.wareHouseSalesDays %>">
             <%= product.yisucangInventory + product.plwhsInventory %>
           </td>
-          <td><%= product.unshippedQty %></td>
-          <td><%= product.undeliveredQty %></td>
+          <td data-bs-toggle="tooltip" data-bs-placement="right" title="Sales Period: <%= product.unshippedSalesDays %>"><%= product.unshippedQty %></td>
+          <td  data-bs-toggle="tooltip" data-bs-placement="right" title="Sales Period: <%= product.undeliveredSalesDays %>"><%= product.undeliveredQty %></td>
           <td>
             <% if (product.orderDues.length > 0) {%>
               <%  orderDuesInfo = []

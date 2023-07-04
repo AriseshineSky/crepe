@@ -23,6 +23,12 @@ var ProductSchema = new Schema({
 		boxCount: { type: Number, default: 0 },
 		quantity: { type: Number, default: 0 },
 	},
+
+	fbaSalesDays: { type: Number, default: -1 },
+	wareHouseSalesDays: { type: Number, default: -1 },
+	unshippedSalesDays: { type: Number, default: -1 },
+	undeliveredSalesDays: { type: Number, default: -1 },
+
 	yisucangInventory: { type: Number, default: 0 },
 	fbaInventory: { type: Number, default: 0 },
 	plwhsInventory: { type: Number, default: 0 },

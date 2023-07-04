@@ -53,6 +53,7 @@ const scheduleCronstyle = () => {
 		logger.info("start to sync product inventory");
 		syncPurchaseDetails.syncPurchasesDetail();
 	});
+
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to sync product inventory");
 		Yisucang.syncYisucang();
@@ -68,6 +69,7 @@ const scheduleCronstyle = () => {
 		syncAllListings.syncListings();
 	});
 
+	Product.updateAll();
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product stocks");
 		Product.updateAll();
