@@ -309,6 +309,28 @@ class ProductUpdator {
 		await this.product.save();
 	}
 
+	async getFbaInventoryAndSalesByCountry(country) {
+		let fbaInventory = 0;
+		let ps = 0;
+
+		const listings = await Listing.findByProduct(this.product, country);
+		for (const listing of listings) {
+			fbaInventory =
+				fbaInventory +
+				listing.availableQuantity +
+				listing.reservedFCTransfer +
+				listing.inboundShipped +
+				listing.reservedFCProcessing;
+
+			ps = ps + listing.ps;
+		}
+
+		return {
+			fbaInventory: Math.round(fbaInventory),
+			ps: Math.round(ps),
+		};
+	}
+
 	async getFbaInventoryAndSalesV3() {
 		let fbaInventory = 0;
 		let ps = 0;

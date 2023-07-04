@@ -6,10 +6,15 @@ exports.findLisingsByAsin = async function (asin) {
 	return await Listing.find({ asin: asin });
 };
 
-async function findByProduct(product) {
-	const countries = product.countries.map((country) => {
-		return country.toUpperCase();
-	});
+async function findByProduct(product, country) {
+	let countries = [];
+	if (country) {
+		countries = [country];
+	} else {
+		countries = product.countries.map((country) => {
+			return country.toUpperCase();
+		});
+	}
 	let weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 	return await Listing.find({
 		asin: product.asin,

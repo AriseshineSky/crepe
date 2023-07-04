@@ -28,59 +28,56 @@ const scheduleCronstyle = () => {
 	// 	logger.info("start to check product inventory");
 	// 	checkProductsInventory.checkProductsInventory();
 	// });
-	//
 
-	schedule.scheduleJob("0  0 */3  * * *", () => {
+	checkProductsInventory.checkProductsInventory();
+	schedule.scheduleJob("0  12 */3  * * *", () => {
 		logger.info("start to sync product inventory");
 		syncYisucangInbounds.syncYisucangInbounds();
 	});
-	schedule.scheduleJob("0 0  */5 *  * *", () => {
+	schedule.scheduleJob("0 3 */5 *  * *", () => {
 		logger.info("start to sync product inventory");
 		Delivery.updateDeliveryReciveds();
 	});
-	schedule.scheduleJob("0 */3 * * * *", () => {
+	schedule.scheduleJob("0 38 */1 * * * *", () => {
 		logger.info("start to sync product inventory");
 		Delivery.updateRemainingArrivalDays();
 	});
-	schedule.scheduleJob("0 */10 * * * *", () => {
+	schedule.scheduleJob("0 28 */1 * * * *", () => {
 		logger.info("start to sync product inventory");
 		syncPurchases.syncPurchaseProcures();
 	});
-	schedule.scheduleJob("0 */10 * * * *", () => {
+	schedule.scheduleJob("0 18 */1 * * * *", () => {
 		logger.info("start to sync product inventory");
 		syncDeliveries.syncDeliveries();
 	});
-	schedule.scheduleJob("0 0 */1 * * *", () => {
+	schedule.scheduleJob("0 42 */1 * * *", () => {
 		logger.info("start to sync product inventory");
 		syncPurchaseDetails.syncPurchasesDetail();
 	});
 
-	schedule.scheduleJob("0 0 */1 * * *", () => {
+	schedule.scheduleJob("0 37 */1 * * *", () => {
 		logger.info("start to sync product inventory");
 		Yisucang.syncYisucang();
 	});
 
-	schedule.scheduleJob("0 0 */1 * * *", () => {
+	schedule.scheduleJob("0 18 */1 * * *", () => {
 		logger.info("start to update lisings");
 		syncProducts.syncProducts();
 	});
 
-	schedule.scheduleJob("0 0 */1 * * *", () => {
+	schedule.scheduleJob("0 13 */1 * * *", () => {
 		logger.info("start to update lisings");
 		syncAllListings.syncListings();
 	});
 
-	// Product.updateAll();
-	schedule.scheduleJob("0 0 */1 * * *", () => {
+	schedule.scheduleJob("0 4 */1 * * *", () => {
 		logger.info("start to update product stocks");
 		Product.updateAll();
 	});
-	schedule.scheduleJob("0 0 */1 * * *", () => {
+	schedule.scheduleJob("0 23 */1 * * *", () => {
 		logger.info("start to update product stocks");
 		Product.syncPm();
 	});
-
-	ShipmentType.syncShipmentTypes();
 
 	schedule.scheduleJob("35 2 */2 * * *", () => {
 		logger.info("start to update product stocks");

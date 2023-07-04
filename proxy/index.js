@@ -1,4 +1,5 @@
 exports.Product = require("./product");
+exports.ProductUpdator = require("./product_updator");
 exports.GProduct = require("./g_product");
 exports.Csv = require("./csv");
 exports.User = require("./user");

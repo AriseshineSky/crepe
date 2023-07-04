@@ -420,7 +420,7 @@ async function prepareFbaInventoryAndSalesV3(product, listings) {
 
 	for (const listing of listings) {
 		fbaInventory =
-			inventory +
+			fbaInventory +
 			listing.availableQuantity +
 			listing.reservedFCTransfer +
 			listing.inboundShipped +
@@ -618,6 +618,33 @@ async function getPurchaseShipmentPlan(purchase, product, inbounds) {
 		step,
 	);
 	return await formatPlan(result.plan, product.unitsPerBox, purchase);
+}
+
+async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
+	let availableQuantity = 0;
+	let reservedFCTransfer = 0;
+	let inboundShipped = 0;
+	let sales = 0;
+	let reservedFCProcessing = 0;
+	if (!listings) {
+		listings = await Listing.findLisingsByAsin(asin);
+	}
+	for (let listing of listings) {
+		if (listing.asin === asin && listing.country === country) {
+			availableQuantity = availableQuantity + listing.availableQuantity;
+			reservedFCTransfer = reservedFCTransfer + listing.reservedFCTransfer;
+			inboundShipped = inboundShipped + listing.inboundShipped;
+			reservedFCProcessing = reservedFCProcessing + listing.reservedFCProcessing;
+			sales = sales + listing.ps;
+		}
+	}
+	return {
+		availableQuantity,
+		reservedFCTransfer,
+		inboundShipped,
+		sales,
+		reservedFCProcessing,
+	};
 }
 
 async function getPurchaseShipmentPlans(purchases, product, inbounds) {
@@ -980,4 +1007,5 @@ module.exports = {
 	updateAll,
 	createOrUpdateByPlwhsId,
 	syncPm,
+	prepareFbaInventoryAndSalesByCountryV2,
 };
