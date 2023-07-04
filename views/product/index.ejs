@@ -68,7 +68,9 @@
           </td>
           <td>
             <% if (product.avgSales && product.avgSales > 0) {%>
-              <%= product.avgSales %>
+							<span data-bs-toggle="tooltip" data-bs-placement="right" title="Expire Date: <%-product.avgSalesExpireDate.toLocaleDateString() %>">
+								<%= product.avgSales %>
+							</span>
             <% } %>
           </td>
           <td>

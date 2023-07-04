@@ -212,6 +212,7 @@ exports.save = async function (req, res, next) {
 	let product = await Product.findById(productId);
 	const countries = req.body.countries;
 	const shipmentTypes = req.body.shipmentTypes;
+	const avgSalesExpireDate = req.body.avgSalesExpireDate;
 	console.log(product);
 	if (!product) {
 		let newProduct = {
@@ -251,6 +252,7 @@ exports.save = async function (req, res, next) {
 		product.minInventory = minInventory;
 		product.countries = countries;
 		product.shipmentTypes = shipmentTypes;
+		product.avgSalesExpireDate = avgSalesExpireDate;
 		await product.save(function (err) {
 			if (err) {
 				return next(err);
