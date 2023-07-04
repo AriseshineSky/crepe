@@ -13,6 +13,7 @@ const purchasesRouter = require("./routes/purchases");
 const productsRouter = require("./routes/products");
 const usersRouter = require("./routes/users");
 const deliveriesRouter = require("./routes/deliveries");
+const shipmentTypesRouter = require("./routes/shipment_types");
 const expressLayouts = require("express-ejs-layouts");
 const auth = require("./middlewares/auth");
 const app = express();
@@ -58,6 +59,7 @@ app.use("/products", productsRouter);
 app.use("/users", usersRouter);
 app.use("/purchases", purchasesRouter);
 app.use("/deliveries", deliveriesRouter);
+app.use("/shipment_types", shipmentTypesRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

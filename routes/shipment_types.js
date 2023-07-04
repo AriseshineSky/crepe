@@ -4,6 +4,5 @@ const router = express.Router();
 
 router.get("/index", shipmentType.list);
 router.get("/sync", shipmentType.sync);
-router.get("/syncAll", shipmentType.syncAll);
 
 module.exports = router;
