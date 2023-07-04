@@ -656,31 +656,20 @@ function sortByType(shipmentTypes) {
 
 async function syncShipmentTypes() {
 	const rows = await sheetApi.listShipmentTypes();
-	logger.debug(rows);
+	console.log(rows);
 	for (const row of rows) {
 		if (row[0] in TYPES) {
-			const freightTpye = await FreightType.findOne({ type: TYPES[row[0]] });
-			logger.debug(" freightTpye", freightTpye);
-
-			if (freightTpye) {
-				freightTpye.period = Number(row[1]);
-				freightTpye.price = Number(row[2]);
-				freightTpye.save(function (error) {
-					if (error) {
-						logger.error(error);
-					}
-				});
+			let shipmentType = await ShipmentType.findOne({ name: TYPES[row[0]] });
+			if (shipmentType) {
+				shipmentType.period = Number(row[1]);
+				shipmentType.price = Number(row[2]);
+				await shipmentType.save();
 			} else {
-				freightTpye = new FreightType();
-				freightTpye.type = TYPES[row[0]];
-				freightTpye.period = Number(row[1]);
-				freightTpye.price = Number(row[2]);
-				logger.debug(freightTpye);
-				freightTpye.save(function (error) {
-					if (error) {
-						logger.error(error);
-					}
-				});
+				shipmentType = new ShipmentType();
+				shipmentType.name = TYPES[row[0]];
+				shipmentType.period = Number(row[1]);
+				shipmentType.price = Number(row[2]);
+				await shipmentType.save();
 			}
 		}
 	}
@@ -689,7 +678,6 @@ async function syncShipmentTypes() {
 module.exports = {
 	all,
 	syncShipmentTypes,
-	syncshipmentTypes,
 	getshipmentTypesAndProductingsByProduct,
 	TYPES,
 	sortByType,

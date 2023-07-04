@@ -85,7 +85,7 @@ async function listFreights() {
 	}
 	return rows;
 }
-async function listFreightTypes() {
+async function listShipmentTypes() {
 	var auth = await authorize();
 	const sheets = google.sheets({ version: "v4", auth });
 	const res = await sheets.spreadsheets.values.get({
@@ -149,4 +149,4 @@ async function listProducts() {
 
 exports.listProducts = listProducts;
 exports.listFreights = listFreights;
-exports.listFreightTypes = listFreightTypes;
+exports.listShipmentTypes = listShipmentTypes;

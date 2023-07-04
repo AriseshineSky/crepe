@@ -15,10 +15,6 @@ exports.types = async function (req, res, next) {
 	});
 };
 exports.sync = async function (req, res, next) {
-	await Freight.syncFreightTypes();
-	res.redirect("/freights/types");
-};
-exports.syncAll = async function (req, res, next) {
-	await Product.syncAllProductFreights(2);
+	await ShipmentType.syncShipmentTypes();
 	res.redirect("/freights/types");
 };

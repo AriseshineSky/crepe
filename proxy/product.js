@@ -1,5 +1,6 @@
 const models = require("../models");
 const Product = models.Product;
+const ShipmentType = models.ShipmentType;
 const User = require("./user");
 const mongoose = require("mongoose");
 const getPm = require("../api/getPM");
@@ -12,24 +13,18 @@ let Yisucang = require("./yisucang");
 let logger = require("../common/logger");
 const mysql = require("mysql2");
 
-const ShipmentTypesInfo = {
-	airExpress: {
-		price: 55,
-		period: 8,
-	},
-	airDelivery: {
-		price: 45,
-		period: 15,
-	},
-	seaExpress: {
-		price: 25,
-		period: 30,
-	},
-	sea: {
-		price: 15,
-		period: 45,
-	},
-};
+let ShipmentTypesInfo;
+async function getShipmentTypes() {
+	let shipmentTypes = await ShipmentType.find();
+	let ShipmentTypesInfo = {};
+	for (type of shipmentTypes) {
+		ShipmentTypesInfo[type.name] = {
+			price: type.price,
+			period: type.period,
+		};
+	}
+	return ShipmentTypesInfo;
+}
 
 async function getInboundShippedCount(asin) {
 	let shipped = 0;
@@ -494,6 +489,7 @@ function convertShipmentsToInbounds(shipments) {
 	return inbounds;
 }
 async function getPlanV3(productId, purchaseCode) {
+	ShipmentTypesInfo = await getShipmentTypes();
 	let product = await Product.findById(productId);
 	const productUpdator = new ProductUpdator(product);
 	await productUpdator.updateAll();
@@ -568,10 +564,11 @@ async function getPlanV3(productId, purchaseCode) {
 		}
 	}
 
+	console.log(await ShipmentType.find());
 	const purchase = {
 		plan: newPurchaseShipmentPlan,
 		product: product,
-		freights: ShipmentTypesInfo,
+		freights: await ShipmentType.find(),
 		inboundShippeds: product.shipments,
 		minTotalSalesPeriod: Math.ceil(minTotalSalesPeriod),
 		maxTotalSalesPeriod: Math.ceil(maxTotalSalesPeriod),
@@ -863,6 +860,7 @@ async function bestPlan(product, inbounds) {
 	const firstShipmentType = product.shipmentTypes[0];
 
 	const shipmentType = ShipmentTypesInfo[firstShipmentType];
+	console.log(ShipmentTypesInfo);
 
 	let plan = {
 		[firstShipmentType]: {

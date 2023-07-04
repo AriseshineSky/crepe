@@ -2,6 +2,7 @@ const schedule = require("node-schedule");
 let checkProductsInventory = require("../lib/checkProductsInventory");
 let Product = require("../proxy").Product;
 let Yisucang = require("../proxy").Yisucang;
+const ShipmentType = require("../proxy").ShipmentType;
 let Delivery = require("../proxy").Delivery;
 let User = require("../proxy").User;
 let Role = require("../proxy").Role;
@@ -69,7 +70,7 @@ const scheduleCronstyle = () => {
 		syncAllListings.syncListings();
 	});
 
-	Product.updateAll();
+	// Product.updateAll();
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product stocks");
 		Product.updateAll();
@@ -77,6 +78,13 @@ const scheduleCronstyle = () => {
 	schedule.scheduleJob("0 0 */1 * * *", () => {
 		logger.info("start to update product stocks");
 		Product.syncPm();
+	});
+
+	ShipmentType.syncShipmentTypes();
+
+	schedule.scheduleJob("35 2 */2 * * *", () => {
+		logger.info("start to update product stocks");
+		ShipmentType.syncShipmentTypes();
 	});
 };
 
