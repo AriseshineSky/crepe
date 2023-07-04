@@ -66,6 +66,10 @@
                   <input class="form-control" name="avgSales" value="<%= product.avgSales %>">
                 </div>
                 <div class="input-group input-group-static mb-4">
+                  <label>平均销量过期时间:</label>
+                  <input class="form-control" name="avgSalesExpireDate" data-provide="datepicker" value="<%= product.avgSalesExpireDate.toLocaleDateString() %>">
+                </div>
+                <div class="input-group input-group-static mb-4">
                   <label>亚马逊7天平均销量:</label>
                   <input class="form-control" name="ps" readonly value="<%= product.ps %>">
                 </div>

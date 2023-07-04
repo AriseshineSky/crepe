@@ -15,6 +15,7 @@ var ProductSchema = new Schema({
 	unitsPerBox: { type: Number, default: 1 },
 	maxAvgSales: { type: Number, default: 0 },
 	avgSales: { type: Number, default: 0 },
+	avgSalesExpireDate: { type: Date, default: Date.now() },
 	sales: { type: Number, default: 0 },
 	ps: { type: Number, default: 0 },
 	totalInventory: { type: Number, default: 0 },

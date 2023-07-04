@@ -11,6 +11,7 @@ const Yisucang = require("./yisucang");
 const Purchase = require("./purchase");
 const Delivery = require("./delivery");
 const logger = require("../common/logger");
+const helper = require("../lib/util/helper");
 
 const ShipmentTypesInfo = {
 	airExpress: {
@@ -63,6 +64,14 @@ class ProductUpdator {
 		return ShipmentType.sortByType(this.product.shipmentTypes);
 	}
 
+	getSales() {
+		const { ps, avgSales, avgSalesExpireDate } = this.product;
+		let sales = ps;
+		if (avgSales && avgSales > 0 && !helper.isExpired(avgSalesExpireDate)) {
+			sales = this.product.avgSales;
+		}
+		return sales;
+	}
 	async updateAll() {
 		await this.updateUnshippedPurchases();
 		await this.updateUndeliveredDeliveris();
@@ -82,10 +91,6 @@ class ProductUpdator {
 		});
 		const shipmentTypes = this.getSortedShipmentTypes();
 
-		let sales = ps;
-		if (this.product.avgSales && this.product.avgSales > 0) {
-			sales = this.product.avgSales;
-		}
 		const newProduct = {
 			fbaInventory,
 			totalInventory,
@@ -100,7 +105,7 @@ class ProductUpdator {
 			quantityToPurchase,
 			shipmentTypes,
 			purchases,
-			sales,
+			sales: this.getSales(),
 		};
 
 		this.product.set(newProduct);

@@ -211,6 +211,7 @@ exports.save = async function (req, res, next) {
 	let avgSales = req.body.avgSales;
 	let product = await Product.findById(productId);
 	const countries = req.body.countries;
+	const shipmentTypes = req.body.shipmentTypes;
 	console.log(product);
 	if (!product) {
 		let newProduct = {
@@ -249,6 +250,7 @@ exports.save = async function (req, res, next) {
 		product.discontinue = discontinue;
 		product.minInventory = minInventory;
 		product.countries = countries;
+		product.shipmentTypes = shipmentTypes;
 		await product.save(function (err) {
 			if (err) {
 				return next(err);
@@ -284,6 +286,7 @@ exports.put = async function (req, res, next) {
 		product.unitsPerBox = unitsPerBox;
 		product.box = box;
 
+		await product.save(function (err) {
 			if (err) {
 				return next(err);
 			}
@@ -305,7 +308,7 @@ exports.addInbound = async function (req, res, next) {
 			quantity: quantity,
 			deliveryDue: deliveryDue,
 		});
-		product.save(function (err) {
+		await product.save(function (err) {
 			if (err) {
 				return next(err);
 			}
