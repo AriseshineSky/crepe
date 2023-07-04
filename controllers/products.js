@@ -16,6 +16,7 @@ exports.syncAllFreights = async function (req, res, next) {
 exports.show = async function (req, res, next) {
 	let productId = req.params.productId;
 	let product = await Product.findById(productId);
+	console.log(product);
 	if (!product) {
 		res.render404("这个产品不存在。");
 		return;
@@ -248,7 +249,7 @@ exports.save = async function (req, res, next) {
 		product.discontinue = discontinue;
 		product.minInventory = minInventory;
 		product.countries = countries;
-		product.save(function (err) {
+		await product.save(function (err) {
 			if (err) {
 				return next(err);
 			}
@@ -283,7 +284,6 @@ exports.put = async function (req, res, next) {
 		product.unitsPerBox = unitsPerBox;
 		product.box = box;
 
-		product.save(function (err) {
 			if (err) {
 				return next(err);
 			}
