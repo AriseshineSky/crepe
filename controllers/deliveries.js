@@ -9,6 +9,20 @@ exports.index = async function (req, res, next) {
 	});
 };
 
+exports.edit = async function (req, res, next) {
+	let deliveryId = req.params.deliveryId;
+	let delivery = await Delivery.findById(deliveryId);
+	console.log("delivery", delivery);
+	if (!delivery) {
+		res.render404("这个产品不存在。");
+		return;
+	} else {
+		res.render("delivery/edit", {
+			delivery: delivery,
+		});
+	}
+};
+
 exports.show = async function (req, res, next) {
 	let deliveryId = req.params.deliveryId;
 	let delivery = await Delivery.findById(deliveryId);

@@ -12,21 +12,16 @@
       <tr>
 				<th>memo</th>
 				<th>box</th>
-				<th>receiveRnQuantity</th>
 				<th>quantity</th>
-				<th>receiptQuantity</th>
-				<th>actualAmount</th>
-				<th>code</th>
+				<th>shipmentDate</th>
+				<th>expectArrivalDate</th>
+				<th>spiltTrackings</th>
 				<th>status</th>
 				<th>statusName</th>
 				<th>trackings</th>
-				<th>orderId</th>
-				<th>shipmentDate</th>
 				<th>deliveryStatus</th>
-				<th>spiltTrackings</th>
-				<th>expectArrivalDate</th>
-				<th>expectShipmentDate</th>
 				<th>action</th>
+				<th>code</th>
       </tr>
     </thead>
     <tbody>
@@ -34,24 +29,19 @@
         <tr>
 					<td><%= delivery.memo %></td>
 					<td><%= delivery.box %></td>
-					<td><%= delivery.receiveRnQuantity %></td>
 					<td><%= delivery.quantity %></td>
-					<td><%= delivery.receiptQuantity %></td>
-					<td><%= delivery.actualAmount %></td>
-					<td><%= delivery.code %></td>
+					<td><%= delivery.shipmentDate ? delivery.shipmentDate.toLocaleDateString() : '' %></td>
+					<td><%= delivery.expectArrivalDate ? delivery.expectArrivalDate.toLocaleDateString() : '' %></td>
 					<td><%= delivery.status %></td>
 					<td><%= delivery.statusName %></td>
 					<td><%= delivery.trackings %></td>
-					<td><%= delivery.orderId %></td>
-					<td><%= delivery.shipmentDate %></td>
 					<td><%= delivery.deliveryStatus %></td>
 					<td><%= delivery.spiltTrackings %></td>
-					<td><%= delivery.expectArrivalDate ? delivery.expectArrivalDate.toLocaleDateString() : '' %></td>
-					<td><%= delivery.expectShipmentDate ? delivery.expectShipmentDate.toLocaleDateString() : '' %></td>
-
           <td>
+            <a href="/deliveries/<%= delivery._id %>/edit" target="_blank" type="button" class="btn btn-primary">Edit</a>
             <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal" data-delivery-id="<%=delivery._id%>" >Delete</button>
           </td>
+					<td><%= delivery.code %></td>
         </tr>
       <% }) %>
     </tbody>

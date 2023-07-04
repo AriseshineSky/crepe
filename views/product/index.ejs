@@ -67,7 +67,7 @@
             <%= product.cycle %>
           </td>
           <td>
-            <% if (product.avgSales > 0) {%>
+            <% if (product.avgSales && product.avgSales > 0) {%>
               <%= product.avgSales %>
             <% } %>
           </td>

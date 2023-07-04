@@ -38,7 +38,7 @@ const DeliverySchema = new Schema({
 	statusName: { type: String },
 	trackings: { type: String },
 	orderId: { type: String },
-	shipmentDate: { type: String },
+	shipmentDate: { type: Date },
 	confirmShipmentDate: { type: Date },
 	estimateArrivePortDate: { type: Date },
 	expectShipmentDate: { type: Date },

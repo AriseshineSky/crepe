@@ -644,7 +644,7 @@ exports.syncDelivery = async function () {
 			let product = await findOrCreate(yiProduct.ID.toString());
 			console.log(yiInventory);
 			product.stock = yiInventory.SumNumber;
-			product.save();
+			await product.save();
 		}
 	}
 };
@@ -735,6 +735,7 @@ async function remove(deliveryId) {
 }
 
 module.exports = {
+	findById: Delivery.findById.bind(Delivery),
 	find: Delivery.find.bind(Delivery),
 	remove,
 	all,

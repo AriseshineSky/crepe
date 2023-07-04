@@ -626,7 +626,7 @@ exports.syncDelivery = async function () {
 			let product = await findOrCreate(yiProduct.ID.toString());
 			console.log(yiInventory);
 			product.stock = yiInventory.SumNumber;
-			product.save();
+			await product.save();
 		}
 	}
 };
