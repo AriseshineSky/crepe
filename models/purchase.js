@@ -50,7 +50,7 @@ let PurchaseSchema = new Schema({
 	paymentAmount: { type: String },
 	increaseQuantity: { type: String },
 	paymentStatus: { type: String },
-	expectDeliveryDate: { type: String },
+	expectDeliveryDate: { type: Date },
 	expectDeliveryDays: { type: Number, default: 0 },
 	totalExcludeTaxAmount: { type: String },
 	totalAmount: { type: String },
