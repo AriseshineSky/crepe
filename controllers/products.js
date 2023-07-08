@@ -206,13 +206,12 @@ exports.save = async function (req, res, next) {
 	let plwhsId = req.body.plwhsId;
 	let yisucangId = req.body.yisucangId;
 	console.log("yi", yisucangId);
-	let airDelivery = req.body.airDelivery;
-	let sea = req.body.sea;
 	let avgSales = req.body.avgSales;
 	let product = await Product.findById(productId);
 	const countries = req.body.countries;
 	const shipmentTypes = req.body.shipmentTypes;
 	const avgSalesExpireDate = req.body.avgSalesExpireDate;
+	const gSku = req.body.gSku;
 	console.log(product);
 	if (!product) {
 		let newProduct = {
@@ -246,8 +245,7 @@ exports.save = async function (req, res, next) {
 		product.box = box;
 		product.plwhsId = plwhsId;
 		product.yisucangId = yisucangId;
-		product.airDelivery = airDelivery;
-		product.sea = sea;
+		product.gSku = gSku;
 		product.discontinue = discontinue;
 		product.minInventory = minInventory;
 		product.countries = countries;
