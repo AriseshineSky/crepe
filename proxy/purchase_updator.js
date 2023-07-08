@@ -14,7 +14,7 @@ class PurchaseUpdator {
 	}
 
 	async updateRemainingDeliveryDays() {
-		this.purchase.expectArrivalDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
+		this.purchase.expectDeliveryDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
 		await this.purchase.save();
 	}
 
@@ -25,7 +25,7 @@ class PurchaseUpdator {
 		if (deliveryDate.isBefore(currentDate)) {
 			this.purchase.expectDeliveryDate = moment(currentDate);
 		}
-		this.purchase.expectArrivalDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
+		this.purchase.expectDeliveryDays = helper.convertDateToPeroid(this.purchase.expectDeliveryDate);
 
 		const deliveries = await Delivery.find({
 			purchaseCode: this.purchase.code,

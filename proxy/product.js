@@ -564,7 +564,6 @@ async function getPlanV3(productId, purchaseCode) {
 		}
 	}
 
-	console.log(await ShipmentType.find());
 	const purchase = {
 		plan: newPurchaseShipmentPlan,
 		product: product,
@@ -648,12 +647,15 @@ async function prepareFbaInventoryAndSalesByCountryV2(asin, country, listings) {
 }
 
 async function getPurchaseShipmentPlans(purchases, product, inbounds) {
-	let orderedPurchaseShipmentPlansMetrics = {};
 	let orderedPurchaseShipmentPlans = [];
 	let newInbounds = helper.deepClone(inbounds);
-
+	let orderedPurchaseShipmentPlansMetrics = { inbounds: newInbounds };
 	for (let i = 0; i < purchases.length; i++) {
-		const shipmentPlan = await getPurchaseShipmentPlan(purchases[i], product, newInbounds);
+		const shipmentPlan = await getPurchaseShipmentPlan(
+			purchases[i],
+			product,
+			orderedPurchaseShipmentPlansMetrics.inbounds,
+		);
 		orderedPurchaseShipmentPlans.push(shipmentPlan);
 		orderedPurchaseShipmentPlansMetrics.gap = shipmentPlan.gap;
 		orderedPurchaseShipmentPlansMetrics.inventoryStatus = shipmentPlan.inventoryStatus;
@@ -887,7 +889,6 @@ async function bestPlan(product, inbounds) {
 	const firstShipmentType = product.shipmentTypes[0];
 
 	const shipmentType = ShipmentTypesInfo[firstShipmentType];
-	console.log(ShipmentTypesInfo);
 
 	let plan = {
 		[firstShipmentType]: {

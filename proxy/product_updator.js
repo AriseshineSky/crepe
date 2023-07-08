@@ -45,7 +45,10 @@ class ProductUpdator {
 	};
 
 	async getUnshippedPurchases() {
-		return await Purchase.findUnshippedByProduct(this.product);
+		const purchases = await Purchase.findUnshippedByProduct(this.product);
+		return purchases.sort(function (m, n) {
+			return m["expectDeliveryDays"] - n["expectDeliveryDays"];
+		});
 	}
 
 	async getUndeliveredDeliveris() {
@@ -253,7 +256,10 @@ class ProductUpdator {
 			const purchaseUpdator = new PurchaseUpdator(purchase);
 			await purchaseUpdator.updateAll(this.product);
 		}
-		return purchases;
+
+		return purchases.sort(function (m, n) {
+			return m["expectDeliveryDays"] - n["expectDeliveryDays"];
+		});
 	}
 
 	async updateDeliveryByPurchases(purchases) {

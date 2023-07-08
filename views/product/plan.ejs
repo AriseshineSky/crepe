@@ -72,7 +72,7 @@
                         </td>
                         <td>
                           <% var status = purchase.plan.inventoryStatus.find(function(status){return status.period === plan['expectDeliveryDays'] + freight.period + GAP}) %>
-                          <%= status.before %>
+                          <%= status? status.before : '' %>
                         </td>
                       </tr>
                     <% } %>
