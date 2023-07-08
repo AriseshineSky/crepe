@@ -24,12 +24,11 @@ let syncProducts = require("../lib/getInfoFromGoogleSheet");
 const scheduleCronstyle = () => {
 	User.checkAdmin();
 
-	// schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
-	// 	logger.info("start to check product inventory");
-	// 	checkProductsInventory.checkProductsInventory();
-	// });
+	schedule.scheduleJob("0 0 6 * * 1,3,5", () => {
+		logger.info("start to check product inventory");
+		checkProductsInventory.checkProductsInventory();
+	});
 
-	checkProductsInventory.checkProductsInventory();
 	schedule.scheduleJob("0  12 */3  * * *", () => {
 		logger.info("start to sync product inventory");
 		syncYisucangInbounds.syncYisucangInbounds();
