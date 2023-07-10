@@ -33,7 +33,8 @@ const scheduleCronstyle = () => {
 		logger.info("start to sync product inventory");
 		syncYisucangInbounds.syncYisucangInbounds();
 	});
-	schedule.scheduleJob("0 3 */5 *  * *", () => {
+
+	schedule.scheduleJob("0 3 */1 *  * *", () => {
 		logger.info("start to sync product inventory");
 		Delivery.updateDeliveryReciveds();
 	});
