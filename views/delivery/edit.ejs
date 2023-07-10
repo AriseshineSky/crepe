@@ -2,8 +2,8 @@
 <div id='content'>
   <div class='panel'>
     <div class='inner post'>
-      <form id='edit_delivery_form' action='/deliveries/<%= delivery._id %>/edit' method='post'>
-        <input type="hidden" name="id" value="<%= delivery._id %>"/>
+      <form id='edit_delivery_form' action='/deliveries/<%= delivery._id %>/save' method='post'>
+        <input type="hidden" name="deliveryId" value="<%= delivery._id %>"/>
 				<div class="card p-4">
 					<div class="card-header">
 						delivery

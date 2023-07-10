@@ -262,8 +262,8 @@ async function updateDeliveryReciveds() {
 					delivery.unreceivedBoxes = delivery.box - delivery.receivedBoxes;
 					remainingBoxCount = 0;
 				}
+
 				await delivery.save();
-				console.log(delivery);
 			} else {
 				break;
 			}

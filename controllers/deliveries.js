@@ -23,6 +23,21 @@ exports.edit = async function (req, res, next) {
 	}
 };
 
+exports.save = async function (req, res, next) {
+	let deliveryId = req.body.deliveryId;
+	let delivery = await Delivery.findById(deliveryId);
+	const { memo, quantity, boxCount, shipmentDate, expectArrivalDate } = req.body;
+	Object.assign(delivery, {
+		memo,
+		quantity,
+		boxCount,
+		shipmentDate,
+		expectArrivalDate,
+	});
+	await delivery.save();
+	res.redirect("/deliveries/" + delivery._id);
+};
+
 exports.show = async function (req, res, next) {
 	let deliveryId = req.params.deliveryId;
 	let delivery = await Delivery.findById(deliveryId);
