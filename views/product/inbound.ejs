@@ -44,7 +44,6 @@
                 <% } %>
               </td>
               <td style="text-align:center;">
-                <button class="btn btn-primary purchase" data-bs-toggle="modal" data-bs-target="#editModal" data-purchase-id="<%=purchase._id%>" >Edit</button>
                 <a href="/products/<%= product._id %>/purchases/<%=purchase.code%>/plan" target="_blank" type="button" class="btn btn-primary">Plan</a>
               </td>
             </tr>
@@ -75,7 +74,6 @@
           <th data-editable="true" data-sortable="true">预估亚马逊可卖日期:</th>
           <th data-editable="true" data-sortable="true">装箱信息:</th>
           <th data-editable="true" data-sortable="true">Memo:</th>
-          <th class="">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -102,10 +100,6 @@
             </td>
             <td>
                 <%= inbound.memo %>
-            </td>
-            <td style="text-align:center;">
-              <button class="btn btn-primary inbound" data-bs-toggle="modal" data-bs-target="#editModal" data-inbound-id="<%=inbound._id%>" >Edit</button>
-              <button class="btn btn-danger inbound" data-bs-toggle="modal" data-bs-target="#myModal" data-inbound-id="<%=inbound._id%>" >Delete</button>
             </td>
           </tr>
         <% }) %>
