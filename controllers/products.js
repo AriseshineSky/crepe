@@ -299,13 +299,21 @@ exports.addInbound = async function (req, res, next) {
 	let productId = req.params.productId;
 	let quantity = req.body.quantity;
 	let deliveryDue = req.body.deliveryDue;
+	let memo = req.body.memo;
+	let totalBoxes = req.body.totalBoxes;
+	let createdAt = req.body.createdAt;
+	let expectArrivalDate = req.body.expectArrivalDate;
 	console.log(quantity);
 	let product = await Product.findById(productId);
 	if (!product) {
 		return;
 	} else {
-		product.inboundShippeds.push({
+		product.shipments.push({
 			quantity: quantity,
+			memo: memo,
+			totalBoxes: totalBoxes,
+			createdAt: createdAt,
+			expectArrivalDate: expectArrivalDate,
 			deliveryDue: deliveryDue,
 		});
 		await product.save(function (err) {

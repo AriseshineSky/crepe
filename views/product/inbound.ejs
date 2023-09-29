@@ -156,10 +156,10 @@
           <h4>添加运输中货物</h4>
         </div>
         <div class="card-body">
-          <input class="form-control" name="product" value="<%= product._id %>" type="hidden" >
+          <input class="form-control" name="productId" value="<%= product._id %>" type="hidden" >
           <div class="input-group input-group-static mb-4">
             <label>purchase code:</label>
-            <input type="text" class="form-control" name="memo">
+            <input type="text" class="form-control" name="purchaseCode">
           </div>
           <div class="input-group input-group-static mb-4">
             <label>数量:</label>
@@ -171,7 +171,7 @@
           </div>
           <div class="input-group input-group-static mb-4">
             <label>发货日期:</label>
-            <input type="text" class="form-control" name="shipmentDate" data-provide="datepicker">
+            <input type="text" class="form-control" name="createdAt" data-provide="datepicker">
           </div>
           <div class="input-group input-group-static mb-4">
             <label>预估收货日期:</label>
