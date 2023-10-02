@@ -961,13 +961,24 @@ const getProductByPlwhsId = async function (plwhsId) {
 };
 
 async function createOrUpdateByPlwhsId(product) {
-	let existProduct = await Product.findOne({ plwhsId: product.plwhsId });
-	if (existProduct) {
-		Object.assign(existProduct, product);
-		await existProduct.save();
+	if (product.plwhsId) {
+		let existProduct = await Product.findOne({ plwhsId: product.plwhsId });
+		if (existProduct) {
+			Object.assign(existProduct, product);
+			await existProduct.save();
+		} else {
+			const newProduct = new Product(product);
+			await newProduct.save();
+		}
 	} else {
-		const newProduct = new Product(product);
-		await newProduct.save();
+		let existProduct = await Product.findOne({ asin: product.asin });
+		if (existProduct) {
+			Object.assign(existProduct, product);
+			await existProduct.save();
+		} else {
+			const newProduct = new Product(product);
+			await newProduct.save();
+		}
 	}
 }
 
